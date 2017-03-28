@@ -5,16 +5,23 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import haru.com.hr.BaseActivity;
 import haru.com.hr.R;
 import haru.com.hr.Remote;
 import haru.com.hr.databinding.ActivityLoginBinding;
+import haru.com.hr.domain.DataStore;
 import haru.com.hr.domain.EmailSet;
+import haru.com.hr.domain.FirstLoadingData;
+import haru.com.hr.domain.PostingData;
 import haru.com.hr.util.SignUtil;
 
 import static haru.com.hr.activity.SplashActivity.URL;
@@ -22,6 +29,9 @@ import static haru.com.hr.activity.SplashActivity.URL;
 public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
 
     public static final String POST = "post";
+    private static final String TAG = "LoginActivity";
+    private boolean firstLogincheck = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +55,8 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
                     // 가입시 이메일 정보 체크
                     if ( infoCheck(email, password) ) {
                         signin(email, password);
+                        getBinding().activityLoginAddress.setVisibility(View.INVISIBLE);
+                        getBinding().activityLoginPassword.setVisibility(View.INVISIBLE);
                     }
                 }
                 break;
@@ -113,9 +125,62 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
 
 
         networkTask.execute(email, password);
+        // 받아온 정보를 데이터에 세팅, 기 사용자라면 사용자 정보를 불러오고 아니라면 튜토리얼을 가져온다.
+
+        dataSetting(firstLogincheck);
         saveSharedpreference(email);
         activityChange();
 
+    }
+
+
+
+    //TODO 여기는 어떻게해야할까 튜토리얼 정보세팅?
+    public void dataSetting(boolean loginCheck) {
+        if(loginCheck) { // 첫 로그인이면 튜토리얼 정보 세팅
+            Log.e(TAG,"dataSetting : 나는 작동합니다.");
+            List<PostingData> pDatas = new ArrayList<>();
+            PostingData datas = new PostingData();
+            datas.set_id(FirstLoadingData.getInstance().get_id0());
+            datas.setTitle(FirstLoadingData.getInstance().getTitle0());
+            datas.setContent(FirstLoadingData.getInstance().getContent0());
+            datas.setImageUrl(FirstLoadingData.getInstance().getImageUrl0());
+            datas.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl0());
+            pDatas.add(datas);
+
+            datas.set_id(FirstLoadingData.getInstance().get_id1());
+            datas.setTitle(FirstLoadingData.getInstance().getTitle1());
+            datas.setContent(FirstLoadingData.getInstance().getContent1());
+            datas.setImageUrl(FirstLoadingData.getInstance().getImageUrl1());
+            datas.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl1());
+            pDatas.add(datas);
+
+            datas.set_id(FirstLoadingData.getInstance().get_id2());
+            datas.setTitle(FirstLoadingData.getInstance().getTitle2());
+            datas.setContent(FirstLoadingData.getInstance().getContent2());
+            datas.setImageUrl(FirstLoadingData.getInstance().getImageUrl2());
+            datas.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl2());
+            pDatas.add(datas);
+
+            datas.set_id(FirstLoadingData.getInstance().get_id3());
+            datas.setTitle(FirstLoadingData.getInstance().getTitle3());
+            datas.setContent(FirstLoadingData.getInstance().getContent3());
+            datas.setImageUrl(FirstLoadingData.getInstance().getImageUrl3());
+            datas.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl3());
+            pDatas.add(datas);
+
+            datas.set_id(FirstLoadingData.getInstance().get_id4());
+            datas.setTitle(FirstLoadingData.getInstance().getTitle4());
+            datas.setContent(FirstLoadingData.getInstance().getContent4());
+            datas.setImageUrl(FirstLoadingData.getInstance().getImageUrl4());
+            datas.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl4());
+            pDatas.add(datas);
+
+            DataStore.getInstance().setDatas(pDatas);
+
+        } else { // 기로그인이면 사용자 정보 세팅
+
+        }
     }
 
     // 로그인후 설정에서 따로 로그아웃 전까지 true로 유지

@@ -3,30 +3,39 @@ package haru.com.hr.activity;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
+import com.lorentzos.flingswipe.SwipeFlingAdapterView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import haru.com.hr.BaseActivity;
+import haru.com.hr.MainStackViewAdapter;
 import haru.com.hr.R;
 import haru.com.hr.databinding.ActivityMainBinding;
+import haru.com.hr.domain.DataStore;
+import haru.com.hr.domain.FirstLoadingData;
+import haru.com.hr.domain.PostingData;
 
 public class MainActivity extends BaseActivity<ActivityMainBinding>
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    private static final String TAG = "MainActivity";
     public final int REQ_PERMISSION = 100;
+    MainStackViewAdapter adapter;
+    List<PostingData> datas;
+    SwipeFlingAdapterView flingContainer;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,26 +43,29 @@ public class MainActivity extends BaseActivity<ActivityMainBinding>
         setBinding(R.layout.activity_main);
 
         checkVersion(REQ_PERMISSION);
+        flingContainer = (SwipeFlingAdapterView) findViewById(R.id.swipeImgView);
 
-//        setSupportActionBar(getBinding().include.toolbar);
+        datas = new ArrayList<>();
 
+        // 튜토리얼을 임의생성. 나중에 TODO 삭제할것
+        dataLoader();
 
-//        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-//                this, getBinding().drawerLayout, getBinding().include.toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-//        getBinding().drawerLayout.setDrawerListener(toggle);
-//
-//        toggle.syncState();
-
-
-//        getBinding().drawerLayout.addDrawerListener();
-//        getBinding().include.contentMain.btn1.setDrawer
+        datas = DataStore.getInstance().getDatas();
+        Log.e(TAG,"데이터의 크기는 : " + datas.size());
+        adapter = new MainStackViewAdapter(this, R.layout.main_stack_item, R.id.tvTitle, datas);
+        flingContainer.setAdapter(adapter);
+        flingContainer.setFlingListener(flingListener);
 
         getBinding().navView.setNavigationItemSelectedListener(this);
     }
 
+    private void dataLoader() {
+        LoginActivity login = new LoginActivity();
+        login.dataSetting(true);
+    }
+
     public void openDrawer(View view){
         getBinding().drawerLayout.openDrawer(getBinding().navView);
-
     }
 
     @Override
@@ -185,4 +197,42 @@ public class MainActivity extends BaseActivity<ActivityMainBinding>
         }
         return checkResult;
     }
+
+    SwipeFlingAdapterView.onFlingListener flingListener = new SwipeFlingAdapterView.onFlingListener() {
+        @Override
+        public void removeFirstObjectInAdapter() {
+            datas.remove(0);
+            adapter.notifyDataSetChanged();
+        }
+
+        @Override
+        public void onLeftCardExit(Object o) {
+
+        }
+
+        @Override
+        public void onRightCardExit(Object o) {
+
+        }
+
+        @Override
+        public void onAdapterAboutToEmpty(int i) {
+
+
+            PostingData data = new PostingData();
+            data.set_id("-1");
+            data.setTitle("이제 당신의 이야기를 시작하세요");
+            data.setContent("당신의 하루를 응원합니다.");
+            data.setImageUrl(Uri.parse("http://cfile29.uf.tistory.com/image/197005455139E816267525"));
+            data.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl0());
+            datas.add(data);
+
+            adapter.notifyDataSetChanged();
+        }
+
+        @Override
+        public void onScroll(float v) {
+
+        }
+    };
 }
