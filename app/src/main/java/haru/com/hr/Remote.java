@@ -12,7 +12,7 @@ import java.net.URL;
  * Created by myPC on 2017-03-20.
  */
 
-public class RemoteSendEmailSet {
+public class Remote {
 
     public static String postJson(String siteUrl, String data) {
         String result = "";

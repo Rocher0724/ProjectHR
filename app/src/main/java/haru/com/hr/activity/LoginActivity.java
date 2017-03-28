@@ -1,25 +1,27 @@
-package haru.com.hr;
+package haru.com.hr.activity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
 
+import haru.com.hr.BaseActivity;
+import haru.com.hr.R;
+import haru.com.hr.Remote;
 import haru.com.hr.databinding.ActivityLoginBinding;
 import haru.com.hr.domain.EmailSet;
-import haru.com.hr.domain.PostingData;
 import haru.com.hr.util.SignUtil;
 
-import static haru.com.hr.SplashActivity.URL;
+import static haru.com.hr.activity.SplashActivity.URL;
 
 public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
 
-    public final String POST = "post";
+    public static final String POST = "post";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,9 +95,10 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
                 String jsonString = gson.toJson(emailSet);
 
                 // postjson을 통해서 json 정보를 서버로 보냄
-                String result = RemoteSendEmailSet.postJson(URL+POST, jsonString);
+                String result = Remote.postJson(URL+POST, jsonString);
 
-                //TODO 서버에있는 정보와 통신해서 OK가 나면 로그인하기 이 이후부분은 어떻게해야할까?
+                //TODO 서버에있는 정보와 통신해서 OK가 나면 아마도 계정 정보가 생성되고 DB에는 새로운 노드가 생겼을것같은데
+                //TODO 무슨정보를 받아오는거지?
 
                 return result;
             }
@@ -108,8 +111,23 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
             }
         };
 
-        networkTask.execute(email, password);
 
+        networkTask.execute(email, password);
+        saveSharedpreference(email);
+        activityChange();
+
+    }
+
+    // 로그인후 설정에서 따로 로그아웃 전까지 true로 유지
+    private void saveSharedpreference(String email) {
+        // 1. Preference 생성하기
+        SharedPreferences sharedPref = getSharedPreferences("LoginCheck", Context.MODE_PRIVATE);
+        // 2. Shared Preference의 값을 입력하기 위해서는 에디터를 통해서만 가능하다.
+        SharedPreferences.Editor editor = sharedPref.edit();
+        // 지금 로그인을 하고있으므로 최초로그인 플래그는 false를 준다.
+        editor.putBoolean("FirstLoginCheck" , false );
+        editor.putString("email" , email );
+        editor.commit();
     }
 
     private void activityChange() {
