@@ -20,7 +20,6 @@ import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 
 import java.util.List;
 
-import haru.com.hr.databinding.MainStackItemBinding;
 import haru.com.hr.domain.DataStore;
 import haru.com.hr.domain.PostingData;
 import jp.wasabeef.glide.transformations.BlurTransformation;

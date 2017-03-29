@@ -2,12 +2,15 @@ package haru.com.hr.activity;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -27,19 +30,17 @@ import haru.com.hr.databinding.ActivityMainBinding;
 import haru.com.hr.domain.DataStore;
 import haru.com.hr.domain.FirstLoadingData;
 import haru.com.hr.domain.PostingData;
+import haru.com.hr.util.BackPressCloseHandler;
 
-public class MainActivity extends BaseActivity<ActivityMainBinding>
+public class MainActivity extends  BaseActivity<ActivityMainBinding>
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = "MainActivity";
-    public final int REQ_PERMISSION = 100;
-    MainStackViewAdapter adapter;
-    List<PostingData> datas;
-    SwipeFlingAdapterView flingContainer;
-
-    public void buttomClickListener(View view) {
-
-    }
+    private final int REQ_PERMISSION = 100;
+    private MainStackViewAdapter adapter;
+    private List<PostingData> datas;
+    private SwipeFlingAdapterView flingContainer;
+    private BackPressCloseHandler backPressCloseHandler;
 
 
     @Override
@@ -48,6 +49,8 @@ public class MainActivity extends BaseActivity<ActivityMainBinding>
         setBinding(R.layout.activity_main);
 
         checkVersion(REQ_PERMISSION);
+        backPressCloseHandler = new BackPressCloseHandler(this);
+
         flingContainer = (SwipeFlingAdapterView) findViewById(R.id.swipeImgView);
 
         datas = new ArrayList<>();
@@ -64,7 +67,18 @@ public class MainActivity extends BaseActivity<ActivityMainBinding>
         getBinding().navView.setNavigationItemSelectedListener(this);
     }
 
-    private void dataLoader() {
+
+
+    public void buttomClickListener(View view) {
+
+    }
+
+    public void writeButtonClickListener(View view) {
+        Intent intent = new Intent(MainActivity.this, WriteActivity.class);
+        startActivity(intent);
+    }
+
+    private void dataLoader() { // TODO 아마 나중에는 스플래시에서 데이터가 로딩되기때문에  지우거나 바뀌어야할것
         LoginActivity login = new LoginActivity();
         login.dataSetting(true);
         Log.e(TAG,"데이터로더");
@@ -79,7 +93,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding>
         if (getBinding().drawerLayout.isDrawerOpen(GravityCompat.START)) {
             getBinding().drawerLayout.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            backPressCloseHandler.onBackPressed();
         }
     }
 
@@ -112,7 +126,16 @@ public class MainActivity extends BaseActivity<ActivityMainBinding>
         int id = item.getItemId();
 
         if (id == R.id.nav_camera) {
-            // Handle the camera action
+            // 임의지정 TODO 삭제하기
+            // 1. Preference 생성하기
+            SharedPreferences sharedPref = getSharedPreferences("LoginCheck", Context.MODE_PRIVATE);
+            // 2. Shared Preference의 값을 입력하기 위해서는 에디터를 통해서만 가능하다.
+            SharedPreferences.Editor editor = sharedPref.edit();
+            // 지금 로그인을 하고있으므로 최초로그인 플래그는 false를 준다.
+            editor.remove("FirstLoginCheck");
+            editor.clear();
+            Toast.makeText(this, "shared preference가 삭제됨", Toast.LENGTH_SHORT).show();
+
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {

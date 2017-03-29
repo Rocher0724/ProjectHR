@@ -5,4 +5,5 @@
     <color name="colorPrimaryDark">#9daaff</color>
     <color name="colorAccent">#ffecfc</color>
     <color name="loginTextInputLayout">#ededed</color>
+    <color name="mainIconColor">#ededed</color>
 </resources>

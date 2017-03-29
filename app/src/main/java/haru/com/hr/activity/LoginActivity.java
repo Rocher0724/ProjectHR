@@ -3,29 +3,19 @@ package haru.com.hr.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import haru.com.hr.BaseActivity;
 import haru.com.hr.R;
-import haru.com.hr.Remote;
 import haru.com.hr.databinding.ActivityLoginBinding;
 import haru.com.hr.domain.DataStore;
-import haru.com.hr.domain.EmailSet;
 import haru.com.hr.domain.FirstLoadingData;
 import haru.com.hr.domain.PostingData;
 import haru.com.hr.util.BackPressCloseHandler;
 import haru.com.hr.util.SignUtil;
-
-import static haru.com.hr.activity.SplashActivity.URL;
 
 public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
 
@@ -34,7 +24,6 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
     public static final String POST = "post";
     private static final String TAG = "LoginActivity";
     private boolean firstLogincheck = false;
-    private boolean secondBackClick = false;
 
     private BackPressCloseHandler backPressCloseHandler;
 
@@ -45,6 +34,13 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
         setBinding(R.layout.activity_login);
 
         backPressCloseHandler = new BackPressCloseHandler(this);
+
+
+        // TODO 임의 로그인을 위해서 설정한것임. 나중에 지워야함
+        getBinding().btnGoToCreateAccountView.setOnLongClickListener(v -> {
+            activityChange();
+            return false;
+        });
 
         //TODO 로그인 처리후 액티비티 변환 처리해야함 intent이동하는거 그거
     }
@@ -78,8 +74,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
                 }
                 break;
             case R.id.btnGoToCreateAccountView:
-                getBinding().loginConstLO.setVisibility(View.GONE);
-                getBinding().createAccountConstLO.setVisibility(View.VISIBLE);
+                loginViewAndCreateViewChange();
                 break;
             case R.id.btnCreateAccount:
                 String email = getBinding().etActivityLoginCreateAddress.getText().toString();
@@ -99,12 +94,21 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
         }
     }
 
+    private void loginViewAndCreateViewChange() {
+        if( getBinding().loginConstLO.getVisibility() == View.GONE) {
+            getBinding().loginConstLO.setVisibility(View.VISIBLE);
+            getBinding().createAccountConstLO.setVisibility(View.GONE);
+        } else {
+            getBinding().loginConstLO.setVisibility(View.GONE);
+            getBinding().createAccountConstLO.setVisibility(View.VISIBLE);
+        }
+
+    }
 
     @Override
     public void onBackPressed() {
         if( getBinding().loginConstLO.getVisibility() == View.GONE) {
-            getBinding().loginConstLO.setVisibility(View.VISIBLE);
-            getBinding().createAccountConstLO.setVisibility(View.GONE);
+            loginViewAndCreateViewChange();
             return;
         }
 
@@ -131,11 +135,11 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
     public boolean infoCheck(String email, String password, String confirm) {
         int checkCount = 0;
         if(!SignUtil.validateEmail(email)) {
-            getBinding().tvActivityLoginAddress.setText("이메일 형식이 잘못되었습니다.");
+            getBinding().tvActivityLoginCreateAddress.setText("이메일 형식이 잘못되었습니다.");
             checkCount++;
         }
         if(!SignUtil.validatePassword(password)) {
-            getBinding().tvActivityLoginPassword.setText("비밀번호는 6~16자리여야 합니다.");
+            getBinding().tvActivityLoginCreatePassword.setText("비밀번호는 6~16자리여야 합니다.");
             checkCount++;
         }
         if( !password.equals(confirm) ) {
@@ -144,7 +148,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
         }
 
         if(checkCount > 0) {
-            Toast.makeText(LoginActivity.this, "형식이 잘못되었습니다.",Toast.LENGTH_SHORT).show();
+            Toast.makeText(LoginActivity.this, "형식이 잘못되었습니다.2",Toast.LENGTH_SHORT).show();
             return false;
         }
         return true;
@@ -266,5 +270,6 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
         // 로딩 화면인 현재 Activity는 종료한다.
         finish();
     }
+
 
 }
