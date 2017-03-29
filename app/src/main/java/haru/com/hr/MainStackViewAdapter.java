@@ -82,7 +82,9 @@ public class MainStackViewAdapter extends ArrayAdapter<PostingData> {
         PostingData data = datas.get(position);
         Log.e(TAG,"타이틀 : " + data.getTitle());
         viewHolder.tvTitle.setText(data.getTitle());
+        viewHolder.tvTitle.setTextColor(Color.WHITE);
         viewHolder.tvContent.setText(data.getContent());
+        viewHolder.tvContent.setTextColor(Color.WHITE);
         Glide.with(context)
                 .load(data.getImageUrl())
                 .bitmapTransform(new CenterCrop(context)

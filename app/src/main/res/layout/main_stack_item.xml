@@ -56,12 +56,14 @@
 
     <ImageView
         android:id="@+id/imgEmotion"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_marginBottom="8dp"
         android:layout_marginRight="8dp"
         app:layout_constraintBottom_toTopOf="@+id/tvContent"
         app:layout_constraintRight_toRightOf="@+id/tvContent"
-        app:srcCompat="@mipmap/ic_launcher" />
+        app:srcCompat="@mipmap/ic_launcher"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintLeft_toLeftOf="@+id/tvContent" />
 
 </android.support.constraint.ConstraintLayout>

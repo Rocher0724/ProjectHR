@@ -2,6 +2,7 @@ package haru.com.hr.activity;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
@@ -36,6 +37,10 @@ public class MainActivity extends BaseActivity<ActivityMainBinding>
     List<PostingData> datas;
     SwipeFlingAdapterView flingContainer;
 
+    public void buttomClickListener(View view) {
+
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +67,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding>
     private void dataLoader() {
         LoginActivity login = new LoginActivity();
         login.dataSetting(true);
+        Log.e(TAG,"데이터로더");
     }
 
     public void openDrawer(View view){
@@ -201,8 +207,10 @@ public class MainActivity extends BaseActivity<ActivityMainBinding>
     SwipeFlingAdapterView.onFlingListener flingListener = new SwipeFlingAdapterView.onFlingListener() {
         @Override
         public void removeFirstObjectInAdapter() {
+//            datas.add(datas.get(0));
             datas.remove(0);
             adapter.notifyDataSetChanged();
+            Log.e(TAG,"제거했을때 하는일");
         }
 
         @Override
@@ -226,8 +234,9 @@ public class MainActivity extends BaseActivity<ActivityMainBinding>
             data.setImageUrl(Uri.parse("http://cfile29.uf.tistory.com/image/197005455139E816267525"));
             data.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl0());
             datas.add(data);
-
+            Log.e(TAG,"없을땐?");
             adapter.notifyDataSetChanged();
+
         }
 
         @Override

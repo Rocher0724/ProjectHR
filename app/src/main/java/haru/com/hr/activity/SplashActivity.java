@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 
@@ -45,21 +46,20 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
 
             // 방어코딩
             if( email != null) {
-                signin(email);
-                getData();
+                Log.e(TAG, "방어코딩 안으로 들어왔다" );
+//                signin(email); // todo 서버통신할때는 주석풀기
+//                getData();
             } else {
                 Log.e(TAG,"email이 null입니다.");
             }
 
         } else {
-            // 로그인 쿠키가 없는경우  1초간 스플래시에서 머문후 로그인페이지로 이동
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            // 첫 로그인인경우 스플래시만 보여주고 로그인화면으로 넘어간다
         }
-        activityChange();
+
+        // 로그인 쿠키가 없는경우  1초간 스플래시에서 머문후 로그인페이지로 이동
+        Handler handler = new Handler();
+        handler.postDelayed(new splashHandler(), 2000);
     }
 
     private boolean checkFirstLogin() {
@@ -68,8 +68,10 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
 
     private boolean loadSharedpreference() {
         SharedPreferences sharedPref = getSharedPreferences("LoginCheck", Context.MODE_PRIVATE);
-        boolean loginCheck = sharedPref.getBoolean("first", true );
+        boolean loginCheck = sharedPref.getBoolean("FirstLoginCheck", true );
+        Log.e(TAG,"최초로그인체크 : " + loginCheck);
         email = sharedPref.getString("email", null);
+        Log.e(TAG,"이메일은 : " + email);
         return loginCheck;
     }
 
@@ -89,7 +91,7 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
                 String jsonString = gson.toJson(email);
 
                 // postjson을 통해서 json 정보를 서버로 보냄 //TODO 주소맞추기
-                String result = Remote.postJson(URL/*+주소*/, jsonString);
+                String result = Remote.postJson(URL/*+주소 TODO*/, jsonString);
 
                 //TODO 계정정보(이메일)를 보냈으니까 게시한 포스팅정보를 받아와야함.
 
@@ -129,17 +131,11 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
                     DataStore dataStore = DataStore.getInstance();
                     dataStore.setDatas(data.getData());
 
-                    try {
-                        // 너무 빨리 로딩될경우 그냥 액티비티를 넘겨버리면 스플래시 화면이 너무빨리 지나가므로 0.5초정도 주었다.
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
 
-                    activityChange();
 
                     // 로딩 화면인 현재 Activity는 종료한다.
-                    finish();
+//                    activityChange();
+//                    finish();
 
                 } else {
                     //정상적이지 않을 경우 message에 오류내용이 담겨 온다.
@@ -158,6 +154,7 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
 
     private void activityChange() {
         //TODO 기 로그인자는 메인으로 바로이동시켜야하나?
+        Log.e(TAG,"액티비티를 바꾸자");
 
         Intent intent = loadSharedpreference()?
                 new Intent(SplashActivity.this, LoginActivity.class)
@@ -165,5 +162,12 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
 
         startActivity(intent);
         finish();
+    }
+
+    private class splashHandler implements Runnable {
+        @Override
+        public void run() {
+            activityChange();
+        }
     }
 }

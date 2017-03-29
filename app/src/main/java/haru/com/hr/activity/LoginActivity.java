@@ -22,15 +22,21 @@ import haru.com.hr.domain.DataStore;
 import haru.com.hr.domain.EmailSet;
 import haru.com.hr.domain.FirstLoadingData;
 import haru.com.hr.domain.PostingData;
+import haru.com.hr.util.BackPressCloseHandler;
 import haru.com.hr.util.SignUtil;
 
 import static haru.com.hr.activity.SplashActivity.URL;
 
 public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
 
+
+
     public static final String POST = "post";
     private static final String TAG = "LoginActivity";
     private boolean firstLogincheck = false;
+    private boolean secondBackClick = false;
+
+    private BackPressCloseHandler backPressCloseHandler;
 
 
     @Override
@@ -38,16 +44,28 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
         super.onCreate(savedInstanceState);
         setBinding(R.layout.activity_login);
 
+        backPressCloseHandler = new BackPressCloseHandler(this);
+
         //TODO 로그인 처리후 액티비티 변환 처리해야함 intent이동하는거 그거
+    }
+
+    private void editTextVisibleChanger() {
+
+        if( getBinding().activityLoginAddress.getVisibility() == View.INVISIBLE ) {
+            getBinding().activityLoginAddress.setVisibility(View.VISIBLE);
+            getBinding().activityLoginPassword.setVisibility(View.VISIBLE);
+        } else {
+            getBinding().activityLoginAddress.setVisibility(View.INVISIBLE);
+            getBinding().activityLoginPassword.setVisibility(View.INVISIBLE);
+        }
     }
 
     public void clickListener(View view) {
         switch (view.getId()) {
             case R.id.btnEmailLogin:
-                if( getBinding().activityLoginAddress.getVisibility() == View.GONE ) {
+                if( getBinding().activityLoginAddress.getVisibility() == View.INVISIBLE ) {
                     // todo 여유가되면 걍 visible이 아니라 애니메이션으로 부드럽게 in 되도록 해보자
-                    getBinding().activityLoginAddress.setVisibility(View.VISIBLE);
-                    getBinding().activityLoginPassword.setVisibility(View.VISIBLE);
+                    editTextVisibleChanger(); // 현재 인비지블이므로 비지블로 바꾸게 처리
                 } else {
                     String email = getBinding().etActivityLoginAddress.getText().toString();
                     String password = getBinding().etActivityLoginPassword.getText().toString();
@@ -55,18 +73,43 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
                     // 가입시 이메일 정보 체크
                     if ( infoCheck(email, password) ) {
                         signin(email, password);
-                        getBinding().activityLoginAddress.setVisibility(View.INVISIBLE);
-                        getBinding().activityLoginPassword.setVisibility(View.INVISIBLE);
+                        editTextVisibleChanger(); //현재 비지블이므로 로그인하면서 텍스트 숨김
                     }
                 }
                 break;
-            case R.id.btnFacebookLogin:
-                // TODO 페이스북로그인 api 붙이기
+            case R.id.btnGoToCreateAccountView:
+                getBinding().loginConstLO.setVisibility(View.GONE);
+                getBinding().createAccountConstLO.setVisibility(View.VISIBLE);
+                break;
+            case R.id.btnCreateAccount:
+                String email = getBinding().etActivityLoginCreateAddress.getText().toString();
+                String password = getBinding().etActivityLoginCreatePassword.getText().toString();
+                String confirm = getBinding().etActivityLoginCreateConfirm.getText().toString();
+                if( infoCheck(email, password, confirm) ) {
+
+                    // TODO 정보를 보내야겠지
+
+                    onBackPressed(); // 현재 getBinding().loginConstLO.getVisibility() == View.GONE 인 상태이므로 이전화면으로 간다.
+                }
+
 
                 break;
+
+            // TODO 페이스북로그인 api 붙이기
         }
     }
 
+
+    @Override
+    public void onBackPressed() {
+        if( getBinding().loginConstLO.getVisibility() == View.GONE) {
+            getBinding().loginConstLO.setVisibility(View.VISIBLE);
+            getBinding().createAccountConstLO.setVisibility(View.GONE);
+            return;
+        }
+
+        backPressCloseHandler.onBackPressed();
+    }
     public boolean infoCheck(String email, String password) {
 
         int checkCount = 0;
@@ -80,14 +123,35 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
         }
 
         if(checkCount > 0) {
-            Toast.makeText(LoginActivity.this, "형식이 잘못되었음",Toast.LENGTH_SHORT).show();
+            Toast.makeText(LoginActivity.this, "형식이 잘못되었습니다.",Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
+    public boolean infoCheck(String email, String password, String confirm) {
+        int checkCount = 0;
+        if(!SignUtil.validateEmail(email)) {
+            getBinding().tvActivityLoginAddress.setText("이메일 형식이 잘못되었습니다.");
+            checkCount++;
+        }
+        if(!SignUtil.validatePassword(password)) {
+            getBinding().tvActivityLoginPassword.setText("비밀번호는 6~16자리여야 합니다.");
+            checkCount++;
+        }
+        if( !password.equals(confirm) ) {
+            getBinding().tvActivityLoginCreateConfirm.setText("비밀번호가 일치하지 않습니다.");
+            checkCount++;
+        }
+
+        if(checkCount > 0) {
+            Toast.makeText(LoginActivity.this, "형식이 잘못되었습니다.",Toast.LENGTH_SHORT).show();
             return false;
         }
         return true;
     }
 
     public void signin(String email, String password) {
-
+/*
         AsyncTask<String, Void, String> networkTask = new AsyncTask<String, Void, String>(){
             @Override
             protected void onPreExecute() {
@@ -123,12 +187,10 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
             }
         };
 
-
         networkTask.execute(email, password);
-        // 받아온 정보를 데이터에 세팅, 기 사용자라면 사용자 정보를 불러오고 아니라면 튜토리얼을 가져온다.
-
+        // 받아온 정보를 데이터에 세팅, 기 사용자라면 사용자 정보를 불러오고 아니라면 튜토리얼을 가져온다.*/
         dataSetting(firstLogincheck);
-        saveSharedpreference(email);
+        saveSharedpreference(email); // 자동로그인을 위한 shared preference
         activityChange();
 
     }
@@ -139,44 +201,45 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
     public void dataSetting(boolean loginCheck) {
         if(loginCheck) { // 첫 로그인이면 튜토리얼 정보 세팅
             Log.e(TAG,"dataSetting : 나는 작동합니다.");
-            List<PostingData> pDatas = new ArrayList<>();
-            PostingData datas = new PostingData();
-            datas.set_id(FirstLoadingData.getInstance().get_id0());
-            datas.setTitle(FirstLoadingData.getInstance().getTitle0());
-            datas.setContent(FirstLoadingData.getInstance().getContent0());
-            datas.setImageUrl(FirstLoadingData.getInstance().getImageUrl0());
-            datas.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl0());
-            pDatas.add(datas);
+            PostingData datas0 = new PostingData();
+            datas0.set_id(FirstLoadingData.getInstance().get_id0());
+            datas0.setTitle(FirstLoadingData.getInstance().getTitle0());
+            datas0.setContent(FirstLoadingData.getInstance().getContent0());
+            datas0.setImageUrl(FirstLoadingData.getInstance().getImageUrl0());
+            datas0.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl0());
+            DataStore.getInstance().addData(datas0);
 
-            datas.set_id(FirstLoadingData.getInstance().get_id1());
-            datas.setTitle(FirstLoadingData.getInstance().getTitle1());
-            datas.setContent(FirstLoadingData.getInstance().getContent1());
-            datas.setImageUrl(FirstLoadingData.getInstance().getImageUrl1());
-            datas.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl1());
-            pDatas.add(datas);
+            PostingData datas1 = new PostingData();
+            datas1.set_id(FirstLoadingData.getInstance().get_id1());
+            datas1.setTitle(FirstLoadingData.getInstance().getTitle1());
+            datas1.setContent(FirstLoadingData.getInstance().getContent1());
+            datas1.setImageUrl(FirstLoadingData.getInstance().getImageUrl1());
+            datas1.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl1());
+            DataStore.getInstance().addData(datas1);
 
-            datas.set_id(FirstLoadingData.getInstance().get_id2());
-            datas.setTitle(FirstLoadingData.getInstance().getTitle2());
-            datas.setContent(FirstLoadingData.getInstance().getContent2());
-            datas.setImageUrl(FirstLoadingData.getInstance().getImageUrl2());
-            datas.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl2());
-            pDatas.add(datas);
+            PostingData datas2 = new PostingData();
+            datas2.set_id(FirstLoadingData.getInstance().get_id2());
+            datas2.setTitle(FirstLoadingData.getInstance().getTitle2());
+            datas2.setContent(FirstLoadingData.getInstance().getContent2());
+            datas2.setImageUrl(FirstLoadingData.getInstance().getImageUrl2());
+            datas2.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl2());
+            DataStore.getInstance().addData(datas2);
 
-            datas.set_id(FirstLoadingData.getInstance().get_id3());
-            datas.setTitle(FirstLoadingData.getInstance().getTitle3());
-            datas.setContent(FirstLoadingData.getInstance().getContent3());
-            datas.setImageUrl(FirstLoadingData.getInstance().getImageUrl3());
-            datas.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl3());
-            pDatas.add(datas);
+            PostingData datas3 = new PostingData();
+            datas3.set_id(FirstLoadingData.getInstance().get_id3());
+            datas3.setTitle(FirstLoadingData.getInstance().getTitle3());
+            datas3.setContent(FirstLoadingData.getInstance().getContent3());
+            datas3.setImageUrl(FirstLoadingData.getInstance().getImageUrl3());
+            datas3.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl3());
+            DataStore.getInstance().addData(datas3);
 
-            datas.set_id(FirstLoadingData.getInstance().get_id4());
-            datas.setTitle(FirstLoadingData.getInstance().getTitle4());
-            datas.setContent(FirstLoadingData.getInstance().getContent4());
-            datas.setImageUrl(FirstLoadingData.getInstance().getImageUrl4());
-            datas.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl4());
-            pDatas.add(datas);
-
-            DataStore.getInstance().setDatas(pDatas);
+            PostingData datas4 = new PostingData();
+            datas4.set_id(FirstLoadingData.getInstance().get_id4());
+            datas4.setTitle(FirstLoadingData.getInstance().getTitle4());
+            datas4.setContent(FirstLoadingData.getInstance().getContent4());
+            datas4.setImageUrl(FirstLoadingData.getInstance().getImageUrl4());
+            datas4.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl4());
+            DataStore.getInstance().addData(datas4);
 
         } else { // 기로그인이면 사용자 정보 세팅
 
