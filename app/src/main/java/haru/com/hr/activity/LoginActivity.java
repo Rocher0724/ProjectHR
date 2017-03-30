@@ -6,7 +6,13 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Toast;
+
+import java.text.DateFormat;
+import java.util.Date;
 
 import haru.com.hr.BaseActivity;
 import haru.com.hr.R;
@@ -14,6 +20,7 @@ import haru.com.hr.databinding.ActivityLoginBinding;
 import haru.com.hr.domain.DataStore;
 import haru.com.hr.domain.FirstLoadingData;
 import haru.com.hr.domain.PostingData;
+import haru.com.hr.util.AnimationUtil;
 import haru.com.hr.util.BackPressCloseHandler;
 import haru.com.hr.util.SignUtil;
 
@@ -24,6 +31,9 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
     public static final String POST = "post";
     private static final String TAG = "LoginActivity";
     private boolean firstLogincheck = false;
+    AnimationUtil anim = null;
+    Animation loginActLogoAnim = null;
+    Animation loginTextAnum = null;
 
     private BackPressCloseHandler backPressCloseHandler;
 
@@ -36,20 +46,34 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
         backPressCloseHandler = new BackPressCloseHandler(this);
 
 
+
         // TODO 임의 로그인을 위해서 설정한것임. 나중에 지워야함
         getBinding().btnGoToCreateAccountView.setOnLongClickListener(v -> {
             activityChange();
             return false;
         });
 
+
         //TODO 로그인 처리후 액티비티 변환 처리해야함 intent이동하는거 그거
     }
 
+    private void animationSetting() {
+        anim = new AnimationUtil(this);
+        loginActLogoAnim = anim.getLoginActivityMainLogoAnim();
+        loginTextAnum = anim.getLoginActivityTextAnim();
+    }
+
+
     private void editTextVisibleChanger() {
+
+        animationSetting();
 
         if( getBinding().activityLoginAddress.getVisibility() == View.INVISIBLE ) {
             getBinding().activityLoginAddress.setVisibility(View.VISIBLE);
+            getBinding().activityLoginAddress.setAnimation(loginTextAnum);
             getBinding().activityLoginPassword.setVisibility(View.VISIBLE);
+            getBinding().activityLoginPassword.setAnimation(loginTextAnum);
+            getBinding().imgLogoWithName.startAnimation(loginActLogoAnim);
         } else {
             getBinding().activityLoginAddress.setVisibility(View.INVISIBLE);
             getBinding().activityLoginPassword.setVisibility(View.INVISIBLE);
@@ -108,50 +132,71 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
     @Override
     public void onBackPressed() {
         if( getBinding().loginConstLO.getVisibility() == View.GONE) {
+            createAccountExplanationRemove();
             loginViewAndCreateViewChange();
             return;
         }
 
+        // 로그인화면에서 백키를 누르면 한번더 누르겠냐고 묻는다.
         backPressCloseHandler.onBackPressed();
     }
+    private void createAccountExplanationRemove() {
+        getBinding().tvActivityLoginAddress.setText("");
+        getBinding().tvActivityLoginPassword.setText("");
+        getBinding().tvActivityLoginCreateAddress.setText("");
+        getBinding().tvActivityLoginCreatePassword.setText("");
+        getBinding().tvActivityLoginCreateConfirm.setText("");
+    }
+
+
     public boolean infoCheck(String email, String password) {
+
+        AnimationUtil anim = null;
+        Animation loginTextAnum = null;
+        anim = new AnimationUtil(this);
+        loginTextAnum = anim.getLoginActivityTextAnim();
 
         int checkCount = 0;
         if(!SignUtil.validateEmail(email)) {
             getBinding().tvActivityLoginAddress.setText("이메일 형식이 잘못되었습니다.");
+            getBinding().tvActivityLoginAddress.setAnimation(loginTextAnum);
             checkCount++;
         }
         if(!SignUtil.validatePassword(password)) {
             getBinding().tvActivityLoginPassword.setText("비밀번호는 6~16자리여야 합니다.");
+            getBinding().tvActivityLoginPassword.setAnimation(loginTextAnum);
+
             checkCount++;
         }
 
-        if(checkCount > 0) {
-            Toast.makeText(LoginActivity.this, "형식이 잘못되었습니다.",Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        return true;
+        boolean returnCheck = !(checkCount > 0)? true : false;
+
+        return returnCheck;
     }
     public boolean infoCheck(String email, String password, String confirm) {
+
+        animationSetting();
+
         int checkCount = 0;
         if(!SignUtil.validateEmail(email)) {
             getBinding().tvActivityLoginCreateAddress.setText("이메일 형식이 잘못되었습니다.");
+            getBinding().tvActivityLoginCreateAddress.setAnimation(loginTextAnum);
             checkCount++;
         }
         if(!SignUtil.validatePassword(password)) {
             getBinding().tvActivityLoginCreatePassword.setText("비밀번호는 6~16자리여야 합니다.");
+            getBinding().tvActivityLoginCreatePassword.setAnimation(loginTextAnum);
             checkCount++;
         }
         if( !password.equals(confirm) ) {
             getBinding().tvActivityLoginCreateConfirm.setText("비밀번호가 일치하지 않습니다.");
+            getBinding().tvActivityLoginCreateConfirm.setAnimation(loginTextAnum);
             checkCount++;
         }
 
-        if(checkCount > 0) {
-            Toast.makeText(LoginActivity.this, "형식이 잘못되었습니다.2",Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        return true;
+        boolean returnCheck = !(checkCount > 0)? true : false;
+
+        return returnCheck;
     }
 
     public void signin(String email, String password) {
@@ -211,6 +256,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
             datas0.setContent(FirstLoadingData.getInstance().getContent0());
             datas0.setImageUrl(FirstLoadingData.getInstance().getImageUrl0());
             datas0.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl0());
+            datas0.setnDate(FirstLoadingData.getInstance().getDate0());
             DataStore.getInstance().addData(datas0);
 
             PostingData datas1 = new PostingData();
@@ -219,6 +265,8 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
             datas1.setContent(FirstLoadingData.getInstance().getContent1());
             datas1.setImageUrl(FirstLoadingData.getInstance().getImageUrl1());
             datas1.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl1());
+            datas1.setnDate(DateFormat.getDateTimeInstance().format(new Date()));
+            datas0.setnDate(FirstLoadingData.getInstance().getDate1());
             DataStore.getInstance().addData(datas1);
 
             PostingData datas2 = new PostingData();
@@ -227,6 +275,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
             datas2.setContent(FirstLoadingData.getInstance().getContent2());
             datas2.setImageUrl(FirstLoadingData.getInstance().getImageUrl2());
             datas2.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl2());
+            datas0.setnDate(FirstLoadingData.getInstance().getDate2());
             DataStore.getInstance().addData(datas2);
 
             PostingData datas3 = new PostingData();
@@ -235,6 +284,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
             datas3.setContent(FirstLoadingData.getInstance().getContent3());
             datas3.setImageUrl(FirstLoadingData.getInstance().getImageUrl3());
             datas3.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl3());
+            datas0.setnDate(FirstLoadingData.getInstance().getDate3());
             DataStore.getInstance().addData(datas3);
 
             PostingData datas4 = new PostingData();
@@ -243,6 +293,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
             datas4.setContent(FirstLoadingData.getInstance().getContent4());
             datas4.setImageUrl(FirstLoadingData.getInstance().getImageUrl4());
             datas4.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl4());
+            datas0.setnDate(FirstLoadingData.getInstance().getDate4());
             DataStore.getInstance().addData(datas4);
 
         } else { // 기로그인이면 사용자 정보 세팅
@@ -270,6 +321,5 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
         // 로딩 화면인 현재 Activity는 종료한다.
         finish();
     }
-
 
 }

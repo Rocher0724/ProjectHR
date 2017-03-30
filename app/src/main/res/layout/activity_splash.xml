@@ -18,34 +18,39 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/splash2" />
+            app:srcCompat="@drawable/splash2"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintVertical_bias="0.0" />
 
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Haru"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            android:textColor="@color/loginTextInputLayout"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
+        <ImageView
+            android:id="@+id/imageView4"
+            android:layout_width="189dp"
+            android:layout_height="152dp"
+            app:srcCompat="@drawable/haru_logo_with_name_semiwhite"
+            app:layout_constraintTop_toTopOf="@+id/imageView"
+            android:layout_marginTop="8dp"
+            android:layout_marginRight="8dp"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.594" />
+            android:layout_marginLeft="8dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/imageView"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintVertical_bias="0.37"
+            app:layout_constraintHorizontal_bias="0.503" />
 
         <ProgressBar
             android:id="@+id/splashPB"
             style="?android:attr/progressBarStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="72dp"
             android:visibility="visible"
-            app:layout_constraintBottom_toTopOf="@+id/textView"
+            android:layout_marginTop="70dp"
+            app:layout_constraintTop_toBottomOf="@+id/imageView4"
+            android:layout_marginRight="8dp"
+            app:layout_constraintRight_toRightOf="@+id/imageView4"
             android:layout_marginLeft="8dp"
-            app:layout_constraintLeft_toLeftOf="@+id/textView"
-            android:layout_marginRight="0dp"
-            app:layout_constraintRight_toRightOf="@+id/textView"
-            app:layout_constraintHorizontal_bias="0.722" />
+            app:layout_constraintLeft_toLeftOf="@+id/imageView4"
+            app:layout_constraintHorizontal_bias="0.497" />
 
     </android.support.constraint.ConstraintLayout>
 

@@ -20,7 +20,9 @@ import android.view.MenuItem;
 import android.widget.Toast;
 import com.lorentzos.flingswipe.SwipeFlingAdapterView;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import haru.com.hr.BaseActivity;
@@ -70,6 +72,25 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
 
 
     public void buttomClickListener(View view) {
+        switch (view.getId()) {
+            case R.id.imgMainStack:
+                getBinding().mainInclude.swipeImgView.setVisibility(View.VISIBLE);
+                getBinding().mainInclude.mainMoa.constMainMoa.setVisibility(View.GONE);
+                getBinding().mainInclude.imgLogo.setVisibility(View.VISIBLE);
+
+                break;
+
+            case R.id.imgMainMoa:
+                getBinding().mainInclude.swipeImgView.setVisibility(View.GONE);
+                getBinding().mainInclude.mainMoa.constMainMoa.setVisibility(View.VISIBLE);
+                getBinding().mainInclude.imgLogo.setVisibility(View.GONE);
+
+                break;
+
+            case R.id.imgMainCal:
+
+                break;
+        }
 
     }
 
@@ -132,8 +153,15 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
             // 2. Shared Preference의 값을 입력하기 위해서는 에디터를 통해서만 가능하다.
             SharedPreferences.Editor editor = sharedPref.edit();
             // 지금 로그인을 하고있으므로 최초로그인 플래그는 false를 준다.
-            editor.remove("FirstLoginCheck");
+            editor.remove("LoginCheck");
             editor.clear();
+            editor.commit();
+
+            boolean loginCheck = sharedPref.getBoolean("FirstLoginCheck", true );
+            Log.e(TAG,"FirstLoginCheck가 남아있나? : " + loginCheck);
+            loginCheck = sharedPref.getBoolean("FirstLoginCheck", false );
+            Log.e(TAG,"FirstLoginCheck가 남아있나? : " + loginCheck);
+
             Toast.makeText(this, "shared preference가 삭제됨", Toast.LENGTH_SHORT).show();
 
         } else if (id == R.id.nav_gallery) {
@@ -252,10 +280,13 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
 
             PostingData data = new PostingData();
             data.set_id("-1");
-            data.setTitle("이제 당신의 이야기를 시작하세요");
-            data.setContent("당신의 하루를 응원합니다.");
+//            data.setTitle("이제 당신의 이야기를 시작하세요");
+            data.setTitle("아...");
+            data.setContent("개짜증나");
+//            data.setContent("당신의 하루를 응원합니다.");
             data.setImageUrl(Uri.parse("http://cfile29.uf.tistory.com/image/197005455139E816267525"));
             data.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl0());
+            data.setnDate(DateFormat.getDateTimeInstance().format(new Date()));
             datas.add(data);
             Log.e(TAG,"없을땐?");
             adapter.notifyDataSetChanged();

@@ -64,7 +64,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textColor="@color/colorAccent" />
+                    android:paddingTop="8dp"
+                    android:textColor="@color/loginTextInputLayout" />
             </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout
@@ -99,7 +100,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textColor="@color/colorAccent" />
+                    android:paddingTop="8dp"
+                    android:textColor="@color/loginTextInputLayout" />
             </android.support.design.widget.TextInputLayout>
 
             <!--나중에 ImageView나 ImageButton으로 바꾸기-->
@@ -142,6 +144,22 @@
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/activity_login_password"
                 app:layout_constraintVertical_bias="0.57" />
+
+            <ImageView
+                android:id="@+id/imgLogoWithName"
+                android:layout_width="177dp"
+                android:layout_height="125dp"
+                android:layout_marginBottom="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintBottom_toBottomOf="@+id/imgLogin"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/imgLogin"
+                app:layout_constraintVertical_bias="0.396"
+                app:srcCompat="@drawable/haru_logo_with_name_semiwhite"
+                app:layout_constraintHorizontal_bias="0.502" />
 
 
             <!--<ImageView-->
@@ -216,6 +234,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:paddingTop="8dp"
                     android:textColor="@color/loginTextInputLayout" />
             </android.support.design.widget.TextInputLayout>
 
@@ -251,6 +270,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:paddingTop="8dp"
                     android:textColor="@color/loginTextInputLayout" />
 
             </android.support.design.widget.TextInputLayout>
@@ -289,6 +309,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:paddingTop="8dp"
                     android:textColor="@color/loginTextInputLayout" />
             </android.support.design.widget.TextInputLayout>
 

@@ -70,6 +70,7 @@ public class MainStackViewAdapter extends ArrayAdapter<PostingData> {
             viewHolder.imgEmotion = (ImageView) convertView.findViewById(R.id.imgEmotion);
             viewHolder.tvTitle = (TextView) convertView.findViewById(R.id.tvTitle);
             viewHolder.tvContent = (TextView) convertView.findViewById(R.id.tvContent);
+            viewHolder.tvDate = (TextView) convertView.findViewById(R.id.tvDate);
             convertView.setTag(viewHolder);
         }
         // 캐시된 뷰가 있을 경우 저장된 뷰홀더를 사용한다
@@ -84,6 +85,7 @@ public class MainStackViewAdapter extends ArrayAdapter<PostingData> {
         viewHolder.tvTitle.setTextColor(Color.WHITE);
         viewHolder.tvContent.setText(data.getContent());
         viewHolder.tvContent.setTextColor(Color.WHITE);
+        viewHolder.tvDate.setText(data.getnDate());
         Glide.with(context)
                 .load(data.getImageUrl())
                 .bitmapTransform(new CenterCrop(context)
@@ -91,7 +93,7 @@ public class MainStackViewAdapter extends ArrayAdapter<PostingData> {
                         , new ColorFilterTransformation(context, Color.argb(100, 100, 100, 100)))
                 .into(viewHolder.imgImage);
 
-        Glide.with(context).load(data.getEmotionUrl())
+        Glide.with(context).load(R.drawable.emition_happy_white)
                 .into(viewHolder.imgEmotion);
 
 
@@ -104,6 +106,7 @@ public class MainStackViewAdapter extends ArrayAdapter<PostingData> {
         public ImageView imgEmotion;
         public TextView tvTitle;
         public TextView tvContent;
+        public TextView tvDate;
 
     }
 }
