@@ -19,8 +19,17 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
 
     }
 
-    public void writeAcitivityClickListener (View view) {
-        Intent intent = new Intent(WriteActivity.this, MainActivity.class);
-        startActivity(intent);
+    public void writeAcitivityClickListener(View view) {
+        switch (view.getId()) {
+            case R.id.imgWriteCancel:
+                onBackPressed();
+                break;
+            case R.id.tvWriteSave:
+                //TODO 글저장작업
+                break;
+        }
+
+
     }
+
 }

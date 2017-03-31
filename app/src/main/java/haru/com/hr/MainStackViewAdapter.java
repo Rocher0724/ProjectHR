@@ -18,6 +18,8 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.List;
 
 import haru.com.hr.domain.DataStore;
@@ -85,7 +87,7 @@ public class MainStackViewAdapter extends ArrayAdapter<PostingData> {
         viewHolder.tvTitle.setTextColor(Color.WHITE);
         viewHolder.tvContent.setText(data.getContent());
         viewHolder.tvContent.setTextColor(Color.WHITE);
-        viewHolder.tvDate.setText(data.getnDate());
+        viewHolder.tvDate.setText(DateFormat.getDateTimeInstance().format(new Date()));
         Glide.with(context)
                 .load(data.getImageUrl())
                 .bitmapTransform(new CenterCrop(context)

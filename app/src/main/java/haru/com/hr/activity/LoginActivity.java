@@ -33,7 +33,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
     private boolean firstLogincheck = false;
     AnimationUtil anim = null;
     Animation loginActLogoAnim = null;
-    Animation loginTextAnum = null;
+    Animation loginTextAnim = null;
 
     private BackPressCloseHandler backPressCloseHandler;
 
@@ -52,15 +52,22 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
             activityChange();
             return false;
         });
+        getBinding().btnCreateAccount.setOnLongClickListener(v -> {
+            activityChange();
+            return false;
+        });
 
 
         //TODO 로그인 처리후 액티비티 변환 처리해야함 intent이동하는거 그거
     }
 
     private void animationSetting() {
-        anim = new AnimationUtil(this);
+        anim = new AnimationUtil(this, TAG);
         loginActLogoAnim = anim.getLoginActivityMainLogoAnim();
-        loginTextAnum = anim.getLoginActivityTextAnim();
+        Log.e(TAG,loginActLogoAnim + "");
+        loginTextAnim = anim.getLoginActivityTextAnim();
+        Log.e(TAG,loginTextAnim + "");
+
     }
 
 
@@ -70,10 +77,14 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
 
         if( getBinding().activityLoginAddress.getVisibility() == View.INVISIBLE ) {
             getBinding().activityLoginAddress.setVisibility(View.VISIBLE);
-            getBinding().activityLoginAddress.setAnimation(loginTextAnum);
+            getBinding().activityLoginAddress.setAnimation(loginTextAnim);
             getBinding().activityLoginPassword.setVisibility(View.VISIBLE);
-            getBinding().activityLoginPassword.setAnimation(loginTextAnum);
-            getBinding().imgLogoWithName.startAnimation(loginActLogoAnim);
+            getBinding().activityLoginPassword.setAnimation(loginTextAnim);
+
+            if(loginActLogoAnim != null) {
+                getBinding().imgLogoWithName.startAnimation(loginActLogoAnim);
+            }
+            Log.e(TAG,loginActLogoAnim + "");
         } else {
             getBinding().activityLoginAddress.setVisibility(View.INVISIBLE);
             getBinding().activityLoginPassword.setVisibility(View.INVISIBLE);
@@ -122,6 +133,9 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
         if( getBinding().loginConstLO.getVisibility() == View.GONE) {
             getBinding().loginConstLO.setVisibility(View.VISIBLE);
             getBinding().createAccountConstLO.setVisibility(View.GONE);
+            getBinding().etActivityLoginCreateAddress.setText("");
+            getBinding().etActivityLoginCreateConfirm.setText("");
+            getBinding().etActivityLoginCreatePassword.setText("");
         } else {
             getBinding().loginConstLO.setVisibility(View.GONE);
             getBinding().createAccountConstLO.setVisibility(View.VISIBLE);
@@ -152,24 +166,32 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
     public boolean infoCheck(String email, String password) {
 
         AnimationUtil anim = null;
-        Animation loginTextAnum = null;
-        anim = new AnimationUtil(this);
-        loginTextAnum = anim.getLoginActivityTextAnim();
+        Animation loginTextAnim = null;
+        anim = new AnimationUtil(this, TAG);
+        loginTextAnim = anim.getLoginActivityTextAnim();
 
         int checkCount = 0;
-        if(!SignUtil.validateEmail(email)) {
+        if( !SignUtil.validateEmail(email) ) {
             getBinding().tvActivityLoginAddress.setText("이메일 형식이 잘못되었습니다.");
-            getBinding().tvActivityLoginAddress.setAnimation(loginTextAnum);
+            getBinding().tvActivityLoginAddress.setAnimation(loginTextAnim);
             checkCount++;
+        } else {
+            getBinding().tvActivityLoginAddress.setText("");
+
         }
-        if(!SignUtil.validatePassword(password)) {
+        if( !SignUtil.validatePassword(password) ) {
             getBinding().tvActivityLoginPassword.setText("비밀번호는 6~16자리여야 합니다.");
-            getBinding().tvActivityLoginPassword.setAnimation(loginTextAnum);
+            getBinding().tvActivityLoginPassword.setAnimation(loginTextAnim);
 
             checkCount++;
+        } else {
+            getBinding().tvActivityLoginPassword.setText("");
+
         }
 
         boolean returnCheck = !(checkCount > 0)? true : false;
+
+
 
         return returnCheck;
     }
@@ -178,21 +200,23 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
         animationSetting();
 
         int checkCount = 0;
-        if(!SignUtil.validateEmail(email)) {
+        if( !SignUtil.validateEmail(email) ) {
             getBinding().tvActivityLoginCreateAddress.setText("이메일 형식이 잘못되었습니다.");
-            getBinding().tvActivityLoginCreateAddress.setAnimation(loginTextAnum);
+            getBinding().tvActivityLoginCreateAddress.setAnimation(loginTextAnim);
             checkCount++;
-        }
-        if(!SignUtil.validatePassword(password)) {
+        } else { getBinding().tvActivityLoginCreateAddress.setText(""); }
+
+        if( !SignUtil.validatePassword(password) ) {
             getBinding().tvActivityLoginCreatePassword.setText("비밀번호는 6~16자리여야 합니다.");
-            getBinding().tvActivityLoginCreatePassword.setAnimation(loginTextAnum);
+            getBinding().tvActivityLoginCreatePassword.setAnimation(loginTextAnim);
             checkCount++;
-        }
+        } else { getBinding().tvActivityLoginCreatePassword.setText(""); }
+
         if( !password.equals(confirm) ) {
             getBinding().tvActivityLoginCreateConfirm.setText("비밀번호가 일치하지 않습니다.");
-            getBinding().tvActivityLoginCreateConfirm.setAnimation(loginTextAnum);
+            getBinding().tvActivityLoginCreateConfirm.setAnimation(loginTextAnim);
             checkCount++;
-        }
+        } else { getBinding().tvActivityLoginCreateConfirm.setText(""); }
 
         boolean returnCheck = !(checkCount > 0)? true : false;
 
@@ -243,7 +267,6 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
         activityChange();
 
     }
-
 
 
     //TODO 여기는 어떻게해야할까 튜토리얼 정보세팅?
@@ -320,6 +343,20 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
 
         // 로딩 화면인 현재 Activity는 종료한다.
         finish();
+    }
+
+
+    @Override
+    protected void onStop() {
+        nullCheck();
+        super.onStop();
+    }
+
+    private void nullCheck(){
+        anim = null;
+        loginActLogoAnim = null;
+        loginTextAnim = null;
+        backPressCloseHandler = null;
     }
 
 }

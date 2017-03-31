@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/constMainMoa"
@@ -8,21 +9,131 @@
         android:layout_height="match_parent"
         android:visibility="visible">
 
-        <ImageView
-            android:id="@+id/imageView5"
+        <android.support.design.widget.CoordinatorLayout
+            android:id="@+id/mainMoaCoordi"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="0dp"
-            android:layout_marginLeft="0dp"
-            android:layout_marginRight="0dp"
-            android:layout_marginTop="0dp"
-            android:scaleType="centerCrop"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintLeft_toLeftOf="parent"
+            android:layout_height="0dp"
+            android:fitsSystemWindows="false"
+            tools:context="choongyul.android.com.flexibletoolbar.MainActivity"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.0"
-            app:srcCompat="@drawable/main_moa2" />
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <!--fitSystemWindows : 스테이터스 바에도 해당 내용이 보이게 할지 정합니다. flase일 경우 스테이터스 바가 투명해져서 밑에 레이어가 보입니다-->
+
+
+            <android.support.design.widget.AppBarLayout
+                android:id="@+id/app_bar"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/app_bar_height"
+                android:fitsSystemWindows="false"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+                <!--app_bar_height : 사진이 차지하는 높이-->
+
+                <android.support.design.widget.CollapsingToolbarLayout
+                    android:id="@+id/toolbar_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:fitsSystemWindows="false"
+                    app:contentScrim="@color/moaTopColor"
+                    app:layout_scrollFlags="scroll|exitUntilCollapsed"
+                    app:titleEnabled="false">
+                    <!--title이 예제의 큰 글자입니다. 아무 값이 없으면 앱 이름이 들어갈겁니다.-->
+
+                    <ImageView
+                        android:id="@+id/collapsingImage"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:fitsSystemWindows="false"
+                        android:scaleType="centerCrop"
+                        app:layout_collapseMode="pin"
+                        app:layout_collapseParallaxMultiplier="-0.1"
+                        app:srcCompat="@drawable/moa_top4" />
+                    <!--collapseMode로 CollapsingToolbarLayout이 줄어들 때 어떻게 반응 할지 정합니다. parallax면 같이 위로 올라갑니다. pin이면 고정된 상태입니다-->
+                    <!--collapseParallaxMultiplier를 통해서 상대 속도를 결정할 수 있습니다. +는 아래로, -는 위로 곱해지는 값이 커질 수록 속력이 빨라집니다-->
+
+                    <android.support.v7.widget.Toolbar
+                        android:id="@+id/toolbar"
+                        android:layout_width="match_parent"
+                        android:layout_height="80dp"
+                        app:layout_collapseMode="pin"
+                        app:popupTheme="@style/AppTheme.PopupOverlay"/>
+
+                    <android.support.constraint.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:id="@+id/moaInToolbarConstLO"
+                        >
+
+                        <TextView
+                            android:id="@+id/tvMoaInToolbar"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="내 손안에 작은 이야기, 하루한장"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                            android:textColor="@color/mainIconColor"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintLeft_toLeftOf="parent"
+                            app:layout_constraintRight_toRightOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:id="@+id/tvInToolbarCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="8dp"
+                            android:layout_marginRight="8dp"
+                            android:layout_marginTop="8dp"
+                            android:text="0 story"
+                            app:layout_constraintLeft_toLeftOf="parent"
+                            app:layout_constraintRight_toRightOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/tvMoaInToolbar"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginEnd="8dp" />
+
+                    </android.support.constraint.ConstraintLayout>
+
+
+                </android.support.design.widget.CollapsingToolbarLayout>
+            </android.support.design.widget.AppBarLayout>
+
+            <android.support.v4.widget.NestedScrollView
+                android:id="@+id/scrollableView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="0dp"
+                    android:id="@+id/linearLayout2">
+
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/recyclerMainMoa"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        tools:layout_editor_absoluteX="8dp"
+                        tools:layout_editor_absoluteY="8dp" />
+                </LinearLayout>
+            </android.support.v4.widget.NestedScrollView>
+        </android.support.design.widget.CoordinatorLayout>
+
+        <ImageView
+            android:id="@+id/imgMainMoaLogo"
+            android:layout_width="100dp"
+            android:layout_height="36dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="36dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/mainMoaCoordi"
+            app:srcCompat="@drawable/haru_logo_with_name2"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp" />
     </android.support.constraint.ConstraintLayout>
+
 </layout>

@@ -11,12 +11,15 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.animation.Animation;
 import android.widget.Toast;
 import com.lorentzos.flingswipe.SwipeFlingAdapterView;
 
@@ -26,12 +29,14 @@ import java.util.Date;
 import java.util.List;
 
 import haru.com.hr.BaseActivity;
+import haru.com.hr.MainMoaAdapter;
 import haru.com.hr.MainStackViewAdapter;
 import haru.com.hr.R;
 import haru.com.hr.databinding.ActivityMainBinding;
 import haru.com.hr.domain.DataStore;
 import haru.com.hr.domain.FirstLoadingData;
 import haru.com.hr.domain.PostingData;
+import haru.com.hr.util.AnimationUtil;
 import haru.com.hr.util.BackPressCloseHandler;
 
 public class MainActivity extends  BaseActivity<ActivityMainBinding>
@@ -43,6 +48,8 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
     private List<PostingData> datas;
     private SwipeFlingAdapterView flingContainer;
     private BackPressCloseHandler backPressCloseHandler;
+    private Animation buttomSpaceBlur;
+    private RecyclerView recyclerMainMoa;
 
 
     @Override
@@ -67,31 +74,60 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         flingContainer.setFlingListener(flingListener);
 
         getBinding().navView.setNavigationItemSelectedListener(this);
+
+        mainMoaRecyclerSetting();
     }
 
+    private void mainMoaRecyclerSetting() {
+        MainMoaAdapter mainMoaAdapter = new MainMoaAdapter(datas, this);
+        recyclerMainMoa = (RecyclerView) findViewById(R.id.recyclerMainMoa);
+        recyclerMainMoa.setAdapter(mainMoaAdapter);
+        recyclerMainMoa.setLayoutManager(new GridLayoutManager(this,3));
+
+    }
+
+    private void animationSetting() {
+        buttomSpaceBlur = AnimationUtil.mainActivityAnimation();
+    }
 
 
     public void buttomClickListener(View view) {
         switch (view.getId()) {
             case R.id.imgMainStack:
-                getBinding().mainInclude.swipeImgView.setVisibility(View.VISIBLE);
-                getBinding().mainInclude.mainMoa.constMainMoa.setVisibility(View.GONE);
-                getBinding().mainInclude.imgLogo.setVisibility(View.VISIBLE);
+                pressImgMainStackViewChange();
+                Log.e(TAG, "메인 스택 비지블");
 
                 break;
 
             case R.id.imgMainMoa:
-                getBinding().mainInclude.swipeImgView.setVisibility(View.GONE);
-                getBinding().mainInclude.mainMoa.constMainMoa.setVisibility(View.VISIBLE);
-                getBinding().mainInclude.imgLogo.setVisibility(View.GONE);
-
+                animationSetting();
+                pressImgMainMoaViewChange();
+                Log.e(TAG, "메인 스택 곤");
                 break;
 
             case R.id.imgMainCal:
 
                 break;
+            case R.id.imgButtomBlur:
+
+                break;
         }
 
+    }
+
+    private void pressImgMainMoaViewChange() {
+        getBinding().mainInclude.swipeImgView.setVisibility(View.GONE);
+        getBinding().mainInclude.mainMoa.constMainMoa.setVisibility(View.VISIBLE);
+        getBinding().mainInclude.imgLogo.setVisibility(View.GONE);
+        getBinding().mainInclude.imgButtomBlur.setVisibility(View.VISIBLE);
+        getBinding().mainInclude.imgButtomBlur.setAnimation(buttomSpaceBlur);
+    }
+
+    private void pressImgMainStackViewChange() {
+        getBinding().mainInclude.swipeImgView.setVisibility(View.VISIBLE);
+        getBinding().mainInclude.mainMoa.constMainMoa.setVisibility(View.GONE);
+        getBinding().mainInclude.imgLogo.setVisibility(View.VISIBLE);
+        getBinding().mainInclude.imgButtomBlur.setVisibility(View.GONE);
     }
 
     public void writeButtonClickListener(View view) {
@@ -113,9 +149,15 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
     public void onBackPressed() {
         if (getBinding().drawerLayout.isDrawerOpen(GravityCompat.START)) {
             getBinding().drawerLayout.closeDrawer(GravityCompat.START);
+        } else if ( mainStackGoneChecker() ) { // 메인스택 화면이 곤이면
+            pressImgMainStackViewChange(); // 메인스택 화면을 켠다.
         } else {
             backPressCloseHandler.onBackPressed();
         }
+    }
+
+    private boolean mainStackGoneChecker() {
+        return (getBinding().mainInclude.swipeImgView.getVisibility() == View.GONE);
     }
 
     @Override
@@ -147,20 +189,7 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         int id = item.getItemId();
 
         if (id == R.id.nav_camera) {
-            // 임의지정 TODO 삭제하기
-            // 1. Preference 생성하기
-            SharedPreferences sharedPref = getSharedPreferences("LoginCheck", Context.MODE_PRIVATE);
-            // 2. Shared Preference의 값을 입력하기 위해서는 에디터를 통해서만 가능하다.
-            SharedPreferences.Editor editor = sharedPref.edit();
-            // 지금 로그인을 하고있으므로 최초로그인 플래그는 false를 준다.
-            editor.remove("LoginCheck");
-            editor.clear();
-            editor.commit();
-
-            boolean loginCheck = sharedPref.getBoolean("FirstLoginCheck", true );
-            Log.e(TAG,"FirstLoginCheck가 남아있나? : " + loginCheck);
-            loginCheck = sharedPref.getBoolean("FirstLoginCheck", false );
-            Log.e(TAG,"FirstLoginCheck가 남아있나? : " + loginCheck);
+            sharedpreferenceForLogOut();
 
             Toast.makeText(this, "shared preference가 삭제됨", Toast.LENGTH_SHORT).show();
 
@@ -180,8 +209,14 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         return true;
     }
 
-
-
+    private void sharedpreferenceForLogOut() {
+        // TODO 이거 로그아웃할때 실행해줘야하는 메소드임.
+        SharedPreferences sharedPref = getSharedPreferences("LoginCheck", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.remove("LoginCheck");
+        editor.clear();
+        editor.commit();
+    }
 
 
     // 퍼미션체크
@@ -282,7 +317,7 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
             data.set_id("-1");
 //            data.setTitle("이제 당신의 이야기를 시작하세요");
             data.setTitle("아...");
-            data.setContent("개짜증나");
+            data.setContent("빨리완성시켜야징");
 //            data.setContent("당신의 하루를 응원합니다.");
             data.setImageUrl(Uri.parse("http://cfile29.uf.tistory.com/image/197005455139E816267525"));
             data.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl0());
