@@ -1,4 +1,4 @@
-package haru.com.hr;
+package haru.com.hr.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -11,6 +11,7 @@ import com.bumptech.glide.Glide;
 
 import java.util.List;
 
+import haru.com.hr.R;
 import haru.com.hr.domain.PostingData;
 
 /**

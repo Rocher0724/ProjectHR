@@ -8,5 +8,6 @@
     <color name="loginTextInputLayout">#ededed</color>
     <color name="mainIconColor">#ededed</color>
     <color name="moaTopColor">#5e4236</color>
+    <color name="writeSpinnerColor">#000000</color>
 
 </resources>

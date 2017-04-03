@@ -115,6 +115,7 @@
                 android:layout_marginStart="32dp"
                 android:layout_marginTop="8dp"
                 android:onClick="clickListener"
+                android:scaleType="centerCrop"
                 android:text="log in"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
@@ -136,6 +137,7 @@
                 android:layout_marginStart="32dp"
                 android:layout_marginTop="8dp"
                 android:onClick="clickListener"
+                android:scaleType="centerCrop"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintLeft_toLeftOf="parent"
@@ -158,7 +160,7 @@
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/imgLogin"
                 app:layout_constraintVertical_bias="0.396"
-                app:srcCompat="@drawable/haru_logo_with_name_semiwhite" />
+                app:srcCompat="@drawable/haru_logo_with_name_semiwhite3" />
 
 
             <!--<ImageView-->
@@ -183,6 +185,7 @@
             android:layout_height="match_parent"
             android:padding="0dp"
             android:visibility="gone"
+
             tools:context="haru.com.hr.activity.LoginActivity">
 
             <ImageView
@@ -323,6 +326,7 @@
                 android:layout_marginStart="32dp"
                 android:layout_marginTop="8dp"
                 android:onClick="clickListener"
+                android:scaleType="centerCrop"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintLeft_toLeftOf="parent"

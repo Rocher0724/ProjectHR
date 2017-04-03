@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:gravity="center_vertical"
+    android:paddingLeft="13dp"
+    android:paddingRight="13dp"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/imgInSpnNormal"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:src="@drawable/emotion_happy_white" />
+
+    <TextView
+        android:id="@+id/tvInSpnNormal"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:alpha="0.87"
+        android:gravity="center"
+        android:paddingLeft="13dp"
+        android:textColor="@color/mainIconColor"
+        android:textColorHint="@color/mainIconColor"
+        android:textSize="15sp" />
+
+    <ImageView
+        android:layout_width="10dp"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="10dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/img_arrow_down_white_small" />
+
+</LinearLayout>

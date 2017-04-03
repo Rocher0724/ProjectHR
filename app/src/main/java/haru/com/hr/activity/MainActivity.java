@@ -10,9 +10,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -29,8 +27,8 @@ import java.util.Date;
 import java.util.List;
 
 import haru.com.hr.BaseActivity;
-import haru.com.hr.MainMoaAdapter;
-import haru.com.hr.MainStackViewAdapter;
+import haru.com.hr.adapter.MainMoaAdapter;
+import haru.com.hr.adapter.MainStackViewAdapter;
 import haru.com.hr.R;
 import haru.com.hr.databinding.ActivityMainBinding;
 import haru.com.hr.domain.DataStore;
@@ -48,8 +46,7 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
     private List<PostingData> datas;
     private SwipeFlingAdapterView flingContainer;
     private BackPressCloseHandler backPressCloseHandler;
-    private Animation buttomSpaceBlur;
-    private RecyclerView recyclerMainMoa;
+    private Animation bottomSpaceBlur;
 
 
     @Override
@@ -80,18 +77,16 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
 
     private void mainMoaRecyclerSetting() {
         MainMoaAdapter mainMoaAdapter = new MainMoaAdapter(datas, this);
-        recyclerMainMoa = (RecyclerView) findViewById(R.id.recyclerMainMoa);
-        recyclerMainMoa.setAdapter(mainMoaAdapter);
-        recyclerMainMoa.setLayoutManager(new GridLayoutManager(this,3));
-
+        getBinding().mainInclude.mainMoa.recyclerMainMoa.setAdapter(mainMoaAdapter);
+        getBinding().mainInclude.mainMoa.recyclerMainMoa.setLayoutManager(new GridLayoutManager(this,3));
     }
 
     private void animationSetting() {
-        buttomSpaceBlur = AnimationUtil.mainActivityAnimation();
+        bottomSpaceBlur = AnimationUtil.mainActivityAnimation();
     }
 
 
-    public void buttomClickListener(View view) {
+    public void bottomClickListener(View view) {
         switch (view.getId()) {
             case R.id.imgMainStack:
                 pressImgMainStackViewChange();
@@ -108,7 +103,7 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
             case R.id.imgMainCal:
 
                 break;
-            case R.id.imgButtomBlur:
+            case R.id.imgBottomBlur:
 
                 break;
         }
@@ -119,15 +114,15 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         getBinding().mainInclude.swipeImgView.setVisibility(View.GONE);
         getBinding().mainInclude.mainMoa.constMainMoa.setVisibility(View.VISIBLE);
         getBinding().mainInclude.imgLogo.setVisibility(View.GONE);
-        getBinding().mainInclude.imgButtomBlur.setVisibility(View.VISIBLE);
-        getBinding().mainInclude.imgButtomBlur.setAnimation(buttomSpaceBlur);
+        getBinding().mainInclude.imgBottomBlur.setVisibility(View.VISIBLE);
+        getBinding().mainInclude.imgBottomBlur.setAnimation(bottomSpaceBlur);
     }
 
     private void pressImgMainStackViewChange() {
         getBinding().mainInclude.swipeImgView.setVisibility(View.VISIBLE);
         getBinding().mainInclude.mainMoa.constMainMoa.setVisibility(View.GONE);
         getBinding().mainInclude.imgLogo.setVisibility(View.VISIBLE);
-        getBinding().mainInclude.imgButtomBlur.setVisibility(View.GONE);
+        getBinding().mainInclude.imgBottomBlur.setVisibility(View.GONE);
     }
 
     public void writeButtonClickListener(View view) {

@@ -31,14 +31,14 @@ public class FirstLoadingData {
 
 
     String _id1 = "1";
-    String title1 = "1";
-    String content1 = "1";
+    String title1 = "이이이이이이이이이이이이이이이이";
+    String content1 = "이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이";
     Uri imageUrl1 = Uri.parse("http://www.okclipart.com/img10/fqwphpddofsuilmgdwdd.jpg");
     Uri emotionUrl1 = Uri.parse("http://cfile232.uf.daum.net/image/162241414F62D78F202DDD");
     String date1 = DateFormat.getDateTimeInstance().format(new Date());
 
     String _id2 = "2";
-    String title2 = "2";
+    String title2 = "이이이이이이이이이이이이이이이이";
     String content2 = "2";
     Uri imageUrl2 = Uri.parse("https://upload.wikimedia.org/wikipedia/en/thumb/4/4d/TV_2_(Norway)_logo.svg/140px-TV_2_(Norway)_logo.svg.png");
     Uri emotionUrl2 = Uri.parse("http://icon2.filejo.com/m/31553_4330.JPG");

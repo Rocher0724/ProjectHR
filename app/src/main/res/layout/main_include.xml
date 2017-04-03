@@ -85,7 +85,7 @@
             android:layout_marginEnd="8dp" />
 
         <ImageView
-            android:id="@+id/imgButtomBlur"
+            android:id="@+id/imgBottomBlur"
             android:layout_width="0dp"
             android:layout_height="61dp"
             android:scaleType="centerCrop"
@@ -94,7 +94,7 @@
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:srcCompat="@drawable/moabuttom2" />
+            app:srcCompat="@drawable/moabottom2" />
 
         <ImageView
             android:id="@+id/imgMainStack"
@@ -106,7 +106,7 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:srcCompat="@drawable/haru_white"
-            android:onClick="buttomClickListener"/>
+            android:onClick="bottomClickListener"/>
 
         <ImageView
             android:id="@+id/imgMainMoa"
@@ -117,7 +117,7 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:srcCompat="@drawable/main_moa_white4"
-            android:onClick="buttomClickListener"/>
+            android:onClick="bottomClickListener"/>
 
         <ImageView
             android:id="@+id/imgMainCal"
@@ -129,7 +129,7 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:srcCompat="@drawable/main_calender_white"
-            android:onClick="buttomClickListener"/>
+            android:onClick="bottomClickListener"/>
 
 
     </android.support.constraint.ConstraintLayout>

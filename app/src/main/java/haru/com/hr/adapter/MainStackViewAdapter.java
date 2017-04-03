@@ -1,7 +1,6 @@
-package haru.com.hr;
+package haru.com.hr.adapter;
 
 import android.content.Context;
-import android.databinding.DataBindingUtil;
 import android.graphics.Color;
 import android.support.annotation.IdRes;
 import android.support.annotation.LayoutRes;
@@ -22,7 +21,7 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
 
-import haru.com.hr.domain.DataStore;
+import haru.com.hr.R;
 import haru.com.hr.domain.PostingData;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import jp.wasabeef.glide.transformations.ColorFilterTransformation;
@@ -95,7 +94,7 @@ public class MainStackViewAdapter extends ArrayAdapter<PostingData> {
                         , new ColorFilterTransformation(context, Color.argb(100, 100, 100, 100)))
                 .into(viewHolder.imgImage);
 
-        Glide.with(context).load(R.drawable.emition_happy_white)
+        Glide.with(context).load(R.drawable.emotion_happy_white)
                 .into(viewHolder.imgEmotion);
 
 

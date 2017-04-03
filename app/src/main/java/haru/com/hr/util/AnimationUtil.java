@@ -18,7 +18,7 @@ public class AnimationUtil {
     private static final String TAG = "AnimationUtil";
     private Animation loginActivityTextAnim = null;
     private Animation loginActivityMainLogoAnim = null;
-    private static Animation mainActivityButtomSpaceBlur = null;
+    private static Animation mainActivityBottomSpaceBlur = null;
 
     Context context;
 
@@ -48,10 +48,10 @@ public class AnimationUtil {
 
     }
     public static Animation mainActivityAnimation() {
-        mainActivityButtomSpaceBlur = new AlphaAnimation(0, 1);
-        mainActivityButtomSpaceBlur.setDuration(500);
+        mainActivityBottomSpaceBlur = new AlphaAnimation(0, 1);
+        mainActivityBottomSpaceBlur.setDuration(500);
 
-        return mainActivityButtomSpaceBlur;
+        return mainActivityBottomSpaceBlur;
     }
 
     public Animation getLoginActivityTextAnim() {
