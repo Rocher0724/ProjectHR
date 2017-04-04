@@ -11,7 +11,7 @@
         android:id="@+id/imgInSpnNormal"
         android:layout_width="20dp"
         android:layout_height="20dp"
-        android:src="@drawable/emotion_happy_white" />
+        android:src="@drawable/emotion_soso_white" />
 
     <TextView
         android:id="@+id/tvInSpnNormal"

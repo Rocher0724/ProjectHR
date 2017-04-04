@@ -94,7 +94,7 @@ public class MainStackViewAdapter extends ArrayAdapter<PostingData> {
                         , new ColorFilterTransformation(context, Color.argb(100, 100, 100, 100)))
                 .into(viewHolder.imgImage);
 
-        Glide.with(context).load(R.drawable.emotion_happy_white)
+        Glide.with(context).load(R.drawable.emotion_soso_white)
                 .into(viewHolder.imgEmotion);
 
 

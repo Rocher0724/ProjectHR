@@ -17,63 +17,22 @@ public class PostingData {
 //    Uri photoUrl;
 //    Uri stateUrl;
 
-//    public String get_id() {
-//        return _id;
-//    }
-//
-//    public void set_id(String _id) {
-//        this._id = _id;
-//    }
-//
-//    public String getTitle() {
-//        return title;
-//    }
-//
-//    public void setTitle(String title) {
-//        this.title = title;
-//    }
-//
-//    public String getContent() {
-//        return content;
-//    }
-//
-//    public void setContent(String content) {
-//        this.content = content;
-//    }
-//
-//    public Date getPostDate() {
-//        return postDate;
-//    }
-//
-//    public void setPostDate(Date postDate) {
-//        this.postDate = postDate;
-//    }
-//
-//    public Uri getPhotoUrl() {
-//        return photoUrl;
-//    }
-//
-//    public void setPhotoUrl(Uri photoUrl) {
-//        this.photoUrl = photoUrl;
-//    }
-//
-//    public Uri getStateUrl() {
-//        return stateUrl;
-//    }
-//
-//    public void setStateUrl(Uri stateUrl) {
-//        this.stateUrl = stateUrl;
-//    }
-
 
     String _id;
     String title;
     String content;
     String nDate;
     Uri imageUrl;
-    Uri emotionUrl;
+    int emotionUrl;
 
 
+    public int getEmotionUrl() {
+        return emotionUrl;
+    }
+
+    public void setEmotionUrl(int emotionUrl) {
+        this.emotionUrl = emotionUrl;
+    }
 
     public String getnDate() { return nDate; }
     public void setnDate(String nDate) { this.nDate = nDate; }
@@ -99,10 +58,14 @@ public class PostingData {
     public void setImageUrl(Uri imageUrl) {
         this.imageUrl = imageUrl;
     }
-    public Uri getEmotionUrl() {
-        return emotionUrl;
-    }
-    public void setEmotionUrl(Uri emotionUrl) {
-        this.emotionUrl = emotionUrl;
+
+
+    public void clear() {
+        _id = null;
+        title = null;
+        content = null;
+        nDate = null;
+        imageUrl = null;
+        emotionUrl = 0;
     }
 }

@@ -10,6 +10,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.AppBarLayout;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.util.Log;
 import android.view.View;
@@ -18,6 +20,7 @@ import android.support.v4.view.GravityCompat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.animation.Animation;
+import android.widget.AdapterView;
 import android.widget.Toast;
 import com.lorentzos.flingswipe.SwipeFlingAdapterView;
 
@@ -30,10 +33,14 @@ import haru.com.hr.BaseActivity;
 import haru.com.hr.adapter.MainMoaAdapter;
 import haru.com.hr.adapter.MainStackViewAdapter;
 import haru.com.hr.R;
+import haru.com.hr.adapter.EmotionSpinnerAdapter;
 import haru.com.hr.databinding.ActivityMainBinding;
 import haru.com.hr.domain.DataStore;
+import haru.com.hr.domain.EmotionSpinnerData;
 import haru.com.hr.domain.FirstLoadingData;
+import haru.com.hr.domain.MainMoaSpinnerDataLoader;
 import haru.com.hr.domain.PostingData;
+import haru.com.hr.domain.WriteSpinnerDataLoader;
 import haru.com.hr.util.AnimationUtil;
 import haru.com.hr.util.BackPressCloseHandler;
 
@@ -42,41 +49,90 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
 
     private static final String TAG = "MainActivity";
     private final int REQ_PERMISSION = 100;
-    private MainStackViewAdapter adapter;
-    private List<PostingData> datas;
+    private MainStackViewAdapter stackViewAdapter;
+    private List<PostingData> postingDatas = new ArrayList<>();
+    private List<PostingData> moaSelectedData = new ArrayList<>();;
     private SwipeFlingAdapterView flingContainer;
     private BackPressCloseHandler backPressCloseHandler;
     private Animation bottomSpaceBlur;
-
+    private MainMoaAdapter mainMoaAdapter;
+//    MainMoaSpinnerDataLoader mainMoaSpinnerDataLoader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setBinding(R.layout.activity_main);
-
         checkVersion(REQ_PERMISSION);
         backPressCloseHandler = new BackPressCloseHandler(this);
 
-        flingContainer = (SwipeFlingAdapterView) findViewById(R.id.swipeImgView);
+        dataLoader(); // 튜토리얼을 임의생성. 나중에 TODO 삭제할것
 
-        datas = new ArrayList<>();
-
-        // 튜토리얼을 임의생성. 나중에 TODO 삭제할것
-        dataLoader();
-
-        datas = DataStore.getInstance().getDatas();
-        Log.e(TAG,"데이터의 크기는 : " + datas.size());
-        adapter = new MainStackViewAdapter(this, R.layout.main_stack_item, R.id.tvTitle, datas);
-        flingContainer.setAdapter(adapter);
-        flingContainer.setFlingListener(flingListener);
+        cardStackSetting();
 
         getBinding().navView.setNavigationItemSelectedListener(this);
 
-        mainMoaRecyclerSetting();
+        mainMoaRecyclerSetting(postingDatas);
+        mainMoaSpnSetting(MainMoaSpinnerDataLoader.getInstance().getDatas());
+        appBarCollapsingChecker();
+
     }
 
-    private void mainMoaRecyclerSetting() {
-        MainMoaAdapter mainMoaAdapter = new MainMoaAdapter(datas, this);
+    private void appBarCollapsingChecker() {
+        getBinding().mainInclude.mainMoa.appBar.addOnOffsetChangedListener((appBarLayout, verticalOffset) -> {
+            float percentage = 1 - ((float)Math.abs(verticalOffset)/appBarLayout.getTotalScrollRange());
+            getBinding().mainInclude.mainMoa.collapsingImage.setAlpha(percentage);
+            getBinding().mainInclude.mainMoa.tvInToolbarCount.setAlpha(percentage);
+            getBinding().mainInclude.mainMoa.tvMoaInToolbar.setAlpha(percentage);
+            getBinding().mainInclude.mainMoa.spnInMoaToolbar.setAlpha(percentage);
+        });
+    }
+
+    private void cardStackSetting() {
+        flingContainer = (SwipeFlingAdapterView) findViewById(R.id.swipeImgView);
+        postingDatas = DataStore.getInstance().getDatas();
+        stackViewAdapter = new MainStackViewAdapter(this, R.layout.main_stack_item, R.id.tvTitle, postingDatas);
+        flingContainer.setAdapter(stackViewAdapter);
+        flingContainer.setFlingListener(flingListener);
+    }
+
+    private void mainMoaSpnSetting(List<EmotionSpinnerData> datas) {
+//        mainMoaSpinnerDataLoader = new MainMoaSpinnerDataLoader();
+        EmotionSpinnerAdapter emotionSpinnerAdapter = new EmotionSpinnerAdapter(this, datas);
+        getBinding().mainInclude.mainMoa.spnInMoaToolbar.setAdapter(emotionSpinnerAdapter);
+        getBinding().mainInclude.mainMoa.spnInMoaToolbar.setOnItemSelectedListener(spnItemClickListener);
+    }
+
+    AdapterView.OnItemSelectedListener spnItemClickListener = new AdapterView.OnItemSelectedListener() {
+        @Override
+        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            moaSelectedData.clear();
+            if( position == 0 ) {
+                moaSelectedData.addAll(postingDatas);
+            } else {
+                for (PostingData item : postingDatas) {
+                    if (item.getEmotionUrl() == MainMoaSpinnerDataLoader.getInstance().getDatas().get(position).getImgInDrawable()) {
+                        moaSelectedData.add(item);
+                    }
+                }
+                Log.e(TAG,"데이터의 크기는 " + moaSelectedData.size()+"");
+            }
+            Log.e(TAG, "데이터의 크기는 " + moaSelectedData.size() + "");
+            refreshAdapter(moaSelectedData);
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> parent) {
+
+        }
+    };
+
+    public void refreshAdapter(List<PostingData> moaSelectedData){
+        mainMoaRecyclerSetting(moaSelectedData);
+        mainMoaAdapter.notifyDataSetChanged();
+    }
+
+    private void mainMoaRecyclerSetting(List<PostingData> data) {
+        mainMoaAdapter = new MainMoaAdapter(data, this);
         getBinding().mainInclude.mainMoa.recyclerMainMoa.setAdapter(mainMoaAdapter);
         getBinding().mainInclude.mainMoa.recyclerMainMoa.setLayoutManager(new GridLayoutManager(this,3));
     }
@@ -95,13 +151,14 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
                 break;
 
             case R.id.imgMainMoa:
-                animationSetting();
+//                animationSetting(); // 메인 화면 아이콘이 밝아서 검은색으로 처리할때 이미지처리하려 했으나 별로라서 그냥 없앨예정
                 pressImgMainMoaViewChange();
                 Log.e(TAG, "메인 스택 곤");
                 break;
 
             case R.id.imgMainCal:
-
+//                animationSetting();
+                pressImgMainCalViewChange();
                 break;
             case R.id.imgBottomBlur:
 
@@ -110,16 +167,28 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
 
     }
 
-    private void pressImgMainMoaViewChange() {
+    private void pressImgMainCalViewChange() {
         getBinding().mainInclude.swipeImgView.setVisibility(View.GONE);
-        getBinding().mainInclude.mainMoa.constMainMoa.setVisibility(View.VISIBLE);
+        getBinding().mainInclude.mainMoa.constMainMoa.setVisibility(View.GONE);
+        getBinding().mainInclude.mainCal.constMainCal.setVisibility(View.VISIBLE);
         getBinding().mainInclude.imgLogo.setVisibility(View.GONE);
         getBinding().mainInclude.imgBottomBlur.setVisibility(View.VISIBLE);
-        getBinding().mainInclude.imgBottomBlur.setAnimation(bottomSpaceBlur);
+//        getBinding().mainInclude.imgBottomBlur.setAnimation(bottomSpaceBlur); // TODO: 2017-04-04 나중에 봐서 애니메이션을 넣을 필요가 없으면 지우기
+
+    }
+
+    private void pressImgMainMoaViewChange() {
+        getBinding().mainInclude.mainMoa.constMainMoa.setVisibility(View.VISIBLE);
+        getBinding().mainInclude.swipeImgView.setVisibility(View.GONE);
+        getBinding().mainInclude.mainCal.constMainCal.setVisibility(View.GONE);
+        getBinding().mainInclude.imgLogo.setVisibility(View.GONE);
+        getBinding().mainInclude.imgBottomBlur.setVisibility(View.VISIBLE);
+//        getBinding().mainInclude.imgBottomBlur.setAnimation(bottomSpaceBlur); // TODO: 2017-04-04 애니메이션 삭제예정
     }
 
     private void pressImgMainStackViewChange() {
         getBinding().mainInclude.swipeImgView.setVisibility(View.VISIBLE);
+        getBinding().mainInclude.mainCal.constMainCal.setVisibility(View.GONE);
         getBinding().mainInclude.mainMoa.constMainMoa.setVisibility(View.GONE);
         getBinding().mainInclude.imgLogo.setVisibility(View.VISIBLE);
         getBinding().mainInclude.imgBottomBlur.setVisibility(View.GONE);
@@ -288,9 +357,9 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
     SwipeFlingAdapterView.onFlingListener flingListener = new SwipeFlingAdapterView.onFlingListener() {
         @Override
         public void removeFirstObjectInAdapter() {
-//            datas.add(datas.get(0));
-            datas.remove(0);
-            adapter.notifyDataSetChanged();
+//            postingDatas.add(datas.get(0));
+            postingDatas.remove(0);
+            stackViewAdapter.notifyDataSetChanged();
             Log.e(TAG,"제거했을때 하는일");
         }
 
@@ -314,12 +383,13 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
             data.setTitle("아...");
             data.setContent("빨리완성시켜야징");
 //            data.setContent("당신의 하루를 응원합니다.");
-            data.setImageUrl(Uri.parse("http://cfile29.uf.tistory.com/image/197005455139E816267525"));
+//            data.setImageUrl(Uri.parse("http://cfile29.uf.tistory.com/image/197005455139E816267525"));
+            data.setImageUrl(Uri.parse("android.resource://"+MainActivity.this.getPackageName()+"/drawable/splash2"));
             data.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl0());
             data.setnDate(DateFormat.getDateTimeInstance().format(new Date()));
-            datas.add(data);
+            postingDatas.add(data);
             Log.e(TAG,"없을땐?");
-            adapter.notifyDataSetChanged();
+            stackViewAdapter.notifyDataSetChanged();
 
         }
 

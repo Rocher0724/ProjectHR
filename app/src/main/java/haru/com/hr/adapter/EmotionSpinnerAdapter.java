@@ -1,7 +1,6 @@
 package haru.com.hr.adapter;
 
 import android.content.Context;
-import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,27 +12,23 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 
 import haru.com.hr.R;
-import haru.com.hr.domain.WriteSpinnerData;
+import haru.com.hr.domain.EmotionSpinnerData;
 
 
 import java.util.List;
-
-import javax.crypto.spec.IvParameterSpec;
-
-import static haru.com.hr.R.drawable.emotion_happy_white;
 
 /**
  * Created by myPC on 2017-04-03.
  */
 
-public class WriteSpinnerAdapter extends BaseAdapter {
+public class EmotionSpinnerAdapter extends BaseAdapter {
 
-    private static final String TAG = "WriteSpinnerAdapter";
+    private static final String TAG = "EmotionSpinnerAdapter";
     Context context;
-    List<WriteSpinnerData> datas;
+    List<EmotionSpinnerData> datas;
     LayoutInflater inflater;
 
-    public WriteSpinnerAdapter(Context context, List<WriteSpinnerData> datas){
+    public EmotionSpinnerAdapter(Context context, List<EmotionSpinnerData> datas){
         this.context = context;
         this.datas = datas;
         inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -56,7 +51,7 @@ public class WriteSpinnerAdapter extends BaseAdapter {
         }
 
         if(datas!=null) {
-            WriteSpinnerData data = datas.get(position);
+            EmotionSpinnerData data = datas.get(position);
             ImageView imgInSpnNormal = ((ImageView)convertView.findViewById(R.id.imgInSpnNormal));
             Glide.with(context).load(data.getImgInDrawable()).into(imgInSpnNormal);
             ((TextView)convertView.findViewById(R.id.tvInSpnNormal)).setText(data.getEmotionText());
@@ -73,7 +68,7 @@ public class WriteSpinnerAdapter extends BaseAdapter {
         }
 
         //데이터세팅
-        WriteSpinnerData data = datas.get(position);
+        EmotionSpinnerData data = datas.get(position);
         ImageView imgWriteEmotion = ((ImageView)convertView.findViewById(R.id.imgWriteInSpinner));
         Glide.with(context).load(data.getImgInDrawable()).into(imgWriteEmotion);
         ((TextView)convertView.findViewById(R.id.tvWriteInSpinner)).setText(data.getEmotionText());

@@ -9,13 +9,21 @@ import haru.com.hr.R;
  * Created by myPC on 2017-04-03.
  */
 
-public class WriteSpinnerDataLoader {
-    private static final String TAG = "WriteSpinnerDataLoader";
+public class MainMoaSpinnerDataLoader {
+    private static final String TAG = "MainMoaSpinnerDataLoader";
+    private static MainMoaSpinnerDataLoader instance;
     List<EmotionSpinnerData> datas;
 
-    public WriteSpinnerDataLoader() {
+
+    private MainMoaSpinnerDataLoader() {
         datas = new ArrayList<>();
         dataloader();
+    }
+    public static MainMoaSpinnerDataLoader getInstance() {
+        if(instance == null) {
+            instance = new MainMoaSpinnerDataLoader();
+        }
+        return instance;
     }
 
 //    private void dataloader() {
@@ -28,6 +36,7 @@ public class WriteSpinnerDataLoader {
 
 
     private void dataloader() {
+        datas.add(new EmotionSpinnerData(R.drawable.emotion_dummy, "전체보기"));
         datas.add(new EmotionSpinnerData(R.drawable.emotion_inlove_white, "행복해요"));
         datas.add(new EmotionSpinnerData(R.drawable.emotion_soso_white, "그저그래요"));
         datas.add(new EmotionSpinnerData(R.drawable.emotion_zzaing_white6, "짜증나요"));

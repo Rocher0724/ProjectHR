@@ -100,7 +100,7 @@
             app:layout_constraintLeft_toLeftOf="@+id/imgWriteActivity"
             app:layout_constraintRight_toRightOf="@+id/imgWriteActivity"
             app:layout_constraintTop_toTopOf="@+id/imgWriteActivity"
-            app:layout_constraintVertical_bias="0.55"
+            app:layout_constraintVertical_bias="0.53999996"
             android:layout_marginStart="32dp"
             android:layout_marginEnd="32dp" />
 
@@ -123,16 +123,17 @@
             android:id="@+id/tvWriteDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginLeft="0dp"
             android:layout_marginRight="8dp"
-            android:text="TextView"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="2dp"
+            android:text="2017.4.4.오전 10:00:00"
             android:textColor="@color/mainIconColor"
-            app:layout_constraintHorizontal_bias="0.106"
+            app:layout_constraintHorizontal_bias="0.06"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imgWriteLine"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp" />
+            app:layout_constraintTop_toBottomOf="@+id/imgWriteLine" />
 
         <ImageView
             android:id="@+id/imgWriteEmotion"
@@ -148,19 +149,46 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/imgWriteLine"
-            app:srcCompat="@drawable/emotion_happy_white" />
+            app:srcCompat="@drawable/emotion_soso_white" />
 
         <Spinner
             android:id="@+id/spnWriteEmotion"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="8dp"
-            android:layout_marginTop="0dp"
+            android:layout_marginTop="2dp"
             android:background="@android:color/transparent"
             android:popupBackground="#000"
             android:spinnerMode="dropdown"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/imgWriteLine" />
+
+        <ImageView
+            android:id="@+id/imgWriteImgSelect"
+            android:layout_width="23dp"
+            android:layout_height="23dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="0dp"
+            app:layout_constraintLeft_toRightOf="@+id/tvWriteDate"
+            app:layout_constraintTop_toBottomOf="@+id/imgWriteLine"
+            app:srcCompat="@drawable/gallery_white"
+            android:onClick="writeAcitivityClickListener"/>
+
+        <ProgressBar
+            android:id="@+id/pbWrite"
+            style="?android:attr/progressBarStyle"
+            android:theme="@style/progressbarColor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@+id/imgWriteActivity"
+            android:layout_marginTop="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="8dp"
+            android:layout_marginRight="8dp"
+            app:layout_constraintRight_toRightOf="parent"
+            android:layout_marginLeft="8dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:visibility="gone"/>
 
     </android.support.constraint.ConstraintLayout>
 

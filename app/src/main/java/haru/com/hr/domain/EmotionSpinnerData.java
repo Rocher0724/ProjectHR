@@ -1,24 +1,18 @@
 package haru.com.hr.domain;
 
-import com.bumptech.glide.Glide;
-
-import haru.com.hr.R;
-import haru.com.hr.adapter.WriteSpinnerAdapter;
-
 /**
  * Created by myPC on 2017-04-03.
  */
 
-public class WriteSpinnerData {
+public class EmotionSpinnerData {
     private int imgInDrawable;
-//    = R.drawable.emotion_happy_white;
     private String emotionText;
 
-    public WriteSpinnerData() {
+    public EmotionSpinnerData() {
 
     }
 
-    public WriteSpinnerData(int imgInDrawable, String emotionText){
+    public EmotionSpinnerData(int imgInDrawable, String emotionText){
         this.imgInDrawable = imgInDrawable;
         this.emotionText = emotionText;
     }

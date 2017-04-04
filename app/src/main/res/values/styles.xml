@@ -11,7 +11,6 @@
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
-        <item name="android:windowTranslucentStatus">true</item>
     </style>
 
 
@@ -39,6 +38,11 @@
         <item name="passwordToggleTint">@color/loginTextInputLayout</item>
         <item name="passwordToggleContentDescription">@string/password_toggle_content_description
         </item>
+    </style>
+
+    <!--progress bar 색깔 지정-->
+    <style name="progressbarColor">
+        <item name="colorAccent">@color/progressBarColor</item> <!-- Whatever color you want-->
     </style>
 
 
