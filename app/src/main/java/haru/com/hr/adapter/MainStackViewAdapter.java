@@ -86,7 +86,7 @@ public class MainStackViewAdapter extends ArrayAdapter<PostingData> {
         viewHolder.tvTitle.setTextColor(Color.WHITE);
         viewHolder.tvContent.setText(data.getContent());
         viewHolder.tvContent.setTextColor(Color.WHITE);
-        viewHolder.tvDate.setText(DateFormat.getDateTimeInstance().format(new Date()));
+        viewHolder.tvDate.setText(data.getnDate());
         Glide.with(context)
                 .load(data.getImageUrl())
                 .bitmapTransform(new CenterCrop(context)

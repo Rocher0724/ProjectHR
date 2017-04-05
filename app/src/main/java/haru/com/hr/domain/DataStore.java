@@ -34,7 +34,7 @@ public class DataStore {
 
     public void addData(PostingData postingData) {
         if( datas.size() > 100 ) {
-
+            // todo 가지고있을수 있는 데이터는 100개정도. 이후에는 10개씩 버리고 10개씩 받아오는식으로 해야할것같다.
         }
         this.datas.add(postingData);
     }

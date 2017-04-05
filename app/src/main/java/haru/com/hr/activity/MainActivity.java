@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -22,12 +23,20 @@ import android.view.MenuItem;
 import android.view.animation.Animation;
 import android.widget.AdapterView;
 import android.widget.Toast;
+
+import com.github.sundeepk.compactcalendarview.CompactCalendarView;
+import com.github.sundeepk.compactcalendarview.domain.Event;
 import com.lorentzos.flingswipe.SwipeFlingAdapterView;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Locale;
 
 import haru.com.hr.BaseActivity;
 import haru.com.hr.adapter.MainMoaAdapter;
@@ -40,7 +49,6 @@ import haru.com.hr.domain.EmotionSpinnerData;
 import haru.com.hr.domain.FirstLoadingData;
 import haru.com.hr.domain.MainMoaSpinnerDataLoader;
 import haru.com.hr.domain.PostingData;
-import haru.com.hr.domain.WriteSpinnerDataLoader;
 import haru.com.hr.util.AnimationUtil;
 import haru.com.hr.util.BackPressCloseHandler;
 
@@ -56,7 +64,15 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
     private BackPressCloseHandler backPressCloseHandler;
     private Animation bottomSpaceBlur;
     private MainMoaAdapter mainMoaAdapter;
-//    MainMoaSpinnerDataLoader mainMoaSpinnerDataLoader;
+    private int emptyDataCount = 0;
+
+
+    private CompactCalendarView calendarView;
+    private SimpleDateFormat dateFormatForMonth = new SimpleDateFormat("yyyy-MM");
+    private SimpleDateFormat selectedDate = new SimpleDateFormat("yyyy.MM.dd");
+    private Calendar event = Calendar.getInstance(Locale.KOREA);
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +81,7 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         checkVersion(REQ_PERMISSION);
         backPressCloseHandler = new BackPressCloseHandler(this);
 
-        dataLoader(); // 튜토리얼을 임의생성. 나중에 TODO 삭제할것
+        dataLoader(); // 튜토리얼 데이터를 임의생성. 나중에 TODO 삭제할것
 
         cardStackSetting();
 
@@ -73,11 +89,90 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
 
         mainMoaRecyclerSetting(postingDatas);
         mainMoaSpnSetting(MainMoaSpinnerDataLoader.getInstance().getDatas());
-        appBarCollapsingChecker();
+        appBarCollapsingCheckerForBlur();
+
+        MainCalSetting();
 
     }
 
-    private void appBarCollapsingChecker() {
+    // -- Main Calendar 부분 --
+    private void MainCalSetting() {
+        calendarView = getBinding().mainInclude.mainCal.calendarView;
+        calendarView.setFirstDayOfWeek(Calendar.SUNDAY);
+        calendarView.setListener(calendarViewListener);
+        getBinding().mainInclude.mainCal.tvMainCalTitle.setText(dateFormatForMonth.format(calendarView.getFirstDayOfCurrentMonth()));
+        loadEventOnCalendar(); // TODO 데이터 로드해서 캘린더에 넣어주는작업
+
+    }
+
+//    private void loadEventOnCalendar1() {
+//        addEvents(2017,4,1);
+//    }
+
+    private void loadEventOnCalendar() {
+        // 데이터를 받아서 날짜를 가져와서 파싱해서 넣어준다.
+
+        Log.e(TAG,postingDatas.size()+"");
+        for( PostingData data : postingDatas) {
+            Log.e(TAG, "데이터 번호 : " + data.get_id());
+            Log.e(TAG, "ndate : " + data.getnDate());
+            String[] date = data.getnDate().split("\\.");
+            int year = dateStrToInt(date[0]);
+            int month = dateStrToInt(date[1]) - 1;
+            int day = dateStrToInt(date[2]) - 1;
+
+            Log.e(TAG,"년 = " + year + ", 월 = " + month + ", 일 = " + day );
+            addEvents( year , month , day );
+        }
+    }
+
+    private static int dateStrToInt(String s) {
+        int result;
+
+        if( s.startsWith(" ") ) {
+            result = Integer.parseInt(s.substring(1));
+        } else {
+            result = Integer.parseInt(s);
+        }
+        return result;
+    }
+
+    CompactCalendarView.CompactCalendarViewListener calendarViewListener = new CompactCalendarView.CompactCalendarViewListener() {
+        @Override
+        public void onDayClick(Date dateClicked) {
+            //날짜를 클릭한것을 인식하는 리스너
+            getBinding().mainInclude.mainCal.tvMainCalTitle.setText(dateFormatForMonth.format(dateClicked));
+            Toast.makeText(MainActivity.this, selectedDate.format(dateClicked), Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onMonthScroll(Date firstDayOfNewMonth) {
+            getBinding().mainInclude.mainCal.tvMainCalTitle.setText(dateFormatForMonth.format(firstDayOfNewMonth));
+
+        }
+    };
+
+    // 달력 안에 아이템 색깔 지정하는 메소드
+    private List<Event> getEvents(long timeInMillis) {
+        return Arrays.asList(new Event(Color.argb(255, 255, 255, 255), timeInMillis));
+    }
+
+    private void addEvents(int year, int month, int day) {
+        event.setTime(new Date());
+        event.set(Calendar.DAY_OF_MONTH, 1);
+        Date firstDayOfMonth = event.getTime();
+        event.setTime(firstDayOfMonth);
+        event.set(Calendar.MONTH, month);
+        event.set(Calendar.ERA, GregorianCalendar.AD);
+        event.set(Calendar.YEAR, year);
+        event.add(Calendar.DATE, day);
+        long timeInMillis = event.getTimeInMillis();
+        List<Event> events = getEvents(timeInMillis);
+        calendarView.addEvents(events);
+    }
+    // ----
+
+    private void appBarCollapsingCheckerForBlur() {
         getBinding().mainInclude.mainMoa.appBar.addOnOffsetChangedListener((appBarLayout, verticalOffset) -> {
             float percentage = 1 - ((float)Math.abs(verticalOffset)/appBarLayout.getTotalScrollRange());
             getBinding().mainInclude.mainMoa.collapsingImage.setAlpha(percentage);
@@ -96,7 +191,6 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
     }
 
     private void mainMoaSpnSetting(List<EmotionSpinnerData> datas) {
-//        mainMoaSpinnerDataLoader = new MainMoaSpinnerDataLoader();
         EmotionSpinnerAdapter emotionSpinnerAdapter = new EmotionSpinnerAdapter(this, datas);
         getBinding().mainInclude.mainMoa.spnInMoaToolbar.setAdapter(emotionSpinnerAdapter);
         getBinding().mainInclude.mainMoa.spnInMoaToolbar.setOnItemSelectedListener(spnItemClickListener);
@@ -173,25 +267,44 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         getBinding().mainInclude.mainCal.constMainCal.setVisibility(View.VISIBLE);
         getBinding().mainInclude.imgLogo.setVisibility(View.GONE);
         getBinding().mainInclude.imgBottomBlur.setVisibility(View.VISIBLE);
+        getBinding().mainInclude.imgMainTopLogo.setVisibility(View.GONE);
 //        getBinding().mainInclude.imgBottomBlur.setAnimation(bottomSpaceBlur); // TODO: 2017-04-04 나중에 봐서 애니메이션을 넣을 필요가 없으면 지우기
 
     }
 
     private void pressImgMainMoaViewChange() {
-        getBinding().mainInclude.mainMoa.constMainMoa.setVisibility(View.VISIBLE);
         getBinding().mainInclude.swipeImgView.setVisibility(View.GONE);
+        getBinding().mainInclude.mainMoa.constMainMoa.setVisibility(View.VISIBLE);
         getBinding().mainInclude.mainCal.constMainCal.setVisibility(View.GONE);
         getBinding().mainInclude.imgLogo.setVisibility(View.GONE);
         getBinding().mainInclude.imgBottomBlur.setVisibility(View.VISIBLE);
+        getBinding().mainInclude.imgMainTopLogo.setVisibility(View.VISIBLE);
+
+        // 튜토리얼자료를 제외한 자료의 개수를 통해서 textview를 띄워줄지 결정한다.
+        int isVisible = (realDataSize(postingDatas) == 0)? View.VISIBLE : View.GONE;
+        getBinding().mainInclude.mainMoa.tvIfEmpty.setVisibility(isVisible);
+
+
 //        getBinding().mainInclude.imgBottomBlur.setAnimation(bottomSpaceBlur); // TODO: 2017-04-04 애니메이션 삭제예정
     }
 
     private void pressImgMainStackViewChange() {
         getBinding().mainInclude.swipeImgView.setVisibility(View.VISIBLE);
-        getBinding().mainInclude.mainCal.constMainCal.setVisibility(View.GONE);
         getBinding().mainInclude.mainMoa.constMainMoa.setVisibility(View.GONE);
+        getBinding().mainInclude.mainCal.constMainCal.setVisibility(View.GONE);
         getBinding().mainInclude.imgLogo.setVisibility(View.VISIBLE);
         getBinding().mainInclude.imgBottomBlur.setVisibility(View.GONE);
+        getBinding().mainInclude.imgMainTopLogo.setVisibility(View.GONE);
+    }
+
+    private int realDataSize(List<PostingData> data){
+        List<PostingData> realdata = new ArrayList<>();
+        for ( PostingData item : data ) {
+            if( !item.get_id().equals("-1") && !item.get_id().equals("-2") ) {
+                realdata.add(item);
+            }
+        }
+        return realdata.size();
     }
 
     public void writeButtonClickListener(View view) {
@@ -357,10 +470,13 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
     SwipeFlingAdapterView.onFlingListener flingListener = new SwipeFlingAdapterView.onFlingListener() {
         @Override
         public void removeFirstObjectInAdapter() {
-//            postingDatas.add(datas.get(0));
+            if( !postingDatas.get(0).get_id().equals("-1") ) {
+                // 임의로 집어넣은 데이터 (get_id 가 -1)가 아닌경우에만 다시 넣어주기.
+                postingDatas.add(postingDatas.get(0));
+            }
             postingDatas.remove(0);
             stackViewAdapter.notifyDataSetChanged();
-            Log.e(TAG,"제거했을때 하는일");
+
         }
 
         @Override
@@ -372,25 +488,26 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         public void onRightCardExit(Object o) {
 
         }
-
         @Override
         public void onAdapterAboutToEmpty(int i) {
-
-
-            PostingData data = new PostingData();
-            data.set_id("-1");
-//            data.setTitle("이제 당신의 이야기를 시작하세요");
-            data.setTitle("아...");
-            data.setContent("빨리완성시켜야징");
-//            data.setContent("당신의 하루를 응원합니다.");
+            // 데이터 셋에서 id값이 -1 인 경우는 날렸을때 돌아오지 않게 설정했기 때문에 -2로 주었다.
+            // 사진 모아보기 창에서는 id가 -1, -2인 값을 표시하지 않도록 했다.
+            Log.e(TAG,"데이터가 없을때 체크한다. emptyDataCount = " + emptyDataCount);
+            if (emptyDataCount < 2) {
+                PostingData data = new PostingData();
+                data.set_id("-2");
+//                data.setTitle("당신의 오늘은 어떤가요?");
+//                data.setContent("생각을 자유롭게 적어보세요");
+                data.setTitle("당신의 이야기를 시작하세요");
+                data.setContent("당신의 하루를 응원합니다.");
 //            data.setImageUrl(Uri.parse("http://cfile29.uf.tistory.com/image/197005455139E816267525"));
-            data.setImageUrl(Uri.parse("android.resource://"+MainActivity.this.getPackageName()+"/drawable/splash2"));
-            data.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl0());
-            data.setnDate(DateFormat.getDateTimeInstance().format(new Date()));
-            postingDatas.add(data);
-            Log.e(TAG,"없을땐?");
-            stackViewAdapter.notifyDataSetChanged();
-
+                data.setImageUrl(Uri.parse("android.resource://" + MainActivity.this.getPackageName() + "/drawable/splash2"));
+                data.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl0());
+                data.setnDate(DateFormat.getDateTimeInstance().format(new Date()));
+                postingDatas.add(data);
+                stackViewAdapter.notifyDataSetChanged();
+                emptyDataCount++;
+            }
         }
 
         @Override

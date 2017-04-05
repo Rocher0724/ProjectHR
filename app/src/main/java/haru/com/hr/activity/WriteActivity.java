@@ -1,6 +1,8 @@
 package haru.com.hr.activity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.provider.MediaStore;
@@ -69,14 +71,13 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
         }
 
         private void pDataEmotionUrlSetting(int position) {
-            pData.setEmotionUrl(writeSpinnerDataLoader.getDatas().get(position).getImgInDrawable());
+            pData.setEmotionUrl(writeSpinnerDataLoader.getDatas().get(position).getImgInDrawable()); // emotion 설정
         }
 
         @Override
         public void onNothingSelected(AdapterView<?> parent) {
-            // 선택하지 않으면 행복해요가 들어가도록 세팅
-            pDataEmotionUrlSetting(0);
-
+            // 최초 세팅에서 선택하지 않았을때 어떤 작업이 수행되는것으로 생각하였으나
+            // onItemSelected의 position 값 0으로 실행이 되고 이 작업은 수행되지 않았다.
         }
     };
 
@@ -121,6 +122,9 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
 
     private void afterPictureSelect(Intent data) {
         getBinding().pbWrite.setVisibility(View.VISIBLE);
+        pData.setImageUrl(data.getData());
+        Log.e(TAG, "이미지URL");
+        Log.e(TAG, data.getData() + "");
         Glide.with(this)
                 .load(data.getData())
                 .listener(new RequestListener<Uri, GlideDrawable>() {
@@ -150,19 +154,29 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
     }
 
     private void dataSave() {
-        pData.setContent(blankCheck(getBinding().etWriteContent.getText().toString())); //str
-        pData.setTitle(blankCheck(getBinding().etWriteTitle.getText().toString()));     //str
+        pData.setContent(blankCheck(getBinding().etWriteContent.getText().toString())); //컨텐츠 세팅
+        pData.setTitle(blankCheck(getBinding().etWriteTitle.getText().toString()));     //타이틀 세팅
 
         // TODO 날짜는 실제 시간과 표시될 날짜가 따로있다. 나중에 실제 데이터셋을 넣을때 표시될 날짜셋을 추가해야할것임.
-        pData.setnDate(getBinding().tvWriteDate.getText().toString());                  //str
+        pData.setnDate(getBinding().tvWriteDate.getText().toString());                  //날짜 세팅str
 
         // TODO 사용자가 데이터를 선택한경우 사용자 핸드폰에 있는 정보를 쏴줘야한다.
         if( isPictureSelect ) {
 
         } else {
-            pData.setImageUrl(Uri.parse("android.resource://" + WriteActivity.this.getPackageName() + "/drawable/splash2"));    // uri
+            pData.setImageUrl(Uri.parse("android.resource://" + WriteActivity.this.getPackageName() + "/drawable/splash2"));    // 이미지uri
         }
-//        pData.setImageUrl(getBinding().imgWriteActivity.get);
+    }
+    // TODO 이거 사용해서 내일 글번호 연동시킬꺼임.
+    private void saveSharedpreference(String email) {
+        // 1. Preference 생성하기
+        SharedPreferences sharedPref = getSharedPreferences("LoginCheck", Context.MODE_PRIVATE);
+        // 2. Shared Preference의 값을 입력하기 위해서는 에디터를 통해서만 가능하다.
+        SharedPreferences.Editor editor = sharedPref.edit();
+        // 지금 로그인을 하고있으므로 최초로그인 플래그는 false를 준다.
+        editor.putBoolean("FirstLoginCheck" , false );
+        editor.putString("email" , email );
+        editor.commit();
     }
 
     private String blankCheck(String text) {

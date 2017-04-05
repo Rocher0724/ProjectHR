@@ -37,7 +37,6 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
 
     private BackPressCloseHandler backPressCloseHandler;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,13 +44,12 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
 
         backPressCloseHandler = new BackPressCloseHandler(this);
 
-
-
-        // TODO 임의 로그인을 위해서 설정한것임. 나중에 지워야함
+        // TODO 임의 로그인을 위해서 롱클릭으로 메인액티비티 들어가도록 설정한것임. 나중에 지워야함
         getBinding().btnGoToCreateAccountView.setOnLongClickListener(v -> {
             activityChange();
             return false;
         });
+        // TODO 임의 로그인을 위해서 롱클릭으로 메인액티비티 들어가도록 설정한것임. 나중에 지워야함
         getBinding().btnCreateAccount.setOnLongClickListener(v -> {
             activityChange();
             return false;
@@ -122,7 +120,6 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
                     onBackPressed(); // 현재 getBinding().loginConstLO.getVisibility() == View.GONE 인 상태이므로 이전화면으로 간다.
                 }
 
-
                 break;
 
             // TODO 페이스북로그인 api 붙이기
@@ -140,7 +137,6 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
             getBinding().loginConstLO.setVisibility(View.GONE);
             getBinding().createAccountConstLO.setVisibility(View.VISIBLE);
         }
-
     }
 
     @Override
@@ -150,7 +146,6 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
             loginViewAndCreateViewChange();
             return;
         }
-
         // 로그인화면에서 백키를 누르면 한번더 누르겠냐고 묻는다.
         backPressCloseHandler.onBackPressed();
     }
@@ -161,7 +156,6 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
         getBinding().tvActivityLoginCreatePassword.setText("");
         getBinding().tvActivityLoginCreateConfirm.setText("");
     }
-
 
     public boolean infoCheck(String email, String password) {
 
@@ -177,23 +171,16 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
             checkCount++;
         } else {
             getBinding().tvActivityLoginAddress.setText("");
-
         }
         if( !SignUtil.validatePassword(password) ) {
             getBinding().tvActivityLoginPassword.setText("비밀번호는 6~16자리여야 합니다.");
             getBinding().tvActivityLoginPassword.setAnimation(loginTextAnim);
-
             checkCount++;
         } else {
             getBinding().tvActivityLoginPassword.setText("");
-
         }
 
-        boolean returnCheck = !(checkCount > 0)? true : false;
-
-
-
-        return returnCheck;
+        return !(checkCount > 0);
     }
     public boolean infoCheck(String email, String password, String confirm) {
 
@@ -218,9 +205,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
             checkCount++;
         } else { getBinding().tvActivityLoginCreateConfirm.setText(""); }
 
-        boolean returnCheck = !(checkCount > 0)? true : false;
-
-        return returnCheck;
+        return !(checkCount > 0);
     }
 
     public void signin(String email, String password) {
@@ -272,7 +257,6 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
     //TODO 여기는 어떻게해야할까 튜토리얼 정보세팅?
     public void dataSetting(boolean loginCheck) {
         if(loginCheck) { // 첫 로그인이면 튜토리얼 정보 세팅
-            Log.e(TAG,"dataSetting : 나는 작동합니다.");
             PostingData datas0 = new PostingData();
             datas0.set_id(FirstLoadingData.getInstance().get_id0());
             datas0.setTitle(FirstLoadingData.getInstance().getTitle0());
@@ -288,8 +272,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
             datas1.setContent(FirstLoadingData.getInstance().getContent1());
             datas1.setImageUrl(FirstLoadingData.getInstance().getImageUrl1());
             datas1.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl1());
-            datas1.setnDate(DateFormat.getDateTimeInstance().format(new Date()));
-            datas0.setnDate(FirstLoadingData.getInstance().getDate1());
+            datas1.setnDate(FirstLoadingData.getInstance().getDate1());
             DataStore.getInstance().addData(datas1);
 
             PostingData datas2 = new PostingData();
@@ -298,7 +281,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
             datas2.setContent(FirstLoadingData.getInstance().getContent2());
             datas2.setImageUrl(FirstLoadingData.getInstance().getImageUrl2());
             datas2.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl2());
-            datas0.setnDate(FirstLoadingData.getInstance().getDate2());
+            datas2.setnDate(FirstLoadingData.getInstance().getDate2());
             DataStore.getInstance().addData(datas2);
 
             PostingData datas3 = new PostingData();
@@ -307,7 +290,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
             datas3.setContent(FirstLoadingData.getInstance().getContent3());
             datas3.setImageUrl(FirstLoadingData.getInstance().getImageUrl3());
             datas3.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl3());
-            datas0.setnDate(FirstLoadingData.getInstance().getDate3());
+            datas3.setnDate(FirstLoadingData.getInstance().getDate3());
             DataStore.getInstance().addData(datas3);
 
             PostingData datas4 = new PostingData();
@@ -316,7 +299,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
             datas4.setContent(FirstLoadingData.getInstance().getContent4());
             datas4.setImageUrl(FirstLoadingData.getInstance().getImageUrl4());
             datas4.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl4());
-            datas0.setnDate(FirstLoadingData.getInstance().getDate4());
+            datas4.setnDate(FirstLoadingData.getInstance().getDate4());
             DataStore.getInstance().addData(datas4);
 
         } else { // 기로그인이면 사용자 정보 세팅
@@ -337,12 +320,9 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
     }
 
     private void activityChange() {
-        // 다음액티비티로 이동~
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
         startActivity(intent);
-
-        // 로딩 화면인 현재 Activity는 종료한다.
-        finish();
+        finish(); // 종료해준다.
     }
 
 

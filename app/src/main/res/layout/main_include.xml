@@ -48,7 +48,7 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:visibility="gone"/>
+            tools:visibility="gone" />
 
         <ImageView
             android:id="@+id/imgBtnMenu"
@@ -143,6 +143,21 @@
             app:layout_constraintRight_toRightOf="parent"
             app:srcCompat="@drawable/main_calender_white"
             android:onClick="bottomClickListener"/>
+
+        <ImageView
+            android:id="@+id/imgMainTopLogo"
+            android:layout_width="100dp"
+            android:layout_height="36dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="32dp"
+            android:visibility="gone"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/haru_logo_with_name2" />
 
 
     </android.support.constraint.ConstraintLayout>

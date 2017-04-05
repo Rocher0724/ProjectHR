@@ -130,20 +130,17 @@
                 android:id="@+id/btnGoToCreateAccountView"
                 android:layout_width="0dp"
                 android:layout_height="48dp"
-                android:layout_marginBottom="8dp"
                 android:layout_marginEnd="32dp"
                 android:layout_marginLeft="32dp"
                 android:layout_marginRight="32dp"
                 android:layout_marginStart="32dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="16dp"
                 android:onClick="clickListener"
                 android:scaleType="centerCrop"
-                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/activity_login_password"
-                app:layout_constraintVertical_bias="0.57"
+                app:layout_constraintTop_toBottomOf="@+id/btnEmailLogin"
                 app:srcCompat="@drawable/signupbutton" />
 
             <ImageView

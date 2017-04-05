@@ -5,60 +5,93 @@
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/constMainCal"
-        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:orientation="vertical"
         android:visibility="gone"
         tools:visibility="visible">
 
         <android.support.design.widget.AppBarLayout
-            android:id="@+id/app_bar1"
+            android:id="@+id/appBarInCal"
             android:layout_width="0dp"
             android:layout_height="80dp"
-            android:layout_marginEnd="0dp"
-            android:layout_marginLeft="0dp"
-            android:layout_marginRight="0dp"
-            android:layout_marginStart="0dp"
-            android:layout_marginTop="0dp"
             android:fitsSystemWindows="false"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            android:visibility="visible"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent">
             <!--app_bar_height : 사진이 차지하는 높이-->
 
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbar"
+            <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="80dp"
-                app:layout_collapseMode="pin"
-                app:popupTheme="@style/AppTheme.PopupOverlay" />
+                android:layout_height="match_parent">
+
+                <android.support.v7.widget.Toolbar
+                    android:id="@+id/toolbarInCal"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_marginBottom="0dp"
+                    android:layout_marginLeft="0dp"
+                    android:layout_marginRight="0dp"
+                    android:layout_marginTop="0dp"
+                    app:layout_collapseMode="pin"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:popupTheme="@style/AppTheme.PopupOverlay" />
+
+                <TextView
+                    android:id="@+id/tvMainCalTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp"
+                    android:layout_marginTop="37dp"
+                    android:layout_weight="1"
+                    android:text="2017-04"
+                    android:textSize="22sp"
+                    app:layout_constraintLeft_toLeftOf="@+id/toolbarInCal"
+                    app:layout_constraintRight_toRightOf="@+id/toolbarInCal"
+                    app:layout_constraintTop_toTopOf="@+id/toolbarInCal" />
+
+            </android.support.constraint.ConstraintLayout>
 
         </android.support.design.widget.AppBarLayout>
 
-        <ImageView
-            android:id="@+id/imgMainCalLogo"
-            android:layout_width="100dp"
-            android:layout_height="36dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginTop="32dp"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/haru_logo_with_name2"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp" />
-
-        <CalendarView
+        <com.github.sundeepk.compactcalendarview.CompactCalendarView
             android:id="@+id/calendarView"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="212dp"
             android:layout_marginTop="0dp"
-            app:layout_constraintTop_toBottomOf="@+id/app_bar1"
-            android:layout_marginLeft="0dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="20dp"
+            app:compactCalendarBackgroundColor="#8E6B5C"
+            app:compactCalendarCurrentDayBackgroundColor="#543021"
+            app:compactCalendarCurrentSelectedDayBackgroundColor="#B89384"
+            app:compactCalendarMultiEventIndicatorColor="#fff"
+            app:compactCalendarTargetHeight="250dp"
+            app:compactCalendarTextColor="#fff"
+            app:compactCalendarTextSize="15sp"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/space" />
+
+        <Space
+            android:id="@+id/space"
+            android:layout_width="0dp"
+            android:layout_height="15dp"
+            android:layout_marginLeft="0dp"
             android:layout_marginRight="0dp"
-            app:layout_constraintRight_toRightOf="parent" />
+            android:layout_marginTop="0dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/appBarInCal"
+            android:background="#8E6B5C"/>
+
+
     </android.support.constraint.ConstraintLayout>
 </layout>

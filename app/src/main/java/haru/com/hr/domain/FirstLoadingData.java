@@ -25,15 +25,15 @@ public class FirstLoadingData {
         return instance;
     }
 
-    String _id0 = "0";
+    String _id0 = "-1";
     String title0 = "0";
     String content0 = "0";
     Uri imageUrl0 = Uri.parse("https://img.clipartfest.com/c0cb1105f864119f935b35dcd49be4c0_large-printable-numbers-0-10-0_550-550.jpeg");
     int emotionUrl0 = R.drawable.emotion_soso_white;
-    String date0 = DateFormat.getDateTimeInstance().format(new Date());
+    String date0 = "2017. 4. 1. 오후 7:01:27";
 
 
-    String _id1 = "1";
+    String _id1 = "-1";
     String title1 = "이이이이이이이이이이이이이이이이";
     String content1 = "이이이이이이이이이이이이이이이이이이이이이이이이이이이이이" +
             "이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이이" +
@@ -41,26 +41,28 @@ public class FirstLoadingData {
             "이이이이이이이이이이이이이이이이이이이이이";
     Uri imageUrl1 = Uri.parse("http://www.okclipart.com/img10/fqwphpddofsuilmgdwdd.jpg");
     int emotionUrl1 = R.drawable.emotion_inlove_white;
-    String date1 = DateFormat.getDateTimeInstance().format(new Date());
+    String date1 = "2017. 4. 2. 오후 7:01:27";
 
-    String _id2 = "2";
+    String _id2 = "-1";
     String title2 = "이이이이이이이이이이이이이이이이";
     String content2 = "2";
     Uri imageUrl2 = Uri.parse("https://upload.wikimedia.org/wikipedia/en/thumb/4/4d/TV_2_(Norway)_logo.svg/140px-TV_2_(Norway)_logo.svg.png");
     int emotionUrl2 = R.drawable.emotion_sad_white;
-    String date2 = DateFormat.getDateTimeInstance().format(new Date());
+    String date2 = "2017. 4. 3. 오후 7:01:27";
 
-    String _id3 = "3";
+    String _id3 = "-1";
     String title3 = "3";
     String content3 = "3";
     Uri imageUrl3 = Uri.parse("http://img.ifreepic.com/1297/21297_icon.jpg");
     int emotionUrl3 = R.drawable.emotion_zzaing_white6;
-    String date3 = DateFormat.getDateTimeInstance().format(new Date());
+    String date3 = "2017. 4. 4. 오후 7:01:27";
 
-    String _id4 = "4";
+    String _id4 = "-1";
     String title4 = "4";
     String content4 = "4";
     Uri imageUrl4 = Uri.parse("http://i.ebayimg.com/images/g/BuwAAOxy-WxTCSn7/s-l300.jpg");
+    int emotionUrl4 = R.drawable.emotion_angry_white;
+    String date4 = "2017. 4. 5. 오후 7:01:27";
 
     public int getEmotionUrl0() {
         return emotionUrl0;
@@ -81,9 +83,6 @@ public class FirstLoadingData {
     public int getEmotionUrl4() {
         return emotionUrl4;
     }
-
-    int emotionUrl4 = R.drawable.emotion_angry_white;
-    String date4 = DateFormat.getDateTimeInstance().format(new Date());
 
     public String getDate0() {
         return date0;
