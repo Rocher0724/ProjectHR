@@ -59,7 +59,7 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
 
         // 로그인 쿠키가 없는경우  1초간 스플래시에서 머문후 로그인페이지로 이동
         Handler handler = new Handler();
-        handler.postDelayed(new splashHandler(), 2000);
+        handler.postDelayed(new splashHandler(), 1000);
     }
 
     private boolean checkFirstLogin() {

@@ -58,11 +58,10 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
     private static final String TAG = "MainActivity";
     private final int REQ_PERMISSION = 100;
     private MainStackViewAdapter stackViewAdapter;
-    private List<PostingData> postingDatas = new ArrayList<>();
+    private List<PostingData> postingDatas;
     private List<PostingData> moaSelectedData = new ArrayList<>();;
     private SwipeFlingAdapterView flingContainer;
     private BackPressCloseHandler backPressCloseHandler;
-    private Animation bottomSpaceBlur;
     private MainMoaAdapter mainMoaAdapter;
     private int emptyDataCount = 0;
 
@@ -183,6 +182,7 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
     }
 
     private void cardStackSetting() {
+        postingDatas = new ArrayList<>();
         flingContainer = (SwipeFlingAdapterView) findViewById(R.id.swipeImgView);
         postingDatas = DataStore.getInstance().getDatas();
         stackViewAdapter = new MainStackViewAdapter(this, R.layout.main_stack_item, R.id.tvTitle, postingDatas);
@@ -231,10 +231,6 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         getBinding().mainInclude.mainMoa.recyclerMainMoa.setLayoutManager(new GridLayoutManager(this,3));
     }
 
-    private void animationSetting() {
-        bottomSpaceBlur = AnimationUtil.mainActivityAnimation();
-    }
-
 
     public void bottomClickListener(View view) {
         switch (view.getId()) {
@@ -281,7 +277,7 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         getBinding().mainInclude.imgMainTopLogo.setVisibility(View.VISIBLE);
 
         // 튜토리얼자료를 제외한 자료의 개수를 통해서 textview를 띄워줄지 결정한다.
-        int isVisible = (realDataSize(postingDatas) == 0)? View.VISIBLE : View.GONE;
+        int isVisible = (realDataSize() == 0)? View.VISIBLE : View.GONE;
         getBinding().mainInclude.mainMoa.tvIfEmpty.setVisibility(isVisible);
 
 
@@ -297,13 +293,17 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         getBinding().mainInclude.imgMainTopLogo.setVisibility(View.GONE);
     }
 
-    private int realDataSize(List<PostingData> data){
+    private int realDataSize(){
         List<PostingData> realdata = new ArrayList<>();
-        for ( PostingData item : data ) {
+        for ( PostingData item : postingDatas ) {
+            Log.e(TAG,"아이디값 : "+item.get_id());
             if( !item.get_id().equals("-1") && !item.get_id().equals("-2") ) {
                 realdata.add(item);
+                Log.e(TAG,"리얼데이터 아이디 : "+item.get_id());
+
             }
         }
+        Log.e(TAG,"리얼데이터 사이즈 : " + realdata.size());
         return realdata.size();
     }
 
@@ -393,6 +393,11 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         editor.remove("LoginCheck");
         editor.clear();
         editor.commit();
+
+        SharedPreferences sharedPref2 = getSharedPreferences("postIdCount", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor2 = sharedPref2.edit();
+        editor2.putInt("_id" , 1 );
+        editor.commit();
     }
 
 
@@ -476,7 +481,7 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
             }
             postingDatas.remove(0);
             stackViewAdapter.notifyDataSetChanged();
-
+            Log.e(TAG,"데이터의 크기는 : " + postingDatas.size() + "");
         }
 
         @Override
@@ -502,6 +507,7 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
                 data.setContent("당신의 하루를 응원합니다.");
 //            data.setImageUrl(Uri.parse("http://cfile29.uf.tistory.com/image/197005455139E816267525"));
                 data.setImageUrl(Uri.parse("android.resource://" + MainActivity.this.getPackageName() + "/drawable/splash2"));
+                Log.e(TAG, "empty데이터 이미지url" + data.getImageUrl() );
                 data.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl0());
                 data.setnDate(DateFormat.getDateTimeInstance().format(new Date()));
                 postingDatas.add(data);
@@ -515,4 +521,23 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
 
         }
     };
+
+    @Override
+    protected void onResume() {
+        cardStackSetting();
+        stackViewAdapter.notifyDataSetChanged();
+        super.onResume();
+    }
+
+    private void dataLog(List<PostingData> postingDatas){
+        for( PostingData item : postingDatas) {
+            Log.e(TAG, "메인액티비티. 현재 postingData의 크기는 : " + postingDatas.size());
+            Log.e(TAG, "id : " + item.get_id());
+            Log.e(TAG, "title : " + item.getTitle());
+            Log.e(TAG, "content : " + item.getContent());
+            Log.e(TAG, "imageUrl : " + item.getImageUrl());
+            Log.e(TAG, "emotionUrl : " + item.getEmotionUrl());
+            Log.e(TAG, "                           .                 ");
+        }
+    }
 }

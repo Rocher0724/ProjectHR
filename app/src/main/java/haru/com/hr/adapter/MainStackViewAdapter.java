@@ -2,6 +2,7 @@ package haru.com.hr.adapter;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.net.Uri;
 import android.support.annotation.IdRes;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
@@ -11,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -22,6 +24,9 @@ import java.util.Date;
 import java.util.List;
 
 import haru.com.hr.R;
+import haru.com.hr.activity.MainActivity;
+import haru.com.hr.domain.DataStore;
+import haru.com.hr.domain.FirstLoadingData;
 import haru.com.hr.domain.PostingData;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import jp.wasabeef.glide.transformations.ColorFilterTransformation;
@@ -96,8 +101,6 @@ public class MainStackViewAdapter extends ArrayAdapter<PostingData> {
 
         Glide.with(context).load(R.drawable.emotion_soso_white)
                 .into(viewHolder.imgEmotion);
-
-
         return convertView;
     }
 
@@ -108,6 +111,5 @@ public class MainStackViewAdapter extends ArrayAdapter<PostingData> {
         public TextView tvTitle;
         public TextView tvContent;
         public TextView tvDate;
-
     }
 }

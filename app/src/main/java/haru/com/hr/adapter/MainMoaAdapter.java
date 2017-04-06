@@ -1,6 +1,8 @@
 package haru.com.hr.adapter;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.support.design.widget.TabLayout;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -17,6 +19,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import haru.com.hr.R;
+import haru.com.hr.activity.ImageDetailActivity;
 import haru.com.hr.activity.MainActivity;
 import haru.com.hr.domain.PostingData;
 
@@ -61,7 +64,8 @@ public class MainMoaAdapter extends RecyclerView.Adapter<MainMoaAdapter.ViewHold
         PostingData pData = datas.get(position);
         pData.getImageUrl();
         Glide.with(context).load(pData.getImageUrl()).into(holder.imgPostingPicture);
-
+        holder.imgAddress = pData.getImageUrl() + "";
+        holder.imgUri = pData.getImageUrl();
     }
 
     @Override
@@ -72,10 +76,21 @@ public class MainMoaAdapter extends RecyclerView.Adapter<MainMoaAdapter.ViewHold
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         ImageView imgPostingPicture;
+        String imgAddress;
+        Uri imgUri;
 
         public ViewHolder(View view) {
             super(view);
             imgPostingPicture = (ImageView) view.findViewById(R.id.imgInMoa);
+            imgAddress = null;
+            imgUri = null;
+
+            imgPostingPicture.setOnClickListener( v -> {
+                Intent intent = new Intent(context, ImageDetailActivity.class);
+                intent.putExtra("imgAddress", imgAddress);
+                intent.putExtra("imgUri", imgUri);
+                context.startActivity(intent);
+            });
         }
     }
 }
