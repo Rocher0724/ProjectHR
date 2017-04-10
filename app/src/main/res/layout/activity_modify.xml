@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context="haru.com.hr.activity.ModifyActivity">
+
+        <ImageView
+            android:id="@+id/imgModifyActivity"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:scaleType="centerCrop"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/splash2"
+            app:layout_constraintVertical_bias="0.0" />
+
+        <TextView
+            android:id="@+id/tvModifySave"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="32dp"
+            android:onClick="ModifyClickListener"
+            android:padding="16dp"
+            android:text="Save"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="@color/mainIconColor"
+            app:layout_constraintHorizontal_bias="0.967"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginStart="8dp" />
+
+        <ImageView
+            android:id="@+id/imgModifyCancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="32dp"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/cancel_white3"
+            android:onClick="writeAcitivityClickListener"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp" />
+
+        <EditText
+            android:id="@+id/etModifyTitle"
+            style="@style/EditTextStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginLeft="32dp"
+            android:layout_marginRight="32dp"
+            android:layout_marginTop="8dp"
+            android:ems="1"
+            android:maxLength="16"
+            android:maxLines="1"
+            android:hint="당신의 오늘은 어떤가요?"
+            android:inputType="textPersonName"
+            android:textAlignment="center"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.266"
+            android:layout_marginStart="32dp"
+            android:layout_marginEnd="32dp" />
+
+        <EditText
+            android:id="@+id/etModifyContent"
+            style="@style/EditTextStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginLeft="32dp"
+            android:layout_marginRight="32dp"
+            android:layout_marginTop="8dp"
+            android:ems="10"
+            android:hint="생각을 자유롭게 적어보세요."
+            android:inputType="textMultiLine"
+            android:maxLength="150"
+            android:maxLines="10"
+            android:padding="8dp"
+            android:textAlignment="center"
+            app:layout_constraintBottom_toBottomOf="@+id/imgModifyActivity"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintLeft_toLeftOf="@+id/imgModifyActivity"
+            app:layout_constraintRight_toRightOf="@+id/imgModifyActivity"
+            app:layout_constraintTop_toTopOf="@+id/imgModifyActivity"
+            app:layout_constraintVertical_bias="0.53999996"
+            android:layout_marginStart="32dp"
+            android:layout_marginEnd="32dp" />
+
+        <ImageView
+            android:id="@+id/imgModifyLine"
+            android:layout_width="0dp"
+            android:layout_height="28dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp"
+            android:scaleType="centerCrop"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.763"
+            app:srcCompat="@drawable/line_white4" />
+
+        <TextView
+            android:id="@+id/tvModifyDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginLeft="0dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="2dp"
+            android:text="2017.4.4.오전 10:00:00"
+            android:textColor="@color/mainIconColor"
+            app:layout_constraintHorizontal_bias="0.06"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/imgModifyLine" />
+
+        <ImageView
+            android:id="@+id/imgModifyEmotion"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="0dp"
+            android:visibility="gone"
+            app:layout_constraintHorizontal_bias="0.741"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/imgModifyLine"
+            app:srcCompat="@drawable/emotion_soso_white" />
+
+        <Spinner
+            android:id="@+id/spnModifyEmotion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="2dp"
+            android:background="@android:color/transparent"
+            android:popupBackground="#000"
+            android:spinnerMode="dropdown"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/imgModifyLine" />
+
+        <ImageView
+            android:id="@+id/imgModifyImgSelect"
+            android:layout_width="23dp"
+            android:layout_height="23dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="0dp"
+            app:layout_constraintLeft_toRightOf="@+id/tvModifyDate"
+            app:layout_constraintTop_toBottomOf="@+id/imgModifyLine"
+            app:srcCompat="@drawable/gallery_white"
+            android:onClick="ModifyClickListener"/>
+
+        <ProgressBar
+            android:id="@+id/pbModify"
+            style="?android:attr/progressBarStyle"
+            android:theme="@style/progressbarColor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@+id/imgModifyActivity"
+            android:layout_marginTop="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="8dp"
+            android:layout_marginRight="8dp"
+            app:layout_constraintRight_toRightOf="parent"
+            android:layout_marginLeft="8dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:visibility="gone"/>
+
+    </android.support.constraint.ConstraintLayout>
+
+</layout>

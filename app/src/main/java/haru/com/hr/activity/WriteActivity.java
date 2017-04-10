@@ -7,8 +7,13 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.Toast;
 
@@ -18,17 +23,15 @@ import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 
-import java.security.interfaces.DSAKey;
 import java.text.DateFormat;
 import java.util.Date;
-import java.util.List;
+import java.util.Random;
 
 import haru.com.hr.BaseActivity;
 import haru.com.hr.R;
 import haru.com.hr.adapter.EmotionSpinnerAdapter;
 import haru.com.hr.databinding.ActivityWriteBinding;
 import haru.com.hr.domain.DataStore;
-import haru.com.hr.domain.FirstLoadingData;
 import haru.com.hr.domain.PostingData;
 import haru.com.hr.domain.WriteSpinnerDataLoader;
 import jp.wasabeef.glide.transformations.BlurTransformation;
@@ -43,19 +46,118 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
     private int idCount= 1;
     SharedPreferences sharedPref;
     private Uri selectedImageUrl;
+    int selectedImgInDrawable;
+    private int selectedEmotionPosition;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setBinding(R.layout.activity_write);
+
+        randomImageSetting();
+
         isPictureSelect = false;
         getSharedpreferenceFor_id();
         //Write Activity 진입후 시간 설정
         writeActivityDateSetText();
         spinnerSetting();
-
+        contentEditTextMaxLineSetting();
     }
-    // TODO 이거 사용해서 내일 글번호 연동시킬꺼임.
+
+    private void contentEditTextMaxLineSetting() {
+        getBinding().etWriteContent.addTextChangedListener(new TextWatcher() {
+
+            String previousString = "";
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                previousString = s.toString();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (getBinding().etWriteContent.getLineCount() >= 10) {
+
+                    getBinding().etWriteContent.setOnKeyListener(new View.OnKeyListener(){
+
+
+                        @Override
+                        public boolean onKey(View v, int keyCode, KeyEvent event) {
+                            if(keyCode == event.KEYCODE_ENTER){
+                                return true;
+                            }
+                            return false;
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    private void randomImageSetting() {
+        getBinding().pbWrite.setVisibility(View.VISIBLE);
+        Random rnd = new Random();
+        int randomNumber = rnd.nextInt(5); // 0 <= p < 5
+        backgroungRandomImageSeclect(randomNumber);
+    }
+
+    private void backgroungRandomImageSeclect(int number) {
+
+        switch (number){
+            case 0:
+                glideSetting(R.drawable.back0, 0);
+                break;
+            case 1:
+                glideSetting(R.drawable.back1, 1);
+                break;
+            case 2:
+                glideSetting(R.drawable.back2, 2);
+                break;
+            case 3:
+                glideSetting(R.drawable.back3, 3);
+                break;
+            case 4:
+                glideSetting(R.drawable.back4, 4);
+                break;
+            case 5:
+                glideSetting(R.drawable.back5, 5);
+                break;
+            case 6:
+                glideSetting(R.drawable.back6, 6);
+                break;
+        }
+    }
+
+    private void glideSetting(int drawable, int i) {
+        selectedImgInDrawable = i;
+        Glide.with(this)
+                .load(drawable)
+                .listener(new RequestListener<Integer, GlideDrawable>() {
+                    @Override
+                    public boolean onException(Exception e, Integer model, Target<GlideDrawable> target, boolean isFirstResource) {
+                        getBinding().pbWrite.setVisibility(View.GONE);
+                        Toast.makeText(WriteActivity.this, "오류가 발생하였습니다.", Toast.LENGTH_SHORT).show();
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(GlideDrawable resource, Integer model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                        getBinding().pbWrite.setVisibility(View.GONE);
+                        return false;
+                    }
+                })
+                .bitmapTransform(new CenterCrop(this)
+                        , new BlurTransformation(this, 10)
+                        , new ColorFilterTransformation(this, Color.argb(100, 100, 100, 100)))
+                .into(getBinding().imgWriteActivity);
+    }
+
     private void getSharedpreferenceFor_id() {
         // 1. Preference 생성하기
         sharedPref = getSharedPreferences("postIdCount", Context.MODE_PRIVATE);
@@ -80,9 +182,6 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
         getBinding().spnWriteEmotion.setAdapter(emotionSpinnerAdapter);
         getBinding().spnWriteEmotion.setOnItemSelectedListener(spnItemClickListener);
     }
-
-    private int selectedEmotionPosition;
-
     AdapterView.OnItemSelectedListener spnItemClickListener = new AdapterView.OnItemSelectedListener() {
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -190,7 +289,7 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
             // TODO 사용자가 데이터를 선택한경우 사용자 핸드폰에 있는 정보를 쏴줘야한다.
 
         } else {
-            pData.setImageUrl(Uri.parse("android.resource://" + WriteActivity.this.getPackageName() + "/drawable/splash2"));
+            pData.setImageUrl(Uri.parse("android.resource://" + WriteActivity.this.getPackageName() + "/drawable/back" + selectedImgInDrawable));
         }
 
         pData.setEmotionUrl(writeSpinnerDataLoader.getDatas().get(selectedEmotionPosition).getImgInDrawable());
@@ -213,8 +312,4 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
         super.onBackPressed();
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-    }
 }

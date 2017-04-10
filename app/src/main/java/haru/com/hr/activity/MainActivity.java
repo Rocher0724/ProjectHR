@@ -64,14 +64,10 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
     private BackPressCloseHandler backPressCloseHandler;
     private MainMoaAdapter mainMoaAdapter;
     private int emptyDataCount = 0;
-
-
     private CompactCalendarView calendarView;
     private SimpleDateFormat dateFormatForMonth = new SimpleDateFormat("yyyy-MM");
-    private SimpleDateFormat selectedDate = new SimpleDateFormat("yyyy.MM.dd");
+    private SimpleDateFormat selectedDate = new SimpleDateFormat("yyyy. M. d");
     private Calendar event = Calendar.getInstance(Locale.KOREA);
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,7 +87,6 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         appBarCollapsingCheckerForBlur();
 
         MainCalSetting();
-
     }
 
     // -- Main Calendar 부분 --
@@ -101,12 +96,7 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         calendarView.setListener(calendarViewListener);
         getBinding().mainInclude.mainCal.tvMainCalTitle.setText(dateFormatForMonth.format(calendarView.getFirstDayOfCurrentMonth()));
         loadEventOnCalendar(); // TODO 데이터 로드해서 캘린더에 넣어주는작업
-
     }
-
-//    private void loadEventOnCalendar1() {
-//        addEvents(2017,4,1);
-//    }
 
     private void loadEventOnCalendar() {
         // 데이터를 받아서 날짜를 가져와서 파싱해서 넣어준다.
@@ -140,8 +130,23 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         @Override
         public void onDayClick(Date dateClicked) {
             //날짜를 클릭한것을 인식하는 리스너
+            Log.e(TAG,dateClicked+"");
             getBinding().mainInclude.mainCal.tvMainCalTitle.setText(dateFormatForMonth.format(dateClicked));
-            Toast.makeText(MainActivity.this, selectedDate.format(dateClicked), Toast.LENGTH_SHORT).show();
+
+            Toast.makeText(MainActivity.this, selectedDate.format(dateClicked), Toast.LENGTH_SHORT).show(); // TODO 나중에 지워야함.
+
+            for( PostingData data : postingDatas) {
+                if( !data.get_id().equals("-2") && data.getnDate().startsWith(selectedDate.format(dateClicked))) {
+                    Intent intent = new Intent(MainActivity.this, CalToDetailActivity.class);
+                    intent.putExtra("id",data.get_id());
+                    intent.putExtra("title",data.getTitle());
+                    intent.putExtra("content",data.getContent());
+                    intent.putExtra("imageUrl",data.getImageUrl());
+                    intent.putExtra("emotionUrl",data.getEmotionUrl());
+                    intent.putExtra("nDate",data.getnDate());
+                    startActivity(intent);
+                }
+            }
         }
 
         @Override
@@ -220,8 +225,8 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         }
     };
 
-    public void refreshAdapter(List<PostingData> moaSelectedData){
-        mainMoaRecyclerSetting(moaSelectedData);
+    public void refreshAdapter(List<PostingData> data){
+        mainMoaRecyclerSetting(data);
         mainMoaAdapter.notifyDataSetChanged();
     }
 
@@ -275,10 +280,14 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         getBinding().mainInclude.imgLogo.setVisibility(View.GONE);
         getBinding().mainInclude.imgBottomBlur.setVisibility(View.VISIBLE);
         getBinding().mainInclude.imgMainTopLogo.setVisibility(View.VISIBLE);
+        refreshAdapter(postingDatas); // 사진 모아보기 클릭했을때 데이터 셋을 체인지
 
         // 튜토리얼자료를 제외한 자료의 개수를 통해서 textview를 띄워줄지 결정한다.
         int isVisible = (realDataSize() == 0)? View.VISIBLE : View.GONE;
         getBinding().mainInclude.mainMoa.tvIfEmpty.setVisibility(isVisible);
+        // 자료의 개수를 표시해준다.
+        String numberOfStory = ( realDataSize() == 0 )? "0 story" : realDataSize() + " stories";
+        getBinding().mainInclude.mainMoa.tvInToolbarCount.setText(numberOfStory);
 
 
 //        getBinding().mainInclude.imgBottomBlur.setAnimation(bottomSpaceBlur); // TODO: 2017-04-04 애니메이션 삭제예정
@@ -399,7 +408,6 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         editor2.putInt("_id" , 1 );
         editor.commit();
     }
-
 
     // 퍼미션체크
     public final String PERMISSION_ARRAY[] = {

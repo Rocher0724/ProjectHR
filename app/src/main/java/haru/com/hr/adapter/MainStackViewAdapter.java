@@ -77,6 +77,7 @@ public class MainStackViewAdapter extends ArrayAdapter<PostingData> {
             viewHolder.tvTitle = (TextView) convertView.findViewById(R.id.tvTitle);
             viewHolder.tvContent = (TextView) convertView.findViewById(R.id.tvContent);
             viewHolder.tvDate = (TextView) convertView.findViewById(R.id.tvDate);
+            viewHolder.tvEmotion = (TextView) convertView.findViewById(R.id.tvEmotion);
             convertView.setTag(viewHolder);
         }
         // 캐시된 뷰가 있을 경우 저장된 뷰홀더를 사용한다
@@ -99,9 +100,30 @@ public class MainStackViewAdapter extends ArrayAdapter<PostingData> {
                         , new ColorFilterTransformation(context, Color.argb(100, 100, 100, 100)))
                 .into(viewHolder.imgImage);
 
-        Glide.with(context).load(R.drawable.emotion_soso_white)
+        Glide.with(context).load(data.getEmotionUrl())
                 .into(viewHolder.imgEmotion);
+        emotionTextSetting(data.getEmotionUrl(), viewHolder.tvEmotion);
         return convertView;
+    }
+
+    private void emotionTextSetting(int emotionUrl, TextView tvEmotion) {
+        switch (emotionUrl){
+            case R.drawable.emotion_inlove_white:
+                tvEmotion.setText("행복해요");
+                break;
+            case R.drawable.emotion_soso_white:
+                tvEmotion.setText("그저그래요");
+                break;
+            case R.drawable.emotion_zzaing_white6:
+                tvEmotion.setText("짜증나요");
+                break;
+            case R.drawable.emotion_sad_white:
+                tvEmotion.setText("슬퍼요");
+                break;
+            case R.drawable.emotion_angry_white:
+                tvEmotion.setText("화가나요");
+                break;
+        }
     }
 
     public class ViewHolder
@@ -111,5 +133,6 @@ public class MainStackViewAdapter extends ArrayAdapter<PostingData> {
         public TextView tvTitle;
         public TextView tvContent;
         public TextView tvDate;
+        public TextView tvEmotion;
     }
 }
