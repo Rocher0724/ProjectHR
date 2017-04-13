@@ -12,12 +12,15 @@ import android.view.View;
 import com.google.gson.Gson;
 
 import haru.com.hr.BaseActivity;
+import haru.com.hr.Cookies.AddCookiesInterceptor;
+import haru.com.hr.Cookies.ReceivedCookiesInterceptor;
 import haru.com.hr.HostInterface;
 import haru.com.hr.R;
 import haru.com.hr.Remote;
 import haru.com.hr.databinding.ActivitySplashBinding;
 import haru.com.hr.domain.Data;
 import haru.com.hr.domain.DataStore;
+import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;

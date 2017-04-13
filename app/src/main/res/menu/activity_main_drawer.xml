@@ -9,31 +9,32 @@
         <item
             android:id="@+id/nav_gallery"
             android:icon="@drawable/ic_menu_gallery"
-            android:title="Gallery" />
+            android:title="app information" />
         <item
             android:id="@+id/nav_slideshow"
             android:icon="@drawable/ic_menu_slideshow"
-            android:title="Slideshow" />
+            android:title="open source license" />
         <item
             android:id="@+id/nav_manage"
             android:icon="@drawable/ic_menu_manage"
-            android:title="Tools" />
+            android:title="sign out" />
     </group>
 
     <item android:title="@string/menu1"
         android:textColor="@color/colorPrimaryDark">
         <!--색깔 넣는게 안먹음 TODO -->
         <menu>
-            <item
-                android:id="@+id/nav_share"
-                android:icon="@drawable/ic_menu_share"
-                android:title="공유하기" />
+            <!--<item-->
+                <!--android:id="@+id/nav_share"-->
+                <!--android:icon="@drawable/ic_menu_share"-->
+                <!--android:title="공유하기" />-->
             <item
                 android:id="@+id/nav_send"
                 android:icon="@drawable/ic_menu_send"
                 android:title="개발자에게 이메일 보내기" />
             <item
                 android:id="@+id/nav_review"
+                android:icon="@drawable/ic_menu_share"
                 android:title="하루한장 리뷰" />
 
 

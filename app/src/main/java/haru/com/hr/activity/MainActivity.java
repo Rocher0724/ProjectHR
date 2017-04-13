@@ -126,6 +126,25 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         return result;
     }
 
+    public void calMenuClickListener(View view) {
+        switch (view.getId()) {
+            case R.id.tvCalSendEmail:
+                Intent email = new Intent(Intent.ACTION_SEND);
+                email.putExtra(Intent.EXTRA_EMAIL, new String[]{"rocher0724.dev@gmail.com"});
+                email.putExtra(Intent.EXTRA_SUBJECT, "하루한장 앱에서 메일드립니다.");
+                email.putExtra(Intent.EXTRA_TEXT, "메시지를 이곳에 적어주세요.");
+                email.setType("message/rfc822");
+                startActivity(Intent.createChooser(email, "Choose an Email client :"));
+                break;
+            case R.id.tvCalGoReview:
+            case R.id.tvCalReviewExplain:
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse("market://details?id=" + getPackageName()));
+                startActivity(intent);
+                break;
+        }
+    }
+
     CompactCalendarView.CompactCalendarViewListener calendarViewListener = new CompactCalendarView.CompactCalendarViewListener() {
         @Override
         public void onDayClick(Date dateClicked) {
@@ -270,7 +289,6 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         getBinding().mainInclude.imgBottomBlur.setVisibility(View.VISIBLE);
         getBinding().mainInclude.imgMainTopLogo.setVisibility(View.GONE);
 //        getBinding().mainInclude.imgBottomBlur.setAnimation(bottomSpaceBlur); // TODO: 2017-04-04 나중에 봐서 애니메이션을 넣을 필요가 없으면 지우기
-
     }
 
     private void pressImgMainMoaViewChange() {

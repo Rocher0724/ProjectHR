@@ -48,6 +48,7 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
     private Uri selectedImageUrl;
     int selectedImgInDrawable;
     private int selectedEmotionPosition;
+    private Uri imageUri;
 
 
     @Override
@@ -58,7 +59,7 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
         randomImageSetting();
 
         isPictureSelect = false;
-        getSharedpreferenceFor_id();
+//        getSharedpreferenceFor_id(); // _id값은 서버에서준다.
         //Write Activity 진입후 시간 설정
         writeActivityDateSetText();
         spinnerSetting();
@@ -67,34 +68,14 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
 
     private void contentEditTextMaxLineSetting() {
         getBinding().etWriteContent.addTextChangedListener(new TextWatcher() {
-
-            String previousString = "";
-
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                previousString = s.toString();
-            }
-
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
             @Override
             public void afterTextChanged(Editable s) {
                 if (getBinding().etWriteContent.getLineCount() >= 10) {
-
-                    getBinding().etWriteContent.setOnKeyListener(new View.OnKeyListener(){
-
-
-                        @Override
-                        public boolean onKey(View v, int keyCode, KeyEvent event) {
-                            if(keyCode == event.KEYCODE_ENTER){
-                                return true;
-                            }
-                            return false;
-                        }
-                    });
+                    getBinding().etWriteContent.setOnKeyListener((v, keyCode, event) -> (keyCode == event.KEYCODE_ENTER));
                 }
             }
         });
@@ -108,7 +89,6 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
     }
 
     private void backgroungRandomImageSeclect(int number) {
-
         switch (number){
             case 0:
                 glideSetting(R.drawable.back0, 0);
@@ -158,12 +138,15 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
                 .into(getBinding().imgWriteActivity);
     }
 
+    // _id 값은 서버에서준다
+    @Deprecated
     private void getSharedpreferenceFor_id() {
         // 1. Preference 생성하기
         sharedPref = getSharedPreferences("postIdCount", Context.MODE_PRIVATE);
         idCount = sharedPref.getInt("_id", 1 );
         return;
     }
+    @Deprecated
     private void setSharedpreferenceFor_id() {
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putInt("_id" , idCount );
@@ -228,6 +211,15 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
         intent.setType("image/*"); // 외부저장소에 있는 이미지만 가져오기 위한 필터링
         startActivityForResult( Intent.createChooser(intent, " Select Picture"), REQ_GALLERY);
     }
+    // 위에있는 goGallery로 실행시 내 핸드폰 내부 갤러리와 NCloud 등 앱을 선택해서 사진을 정하도록 되어있는데
+    // ncloud 에서 사진선택시 내가 만든 node서버에서는 사진을 읽을수가 없다고 null이 떠서
+    // 갤러리만 뜨도록 하는 goGallery가 아래버전이다.
+//    private void goGallery() {
+//        Intent intent = new Intent(Intent.ACTION_PICK);
+//        intent.setType(MediaStore.Images.Media.CONTENT_TYPE);
+//        intent.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+//        startActivityForResult( intent, REQ_GALLERY);
+//    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -269,6 +261,7 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
                         , new BlurTransformation(this, 10)
                         , new ColorFilterTransformation(this, Color.argb(100, 100, 100, 100)))
                 .into(getBinding().imgWriteActivity);
+        imageUri = data.getData();
         isPictureSelect = true;
     }
 
@@ -279,9 +272,10 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
 
     private void dataSave() {
         PostingData pData = new PostingData();
-        pData.set_id(idCount + "");
-        idCount = idCount + 1;
-        setSharedpreferenceFor_id();
+//        pData.set_id(idCount + "");  // _id값은 서버에서 제공
+//        idCount = idCount + 1;        // _id값은 서버에서 제공
+//        setSharedpreferenceFor_id();  // _id값은 서버에서 제공
+
         pData.setTitle(blankCheck(getBinding().etWriteTitle.getText().toString()));
         pData.setContent(getBinding().etWriteContent.getText().toString());
 
