@@ -8,5 +8,6 @@
     <string name="action_settings">Settings</string>
     <string name="title_activity_main_view">MainViewActivity</string>
     <string name="menu1">etc</string>
+    <string name="internal_storage">Internal storage</string>
 
 </resources>

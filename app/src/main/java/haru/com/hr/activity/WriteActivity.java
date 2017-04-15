@@ -3,6 +3,9 @@ package haru.com.hr.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.provider.MediaStore;
@@ -23,19 +26,38 @@ import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 import haru.com.hr.BaseActivity;
+import haru.com.hr.HostInterface;
 import haru.com.hr.R;
 import haru.com.hr.adapter.EmotionSpinnerAdapter;
 import haru.com.hr.databinding.ActivityWriteBinding;
 import haru.com.hr.domain.DataStore;
 import haru.com.hr.domain.PostingData;
 import haru.com.hr.domain.WriteSpinnerDataLoader;
+import haru.com.hr.util.FileUtils;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import jp.wasabeef.glide.transformations.ColorFilterTransformation;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
+import static haru.com.hr.activity.MainActivity.SITE_URL;
 
 public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
 
@@ -297,9 +319,60 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
 
     }
 
+
+
     private String blankCheck(String text) {
         return (text.equals(""))? "" : text;
     }
+
+    private void uploadPosting(Uri fileUri, PostingData pData) {
+
+        RequestBody pDataTitle = RequestBody.create(MultipartBody.FORM, pData.getTitle());
+        RequestBody pDataContent = RequestBody.create(MultipartBody.FORM, pData.getContent());
+        RequestBody pDataNDate = RequestBody.create(MultipartBody.FORM, pData.getnDate());
+        RequestBody pDataEmotion = RequestBody.create(MultipartBody.FORM, pData.getEmotionUrl() + "");
+
+        Map<String, RequestBody> map = new HashMap<>();
+        map.put("title", pDataTitle);
+        map.put("content", pDataContent);
+        map.put("nDate", pDataNDate);
+        map.put("Emotion", pDataEmotion);
+
+        File originalFile = FileUtils.getFile(this, fileUri);
+
+        RequestBody filePart = RequestBody.create(
+                MediaType.parse(getContentResolver().getType(fileUri)),
+                originalFile
+        );
+        // 이미지 넣을때 키값
+        MultipartBody.Part file = MultipartBody.Part.createFormData("userfile", originalFile.getName() , filePart);
+
+        Retrofit.Builder builder = new Retrofit.Builder()
+                .baseUrl(SITE_URL)
+                .addConverterFactory(GsonConverterFactory.create());
+
+        Retrofit retrofit = builder.build();
+        HostInterface client = retrofit.create(HostInterface.class);
+
+        Call<ResponseBody> call = client.upload(map, file);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call,
+                                   Response<ResponseBody> response) {
+                Toast.makeText(WriteActivity.this, "Yeah!!!", Toast.LENGTH_SHORT).show();
+                Log.v("Upload", "success");
+                finish();
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Toast.makeText(WriteActivity.this, "nooooo!!!", Toast.LENGTH_SHORT).show();
+                Log.e("Upload error:", t.getMessage());
+            }
+        });
+    }
+
+
 
     @Override
     public void onBackPressed() {

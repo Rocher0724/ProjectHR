@@ -20,12 +20,15 @@
 
     <!--로그인 화면 edittext 스타일 지정 -->
     <style name="EditTextStyle" parent="Widget.AppCompat.EditText">
-        <item name="colorControlNormal">@color/loginTextInputLayout</item>
-        <item name="colorControlActivated">@color/loginTextInputLayout</item>
-        <item name="android:textCursorDrawable">@color/loginTextInputLayout</item>
+        <item name="colorControlNormal">@color/textmarker</item>
+        <!--loginTextInputLayout-->
+        <!-- 텍스트 선택시 물방울로 위치 표시해주는 마커의 색 -->
+        <item name="colorControlActivated">@color/textmarker</item>
+        <item name="android:textCursorDrawable">@color/textmarker</item>
         <item name="android:textColor">@color/loginTextInputLayout</item>
         <item name="android:textColorHint">@color/loginTextInputLayout</item>
-        <item name="android:textColorHighlight">@color/loginTextInputLayout</item>
+        <item name="android:textColorHighlight">@color/textHighLight</item>
+        <item name="android:textSelectHandle">@color/textmarker</item>
         <item name="android:background">@null</item>
     </style>
     <!--텍스트 인풋 레이아웃 스타일 지정 -->
@@ -35,7 +38,7 @@
         <item name="counterTextAppearance">@style/TextAppearance.Design.Counter</item>
         <item name="counterOverflowTextAppearance">@style/TextAppearance.Design.Counter.Overflow</item>
         <item name="passwordToggleDrawable">@drawable/design_password_eye</item>
-        <item name="passwordToggleTint">@color/loginTextInputLayout</item>
+        <item name="passwordToggleTint">@color/textmarker</item>
         <item name="passwordToggleContentDescription">@string/password_toggle_content_description
         </item>
     </style>
@@ -44,6 +47,4 @@
     <style name="progressbarColor">
         <item name="colorAccent">@color/progressBarColor</item> <!-- Whatever color you want-->
     </style>
-
-
 </resources>

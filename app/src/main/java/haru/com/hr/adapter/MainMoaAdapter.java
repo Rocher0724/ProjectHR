@@ -63,7 +63,7 @@ public class MainMoaAdapter extends RecyclerView.Adapter<MainMoaAdapter.ViewHold
 
         PostingData pData = datas.get(position);
         pData.getImageUrl();
-        Glide.with(context).load(pData.getImageUrl()).into(holder.imgPostingPicture);
+        Glide.with(context).load(pData.getImageUrl()).thumbnail(0.1f).into(holder.imgPostingPicture);
         holder.imgAddress = pData.getImageUrl() + "";
         holder.imgUri = pData.getImageUrl();
     }

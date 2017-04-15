@@ -68,6 +68,8 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
     private SimpleDateFormat dateFormatForMonth = new SimpleDateFormat("yyyy-MM");
     private SimpleDateFormat selectedDate = new SimpleDateFormat("yyyy. M. d");
     private Calendar event = Calendar.getInstance(Locale.KOREA);
+    public static final String SITE_URL = "http://192.168.1.225:80/";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -402,8 +404,6 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         } else if (id == R.id.nav_slideshow) {
 
         } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
 
         } else if (id == R.id.nav_send) {
 

@@ -16,12 +16,21 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 
 import haru.com.hr.BaseActivity;
+import haru.com.hr.HostInterface;
 import haru.com.hr.R;
 import haru.com.hr.databinding.ActivityCalToDetailBinding;
+import haru.com.hr.domain.Data;
 import haru.com.hr.domain.DataStore;
 import haru.com.hr.domain.PostingData;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import jp.wasabeef.glide.transformations.ColorFilterTransformation;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
+import static haru.com.hr.activity.SplashActivity.URL;
 
 /**
  * Created by myPC on 2017-04-07.
@@ -104,14 +113,53 @@ public class CalToDetailActivity extends BaseActivity<ActivityCalToDetailBinding
     }
 
     public void calToDetialClickListener(View view){
-        Intent intent = new Intent(CalToDetailActivity.this, ModifyActivity.class);
-        intent.putExtra("id",pData.get_id());
-        intent.putExtra("title",pData.getTitle());
-        intent.putExtra("content",pData.getContent());
-        intent.putExtra("imageUrl",pData.getImageUrl());
-        intent.putExtra("emotionUrl",pData.getEmotionUrl());
-        intent.putExtra("nDate",pData.getnDate());
-        startActivityForResult(intent, REQ_MODIFY);
+        switch (view.getId()) {
+            case R.id.tvCTDmodify:
+                Intent intent = new Intent(CalToDetailActivity.this, ModifyActivity.class);
+                intent.putExtra("id", pData.get_id());
+                intent.putExtra("title", pData.getTitle());
+                intent.putExtra("content", pData.getContent());
+                intent.putExtra("imageUrl", pData.getImageUrl());
+                intent.putExtra("emotionUrl", pData.getEmotionUrl());
+                intent.putExtra("nDate", pData.getnDate());
+                startActivityForResult(intent, REQ_MODIFY);
+                break;
+            case R.id.tvCTDremove:
+                dataRemove();
+                break;
+        }
+    }
+
+    private void dataRemove() {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL) // 포트까지가 베이스url이다.
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        // 2. 사용할 인터페이스를 설정한다.
+        HostInterface localhost = retrofit.create(HostInterface.class);
+        // 3. 데이터를 가져온다
+        Call<Data> result = localhost.getData();
+
+        result.enqueue(new Callback<Data>() {
+            @Override
+            public void onResponse(Call<Data> call, Response<Data> response) {
+                // 값이 정상적으로 리턴되었을 경우
+                if(response.isSuccessful()) {
+                    Data data = response.body(); // 원래 반환 값인 jsonString이 Data 클래스로 변환되어 리턴된다.
+                    DataStore dataStore = DataStore.getInstance();
+                    dataStore.setDatas(data.getData());
+
+                } else {
+                    //정상적이지 않을 경우 message에 오류내용이 담겨 온다.
+                    Log.e("onResponse","값이 비정상적으로 리턴되었다. = " + response.message());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Data> call, Throwable t) {
+
+            }
+        });
     }
 
     @Override

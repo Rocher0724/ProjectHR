@@ -163,6 +163,7 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
 
     private void dataSave() {
         // id값과 ndate는 수정할수없다.
+        // todo 서버에 고정데이터와 변동데이터를 쏴줘서 수정해야할것같다. api 나오면 해보자.
 
         DataStore.getInstance().getDatas().get(dataPosition)
                 .setTitle(blankCheck(getBinding().etModifyTitle.getText().toString()));

@@ -15,14 +15,25 @@ import java.text.DateFormat;
 import java.util.Date;
 
 import haru.com.hr.BaseActivity;
+import haru.com.hr.HostInterface;
 import haru.com.hr.R;
 import haru.com.hr.databinding.ActivityLoginBinding;
+import haru.com.hr.domain.Data;
 import haru.com.hr.domain.DataStore;
+import haru.com.hr.domain.EmailSet;
 import haru.com.hr.domain.FirstLoadingData;
 import haru.com.hr.domain.PostingData;
+import haru.com.hr.domain.Token;
 import haru.com.hr.util.AnimationUtil;
 import haru.com.hr.util.BackPressCloseHandler;
 import haru.com.hr.util.SignUtil;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
+import static haru.com.hr.activity.MainActivity.SITE_URL;
 
 public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
 
@@ -99,10 +110,13 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
                     String email = getBinding().etActivityLoginAddress.getText().toString();
                     String password = getBinding().etActivityLoginPassword.getText().toString();
 
-                    // 가입시 이메일 정보 체크
+                    // 가입시 이메일 형식 체크
                     if ( infoCheck(email, password) ) {
-                        signin(email, password);
+                        signin(email, password); // 서버에 정보 넘겨주고 토큰 받아옴
+                        dataSetting(firstLogincheck); // 데이터 세팅. 기 로그인자면 사용데이터, 최초사용자면 튜토리얼 세팅
+                        saveSharedpreference(email); // 자동로그인을 위한 shared preference todo 자동로그인을위해 무슨정보가 들어가야할까 토큰?
                         editTextVisibleChanger(); //현재 비지블이므로 로그인하면서 텍스트 숨김
+                        activityChange();
                     }
                 }
                 break;
@@ -113,9 +127,10 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
                 String email = getBinding().etActivityLoginCreateAddress.getText().toString();
                 String password = getBinding().etActivityLoginCreatePassword.getText().toString();
                 String confirm = getBinding().etActivityLoginCreateConfirm.getText().toString();
-                if( infoCheck(email, password, confirm) ) {
+                if( infoCheck(email, password, confirm) ) { // 이메일 형식체크 비밀번호 길이 , confirm 체크
 
-                    // TODO 정보를 보내야겠지
+                    regist(email, password);// TODO 정보를 보내야겠지
+
 
                     onBackPressed(); // 현재 getBinding().loginConstLO.getVisibility() == View.GONE 인 상태이므로 이전화면으로 간다.
                 }
@@ -124,6 +139,39 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
 
             // TODO 페이스북로그인 api 붙이기
         }
+    }
+
+    private void regist(String email, String password) {
+        // todo 수정이 필요할듯
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(SITE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+
+        HostInterface localhost = retrofit.create(HostInterface.class);
+        EmailSet emailSet = new EmailSet(email, password);
+
+        Call<Token> call = localhost.email(emailSet);
+
+        call.enqueue(new Callback<Token>() {
+            @Override
+            public void onResponse(Call<Token> call, Response<Token> response) {
+                if( response.isSuccessful() ){
+                    Token token  = response.body();
+                    Log.e(TAG, token.key);
+
+                    Log.e(TAG ,"onResponse : 정상리턴");
+                } else {
+                    Log.e("onResponse","비정상적으로 리턴되었다. = " + response.message());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Token> call, Throwable t) {
+                Log.e(TAG,"sign in 서버통신 실패");
+            }
+        });
     }
 
     private void loginViewAndCreateViewChange() {
@@ -209,101 +257,124 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
     }
 
     public void signin(String email, String password) {
-/*
-        AsyncTask<String, Void, String> networkTask = new AsyncTask<String, Void, String>(){
+        Log.e(TAG, "signin 들어왔다.");
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(SITE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        EmailSet emailSet = new EmailSet(email, password);
+
+        HostInterface localhost = retrofit.create(HostInterface.class);
+        Call<Token> call = localhost.email(emailSet);
+
+        call.enqueue(new Callback<Token>() {
             @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
+            public void onResponse(Call<Token> call, Response<Token> response) {
+                if( response.isSuccessful() ){
+                    Token token  = response.body();
+                    Log.e(TAG, token.key);
+
+                    Log.e(TAG ,"onResponse : 정상리턴");
+                } else {
+                    Log.e("onResponse","비정상적으로 리턴되었다. = " + response.message());
+                }
             }
 
             @Override
-            protected String doInBackground(String... params) {
-                String email = params[0];
-                String password = params[1];
-
-                EmailSet emailSet = new EmailSet();
-                emailSet.setEmail(email);
-                emailSet.setPassword(password);
-
-                Gson gson = new Gson();
-                String jsonString = gson.toJson(emailSet);
-
-                // postjson을 통해서 json 정보를 서버로 보냄
-                String result = Remote.postJson(URL+POST, jsonString);
-
-                //TODO 서버에있는 정보와 통신해서 OK가 나면 아마도 계정 정보가 생성되고 DB에는 새로운 노드가 생겼을것같은데
-                //TODO 무슨정보를 받아오는거지?
-
-                return result;
+            public void onFailure(Call<Token> call, Throwable t) {
+                Log.e(TAG,"sign in 서버통신 실패");
             }
+        });
 
-            @Override
-            protected void onPostExecute(String result) {
-                super.onPostExecute(result);
-//                Toast.makeText(LoginActivity.this, "로그인되었습니다.", Toast.LENGTH_SHORT).show();
-//                finish();
-            }
-        };
-
-        networkTask.execute(email, password);
         // 받아온 정보를 데이터에 세팅, 기 사용자라면 사용자 정보를 불러오고 아니라면 튜토리얼을 가져온다.*/
-        dataSetting(firstLogincheck);
-        saveSharedpreference(email); // 자동로그인을 위한 shared preference
-        activityChange();
+//        dataSetting(firstLogincheck);
+//        saveSharedpreference(email); // 자동로그인을 위한 shared preference
+//        activityChange();
 
     }
 
 
     //TODO 여기는 어떻게해야할까 튜토리얼 정보세팅?
     public void dataSetting(boolean loginCheck) {
-        if(loginCheck) { // 첫 로그인이면 튜토리얼 정보 세팅
-            PostingData datas0 = new PostingData();
-            datas0.set_id(FirstLoadingData.getInstance().get_id0());
-            datas0.setTitle(FirstLoadingData.getInstance().getTitle0());
-            datas0.setContent(FirstLoadingData.getInstance().getContent0());
-            datas0.setImageUrl(FirstLoadingData.getInstance().getImageUrl0());
-            datas0.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl0());
-            datas0.setnDate(FirstLoadingData.getInstance().getDate0());
-            DataStore.getInstance().addData(datas0);
-
-            PostingData datas1 = new PostingData();
-            datas1.set_id(FirstLoadingData.getInstance().get_id1());
-            datas1.setTitle(FirstLoadingData.getInstance().getTitle1());
-            datas1.setContent(FirstLoadingData.getInstance().getContent1());
-            datas1.setImageUrl(FirstLoadingData.getInstance().getImageUrl1());
-            datas1.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl1());
-            datas1.setnDate(FirstLoadingData.getInstance().getDate1());
-            DataStore.getInstance().addData(datas1);
-
-            PostingData datas2 = new PostingData();
-            datas2.set_id(FirstLoadingData.getInstance().get_id2());
-            datas2.setTitle(FirstLoadingData.getInstance().getTitle2());
-            datas2.setContent(FirstLoadingData.getInstance().getContent2());
-            datas2.setImageUrl(FirstLoadingData.getInstance().getImageUrl2());
-            datas2.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl2());
-            datas2.setnDate(FirstLoadingData.getInstance().getDate2());
-            DataStore.getInstance().addData(datas2);
-
-            PostingData datas3 = new PostingData();
-            datas3.set_id(FirstLoadingData.getInstance().get_id3());
-            datas3.setTitle(FirstLoadingData.getInstance().getTitle3());
-            datas3.setContent(FirstLoadingData.getInstance().getContent3());
-            datas3.setImageUrl(FirstLoadingData.getInstance().getImageUrl3());
-            datas3.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl3());
-            datas3.setnDate(FirstLoadingData.getInstance().getDate3());
-            DataStore.getInstance().addData(datas3);
-
-            PostingData datas4 = new PostingData();
-            datas4.set_id(FirstLoadingData.getInstance().get_id4());
-            datas4.setTitle(FirstLoadingData.getInstance().getTitle4());
-            datas4.setContent(FirstLoadingData.getInstance().getContent4());
-            datas4.setImageUrl(FirstLoadingData.getInstance().getImageUrl4());
-            datas4.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl4());
-            datas4.setnDate(FirstLoadingData.getInstance().getDate4());
-            DataStore.getInstance().addData(datas4);
+        if(loginCheck) {
+            // 튜토리얼 세팅
+            // 첫 로그인이면 튜토리얼 정보 세팅
+//            PostingData datas0 = new PostingData();
+//            datas0.set_id(FirstLoadingData.getInstance().get_id0());
+//            datas0.setTitle(FirstLoadingData.getInstance().getTitle0());
+//            datas0.setContent(FirstLoadingData.getInstance().getContent0());
+//            datas0.setImageUrl(FirstLoadingData.getInstance().getImageUrl0());
+//            datas0.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl0());
+//            datas0.setnDate(FirstLoadingData.getInstance().getDate0());
+//            DataStore.getInstance().addData(datas0);
+//
+//            PostingData datas1 = new PostingData();
+//            datas1.set_id(FirstLoadingData.getInstance().get_id1());
+//            datas1.setTitle(FirstLoadingData.getInstance().getTitle1());
+//            datas1.setContent(FirstLoadingData.getInstance().getContent1());
+//            datas1.setImageUrl(FirstLoadingData.getInstance().getImageUrl1());
+//            datas1.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl1());
+//            datas1.setnDate(FirstLoadingData.getInstance().getDate1());
+//            DataStore.getInstance().addData(datas1);
+//
+//            PostingData datas2 = new PostingData();
+//            datas2.set_id(FirstLoadingData.getInstance().get_id2());
+//            datas2.setTitle(FirstLoadingData.getInstance().getTitle2());
+//            datas2.setContent(FirstLoadingData.getInstance().getContent2());
+//            datas2.setImageUrl(FirstLoadingData.getInstance().getImageUrl2());
+//            datas2.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl2());
+//            datas2.setnDate(FirstLoadingData.getInstance().getDate2());
+//            DataStore.getInstance().addData(datas2);
+//
+//            PostingData datas3 = new PostingData();
+//            datas3.set_id(FirstLoadingData.getInstance().get_id3());
+//            datas3.setTitle(FirstLoadingData.getInstance().getTitle3());
+//            datas3.setContent(FirstLoadingData.getInstance().getContent3());
+//            datas3.setImageUrl(FirstLoadingData.getInstance().getImageUrl3());
+//            datas3.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl3());
+//            datas3.setnDate(FirstLoadingData.getInstance().getDate3());
+//            DataStore.getInstance().addData(datas3);
+//
+//            PostingData datas4 = new PostingData();
+//            datas4.set_id(FirstLoadingData.getInstance().get_id4());
+//            datas4.setTitle(FirstLoadingData.getInstance().getTitle4());
+//            datas4.setContent(FirstLoadingData.getInstance().getContent4());
+//            datas4.setImageUrl(FirstLoadingData.getInstance().getImageUrl4());
+//            datas4.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl4());
+//            datas4.setnDate(FirstLoadingData.getInstance().getDate4());
+//            DataStore.getInstance().addData(datas4);
 
         } else { // 기로그인이면 사용자 정보 세팅
 
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(SITE_URL)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+
+            HostInterface localhost = retrofit.create(HostInterface.class);
+            Call<Data> call = localhost.getData();
+
+            call.enqueue(new Callback<Data>() {
+                @Override
+                public void onResponse(Call<Data> call, Response<Data> response) {
+                    if( response.isSuccessful() ){
+                        Data data = response.body();
+                        DataStore dataStore = DataStore.getInstance();
+                        dataStore.setDatas(data.getData());
+
+                        Log.e(TAG ,"onResponse : 데이터 세팅완료");
+                    } else {
+                        Log.e("onResponse","비정상적으로 리턴되었다. = " + response.message());
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Data> call, Throwable t) {
+                    Log.e(TAG,"data setting서버통신 실패");
+                }
+            });
         }
     }
 

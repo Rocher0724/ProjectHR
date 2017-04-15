@@ -46,11 +46,11 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
 
         if( !checkFirstLogin()/* 첫 로그인인지 체크 */) {
             // 첫로그인이 아니면 입력되었던 이메일을 토대로 데이터를 로딩해야함
-
+            loadSharedpreference(); // 이메일을 꺼냄.
             // 방어코딩
             if( email != null) {
                 Log.e(TAG, "방어코딩 안으로 들어왔다" );
-//                signin(email); // todo 서버통신할때는 주석풀기
+                signin(email); // todo 서버통신할때는 주석풀기
 //                getData();
             } else {
                 Log.e(TAG,"email이 null입니다.");
@@ -66,7 +66,48 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
     }
 
     private boolean checkFirstLogin() {
-        return loadSharedpreference();
+        // 토큰이 있으면 토큰을 날려서 서버에 인증한다.
+        String token = getToken();
+
+        if( token != null ) { // 토큰이 널이 아니면 토큰을 날려서 확인을한다.
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(URL) // 포트까지가 베이스url이다.
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+            // 2. 사용할 인터페이스를 설정한다.
+            HostInterface localhost = retrofit.create(HostInterface.class);
+            // 3. 데이터를 가져온다
+            Call<String> result = localhost.tokenCheck(token);
+
+            result.enqueue(new Callback<String>() {
+                @Override
+                public void onResponse(Call<String> call, Response<String> response) {
+                    // 값이 정상적으로 리턴되었을 경우
+                    if (response.isSuccessful()) {
+                        // response.body 는 String을 반환한다.
+
+                    } else {
+                        //정상적이지 않을 경우 message에 오류내용이 담겨 온다.
+                        Log.e("onResponse", "값이 비정상적으로 리턴되었다. = " + response.message());
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<String> call, Throwable t) {
+
+                }
+            });
+
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private String getToken() {
+        SharedPreferences sharedPref = getSharedPreferences("Token", Context.MODE_PRIVATE);
+        String token = sharedPref.getString("token", null);
+        return token;
     }
 
     private boolean loadSharedpreference() {
@@ -79,42 +120,41 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
     }
 
     private void signin(String email) {
+        // todo 이메일과 토큰을 함께 날리고 데이터를 받아낸다.
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL) // 포트까지가 베이스url이다.
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        // 2. 사용할 인터페이스를 설정한다.
+        HostInterface localhost = retrofit.create(HostInterface.class);
+        // 3. 데이터를 가져온다
+        Call<String> result = localhost.tokenCheck(token);
 
-        AsyncTask<String, Void, String> loginCheckTask = new AsyncTask<String, Void, String>(){
+        result.enqueue(new Callback<String>() {
             @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
+            public void onResponse(Call<String> call, Response<String> response) {
+                // 값이 정상적으로 리턴되었을 경우
+                if (response.isSuccessful()) {
+                    // response.body 는 String을 반환한다.
+
+                } else {
+                    //정상적이지 않을 경우 message에 오류내용이 담겨 온다.
+                    Log.e("onResponse", "값이 비정상적으로 리턴되었다. = " + response.message());
+                }
             }
 
             @Override
-            protected String doInBackground(String... params) {
-                String email = params[0];
-
-                Gson gson = new Gson();
-                String jsonString = gson.toJson(email);
-
-                // postjson을 통해서 json 정보를 서버로 보냄 //TODO 주소맞추기
-                String result = Remote.postJson(URL/*+주소 TODO*/, jsonString);
-
-                //TODO 계정정보(이메일)를 보냈으니까 게시한 포스팅정보를 받아와야함.
-
-                return result;
-            }
-
-            @Override
-            protected void onPostExecute(String result) {
-                super.onPostExecute(result);
+            public void onFailure(Call<String> call, Throwable t) {
 
             }
-        };
-        loginCheckTask.execute(email);
+        });
 
     }
 
 
 
     private void getData() {
-
+        // todo 아마 여기서 이메일을 보내고 데이터를 받아오는것도 좋을것같다.
         // 1. 레트로핏을 생성하고
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(URL) // 포트까지가 베이스url이다.
@@ -133,12 +173,6 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
                     Data data = response.body(); // 원래 반환 값인 jsonString이 Data 클래스로 변환되어 리턴된다.
                     DataStore dataStore = DataStore.getInstance();
                     dataStore.setDatas(data.getData());
-
-
-
-                    // 로딩 화면인 현재 Activity는 종료한다.
-//                    activityChange();
-//                    finish();
 
                 } else {
                     //정상적이지 않을 경우 message에 오류내용이 담겨 온다.
