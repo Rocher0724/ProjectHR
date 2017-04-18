@@ -6,23 +6,21 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Toast;
 
-import java.text.DateFormat;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import haru.com.hr.BaseActivity;
 import haru.com.hr.HostInterface;
 import haru.com.hr.R;
+import haru.com.hr.RealData.RealData;
+import haru.com.hr.RealData.RealDataStore;
+import haru.com.hr.RealData.Results;
 import haru.com.hr.databinding.ActivityLoginBinding;
-import haru.com.hr.domain.Data;
-import haru.com.hr.domain.DataStore;
 import haru.com.hr.domain.EmailSet;
-import haru.com.hr.domain.FirstLoadingData;
-import haru.com.hr.domain.PostingData;
 import haru.com.hr.domain.Token;
 import haru.com.hr.util.AnimationUtil;
 import haru.com.hr.util.BackPressCloseHandler;
@@ -33,20 +31,20 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-import static haru.com.hr.activity.MainActivity.SITE_URL;
+import static haru.com.hr.HTTP_ResponseCode.CODE_CONFLICT;
+import static haru.com.hr.HTTP_ResponseCode.CODE_CREATED;
+import static haru.com.hr.HostInterface.URL;
 
 public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
 
-
-
     public static final String POST = "post";
     private static final String TAG = "LoginActivity";
-    private boolean firstLogincheck = false;
     AnimationUtil anim = null;
     Animation loginActLogoAnim = null;
     Animation loginTextAnim = null;
 
     private BackPressCloseHandler backPressCloseHandler;
+    private int responseCode = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,19 +53,18 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
 
         backPressCloseHandler = new BackPressCloseHandler(this);
 
-        // TODO 임의 로그인을 위해서 롱클릭으로 메인액티비티 들어가도록 설정한것임. 나중에 지워야함
-        getBinding().btnGoToCreateAccountView.setOnLongClickListener(v -> {
-            activityChange();
-            return false;
-        });
-        // TODO 임의 로그인을 위해서 롱클릭으로 메인액티비티 들어가도록 설정한것임. 나중에 지워야함
-        getBinding().btnCreateAccount.setOnLongClickListener(v -> {
-            activityChange();
-            return false;
-        });
+//        // TODO 임의 로그인을 위해서 롱클릭으로 메인액티비티 들어가도록 설정한것임. 나중에 지워야함
+//        getBinding().btnGoToCreateAccountView.setOnLongClickListener(v -> {
+//            activityChange();
+//            return false;
+//        });
+//        // TODO 임의 로그인을 위해서 롱클릭으로 메인액티비티 들어가도록 설정한것임. 나중에 지워야함
+//        getBinding().btnCreateAccount.setOnLongClickListener(v -> {
+//            activityChange();
+//            return false;
+//        });
 
-
-        //TODO 로그인 처리후 액티비티 변환 처리해야함 intent이동하는거 그거
+        //TODO 로그인 처리후 액티비티 변환 처리해야함 intent 이동하는거 그거
     }
 
     private void animationSetting() {
@@ -76,7 +73,6 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
         Log.e(TAG,loginActLogoAnim + "");
         loginTextAnim = anim.getLoginActivityTextAnim();
         Log.e(TAG,loginTextAnim + "");
-
     }
 
 
@@ -99,22 +95,27 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
             getBinding().activityLoginPassword.setVisibility(View.INVISIBLE);
         }
     }
+    private boolean checkSignUp() {
+        SharedPreferences sharedPref = getSharedPreferences("LoginCheck", Context.MODE_PRIVATE);
+        boolean loginCheck = sharedPref.getBoolean("FirstLoginCheck", true );
+        return loginCheck;
+    }
 
     public void clickListener(View view) {
         switch (view.getId()) {
             case R.id.btnEmailLogin:
                 if( getBinding().activityLoginAddress.getVisibility() == View.INVISIBLE ) {
-                    // todo 여유가되면 걍 visible이 아니라 애니메이션으로 부드럽게 in 되도록 해보자
+                    // 메인로고가 상단으로 올라가고 signin 관련 edittext가 visible이 된다.
                     editTextVisibleChanger(); // 현재 인비지블이므로 비지블로 바꾸게 처리
                 } else {
                     String email = getBinding().etActivityLoginAddress.getText().toString();
                     String password = getBinding().etActivityLoginPassword.getText().toString();
 
-                    // 가입시 이메일 형식 체크
+                    // 로그인시 이메일 형식 체크
                     if ( infoCheck(email, password) ) {
                         signin(email, password); // 서버에 정보 넘겨주고 토큰 받아옴
-                        dataSetting(firstLogincheck); // 데이터 세팅. 기 로그인자면 사용데이터, 최초사용자면 튜토리얼 세팅
-                        saveSharedpreference(email); // 자동로그인을 위한 shared preference todo 자동로그인을위해 무슨정보가 들어가야할까 토큰?
+                        dataSetting(checkSignUp()); // 데이터 세팅. 기 로그인자면 사용데이터, 최초사용자면 튜토리얼 세팅
+                        saveSharedpreference(email, password); // 자동로그인을 위한 shared preference 저장
                         editTextVisibleChanger(); //현재 비지블이므로 로그인하면서 텍스트 숨김
                         activityChange();
                     }
@@ -123,56 +124,22 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
             case R.id.btnGoToCreateAccountView:
                 loginViewAndCreateViewChange();
                 break;
-            case R.id.btnCreateAccount:
+            case R.id.btnCreateAccount: // 가입시
                 String email = getBinding().etActivityLoginCreateAddress.getText().toString();
                 String password = getBinding().etActivityLoginCreatePassword.getText().toString();
                 String confirm = getBinding().etActivityLoginCreateConfirm.getText().toString();
                 if( infoCheck(email, password, confirm) ) { // 이메일 형식체크 비밀번호 길이 , confirm 체크
 
-                    regist(email, password);// TODO 정보를 보내야겠지
-
-
-                    onBackPressed(); // 현재 getBinding().loginConstLO.getVisibility() == View.GONE 인 상태이므로 이전화면으로 간다.
+                    regist(email, password);
                 }
 
                 break;
 
-            // TODO 페이스북로그인 api 붙이기
+            // if posible TODO 페이스북로그인 api 붙이기
         }
     }
 
-    private void regist(String email, String password) {
-        // todo 수정이 필요할듯
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(SITE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
 
-
-        HostInterface localhost = retrofit.create(HostInterface.class);
-        EmailSet emailSet = new EmailSet(email, password);
-
-        Call<Token> call = localhost.email(emailSet);
-
-        call.enqueue(new Callback<Token>() {
-            @Override
-            public void onResponse(Call<Token> call, Response<Token> response) {
-                if( response.isSuccessful() ){
-                    Token token  = response.body();
-                    Log.e(TAG, token.key);
-
-                    Log.e(TAG ,"onResponse : 정상리턴");
-                } else {
-                    Log.e("onResponse","비정상적으로 리턴되었다. = " + response.message());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Token> call, Throwable t) {
-                Log.e(TAG,"sign in 서버통신 실패");
-            }
-        });
-    }
 
     private void loginViewAndCreateViewChange() {
         if( getBinding().loginConstLO.getVisibility() == View.GONE) {
@@ -221,7 +188,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
             getBinding().tvActivityLoginAddress.setText("");
         }
         if( !SignUtil.validatePassword(password) ) {
-            getBinding().tvActivityLoginPassword.setText("비밀번호는 6~16자리여야 합니다.");
+            getBinding().tvActivityLoginPassword.setText("비밀번호는 8~16자리여야 합니다.");
             getBinding().tvActivityLoginPassword.setAnimation(loginTextAnim);
             checkCount++;
         } else {
@@ -260,126 +227,145 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
         Log.e(TAG, "signin 들어왔다.");
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(SITE_URL)
+                .baseUrl(URL) // 포트까지가 베이스url이다.
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
-
-        EmailSet emailSet = new EmailSet(email, password);
-
+        // 2. 사용할 인터페이스를 설정한다.
         HostInterface localhost = retrofit.create(HostInterface.class);
-        Call<Token> call = localhost.email(emailSet);
+        // 3. 데이터를 가져온다
+        EmailSet emailSet = new EmailSet(email, password);
+        Call<Token> signin = localhost.signin(emailSet);
 
-        call.enqueue(new Callback<Token>() {
+        signin.enqueue(new Callback<Token>() {
             @Override
             public void onResponse(Call<Token> call, Response<Token> response) {
-                if( response.isSuccessful() ){
-                    Token token  = response.body();
-                    Log.e(TAG, token.key);
+                // 값이 정상적으로 리턴되었을 경우
+                if (response.isSuccessful()) {
+                    Token token = response.body();
+                    token.setToken(token.getKey());
 
-                    Log.e(TAG ,"onResponse : 정상리턴");
                 } else {
-                    Log.e("onResponse","비정상적으로 리턴되었다. = " + response.message());
+                    //정상적이지 않을 경우 message에 오류내용이 담겨 온다.
+                    Log.e("onResponse", "값이 비정상적으로 리턴되었다. = " + response.message());
                 }
             }
 
             @Override
             public void onFailure(Call<Token> call, Throwable t) {
-                Log.e(TAG,"sign in 서버통신 실패");
+
             }
         });
-
-        // 받아온 정보를 데이터에 세팅, 기 사용자라면 사용자 정보를 불러오고 아니라면 튜토리얼을 가져온다.*/
-//        dataSetting(firstLogincheck);
-//        saveSharedpreference(email); // 자동로그인을 위한 shared preference
-//        activityChange();
-
     }
+
+    private void regist(String email, String password) {
+
+        Log.e(TAG,"regist 들어왔다.");
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        HostInterface localhost = retrofit.create(HostInterface.class);
+        EmailSet emailSet = new EmailSet(email, password);
+
+        Call<Token> call = localhost.signup(emailSet);
+
+        call.enqueue(new Callback<Token>() {
+            @Override
+            public void onResponse(Call<Token> call, Response<Token> response) {
+                if( response.isSuccessful() ){
+                    if( response.code() == CODE_CREATED) {
+                        Token token = response.body();
+                        token.setToken(token.getKey());
+
+                        onBackPressed(); // 계정이 생성된 경우 로그인할수 있게 뒤로가기를 눌러준다.
+
+                        Log.e(TAG, "regist : 정상리턴");
+                    } else if (response.code() == CODE_CONFLICT) {
+                        // 동일한 정보를 가진 사용자가 있다.
+                        Toast.makeText(LoginActivity.this, "동일한 정보의 사용자가 있습니다.", Toast.LENGTH_SHORT).show();
+
+                    }
+                    responseCode = response.code();
+                } else {
+                    Log.e("regist","비정상적으로 리턴되었다. = " + response.message());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Token> call, Throwable t) {
+                Log.e(TAG,"regist 서버통신 실패");
+                Log.e(TAG,t.toString());
+            }
+        });
+    }
+
+//    private void setToken(String token) {
+//        SharedPreferences sharedPref = getSharedPreferences("Token", Context.MODE_PRIVATE);
+//        SharedPreferences.Editor editor = sharedPref.edit();
+//        editor.putString("token", token);
+//        editor.commit();
+//    }
 
 
     //TODO 여기는 어떻게해야할까 튜토리얼 정보세팅?
     public void dataSetting(boolean loginCheck) {
         if(loginCheck) {
             // 튜토리얼 세팅
-            // 첫 로그인이면 튜토리얼 정보 세팅
-//            PostingData datas0 = new PostingData();
-//            datas0.set_id(FirstLoadingData.getInstance().get_id0());
-//            datas0.setTitle(FirstLoadingData.getInstance().getTitle0());
-//            datas0.setContent(FirstLoadingData.getInstance().getContent0());
-//            datas0.setImageUrl(FirstLoadingData.getInstance().getImageUrl0());
-//            datas0.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl0());
-//            datas0.setnDate(FirstLoadingData.getInstance().getDate0());
-//            DataStore.getInstance().addData(datas0);
-//
-//            PostingData datas1 = new PostingData();
-//            datas1.set_id(FirstLoadingData.getInstance().get_id1());
-//            datas1.setTitle(FirstLoadingData.getInstance().getTitle1());
-//            datas1.setContent(FirstLoadingData.getInstance().getContent1());
-//            datas1.setImageUrl(FirstLoadingData.getInstance().getImageUrl1());
-//            datas1.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl1());
-//            datas1.setnDate(FirstLoadingData.getInstance().getDate1());
-//            DataStore.getInstance().addData(datas1);
-//
-//            PostingData datas2 = new PostingData();
-//            datas2.set_id(FirstLoadingData.getInstance().get_id2());
-//            datas2.setTitle(FirstLoadingData.getInstance().getTitle2());
-//            datas2.setContent(FirstLoadingData.getInstance().getContent2());
-//            datas2.setImageUrl(FirstLoadingData.getInstance().getImageUrl2());
-//            datas2.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl2());
-//            datas2.setnDate(FirstLoadingData.getInstance().getDate2());
-//            DataStore.getInstance().addData(datas2);
-//
-//            PostingData datas3 = new PostingData();
-//            datas3.set_id(FirstLoadingData.getInstance().get_id3());
-//            datas3.setTitle(FirstLoadingData.getInstance().getTitle3());
-//            datas3.setContent(FirstLoadingData.getInstance().getContent3());
-//            datas3.setImageUrl(FirstLoadingData.getInstance().getImageUrl3());
-//            datas3.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl3());
-//            datas3.setnDate(FirstLoadingData.getInstance().getDate3());
-//            DataStore.getInstance().addData(datas3);
-//
-//            PostingData datas4 = new PostingData();
-//            datas4.set_id(FirstLoadingData.getInstance().get_id4());
-//            datas4.setTitle(FirstLoadingData.getInstance().getTitle4());
-//            datas4.setContent(FirstLoadingData.getInstance().getContent4());
-//            datas4.setImageUrl(FirstLoadingData.getInstance().getImageUrl4());
-//            datas4.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl4());
-//            datas4.setnDate(FirstLoadingData.getInstance().getDate4());
-//            DataStore.getInstance().addData(datas4);
+            // todo 첫 로그인이면 튜토리얼 정보 세팅
+
 
         } else { // 기로그인이면 사용자 정보 세팅
 
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl(SITE_URL)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
-
-            HostInterface localhost = retrofit.create(HostInterface.class);
-            Call<Data> call = localhost.getData();
-
-            call.enqueue(new Callback<Data>() {
-                @Override
-                public void onResponse(Call<Data> call, Response<Data> response) {
-                    if( response.isSuccessful() ){
-                        Data data = response.body();
-                        DataStore dataStore = DataStore.getInstance();
-                        dataStore.setDatas(data.getData());
-
-                        Log.e(TAG ,"onResponse : 데이터 세팅완료");
-                    } else {
-                        Log.e("onResponse","비정상적으로 리턴되었다. = " + response.message());
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<Data> call, Throwable t) {
-                    Log.e(TAG,"data setting서버통신 실패");
-                }
-            });
+            getData();
         }
     }
 
+    private void getData() {
+        // todo 아마 여기서 이메일을 보내고 데이터를 받아오는것도 좋을것같다.
+
+        String token = Token.getInstance().getToken();
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL) // 포트까지가 베이스url이다.
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        // 2. 사용할 인터페이스를 설정한다.
+        HostInterface localhost = retrofit.create(HostInterface.class);
+        // 3. 토큰을 보내 데이터를 가져온다
+        Call<RealData> result = localhost.getData(token, 1);
+
+        result.enqueue(new Callback<RealData>() {
+            @Override
+            public void onResponse(Call<RealData> call, Response<RealData> response) {
+                // 값이 정상적으로 리턴되었을 경우
+                if (response.isSuccessful()) {
+                    Results results = response.body().getResults();
+                    RealDataStore realDataStore =RealDataStore.getInstance();
+                    List<Results> list = new ArrayList<>(Arrays.asList(results));
+                    realDataStore.setDatas(list);
+
+                } else {
+                    //정상적이지 않을 경우 message에 오류내용이 담겨 온다.
+                    Log.e("onResponse", "값이 비정상적으로 리턴되었다. = " + response.message());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<RealData> call, Throwable t) {
+
+            }
+        });
+    }
+
+//    private String getToken() {
+//        SharedPreferences sharedPref = getSharedPreferences("Token", Context.MODE_PRIVATE);
+//        String token = sharedPref.getString("token", null);
+//        return token;
+//    }
+
     // 로그인후 설정에서 따로 로그아웃 전까지 true로 유지
-    private void saveSharedpreference(String email) {
+    private void saveSharedpreference(String email, String password) {
         // 1. Preference 생성하기
         SharedPreferences sharedPref = getSharedPreferences("LoginCheck", Context.MODE_PRIVATE);
         // 2. Shared Preference의 값을 입력하기 위해서는 에디터를 통해서만 가능하다.
@@ -387,6 +373,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
         // 지금 로그인을 하고있으므로 최초로그인 플래그는 false를 준다.
         editor.putBoolean("FirstLoginCheck" , false );
         editor.putString("email" , email );
+        editor.putString("password" , password );
         editor.commit();
     }
 

@@ -2,7 +2,6 @@ package haru.com.hr.adapter;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.net.Uri;
 import android.support.annotation.IdRes;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
@@ -12,22 +11,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 
-import java.text.DateFormat;
-import java.util.Date;
 import java.util.List;
 
 import haru.com.hr.R;
-import haru.com.hr.activity.MainActivity;
-import haru.com.hr.domain.DataStore;
-import haru.com.hr.domain.FirstLoadingData;
-import haru.com.hr.domain.PostingData;
+import haru.com.hr.RealData.Results;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import jp.wasabeef.glide.transformations.ColorFilterTransformation;
 
@@ -35,22 +28,16 @@ import jp.wasabeef.glide.transformations.ColorFilterTransformation;
  * Created by myPC on 2017-03-22.
  */
 
-public class MainStackViewAdapter extends ArrayAdapter<PostingData> {
+public class MainStackViewAdapter extends ArrayAdapter<Results> {
 
     private static final String TAG = "MainStackViewAdapter";
     private Context context;
-    List<PostingData> datas;
+    List<Results> datas;
     LayoutInflater inflater;
     int mLayout;
 
-//    public CustomAdapter(Context context, List datas) {
-//        this.datas = datas;
-//        this.context = context;
-//        inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-//    }
 
-
-    public MainStackViewAdapter(@NonNull Context context, @LayoutRes int resource, @IdRes int textViewResourceId, @NonNull List<PostingData> objects) {
+    public MainStackViewAdapter(@NonNull Context context, @LayoutRes int resource, @IdRes int textViewResourceId, @NonNull List<Results> objects) {
         super(context, resource, textViewResourceId, objects);
         datas = objects;
         this.context = context;
@@ -86,44 +73,55 @@ public class MainStackViewAdapter extends ArrayAdapter<PostingData> {
             viewHolder = (ViewHolder) convertView.getTag();
         }
 
-        PostingData data = datas.get(position);
+        Results data = datas.get(position);
         Log.e(TAG,"타이틀 : " + data.getTitle());
         viewHolder.tvTitle.setText(data.getTitle());
-        viewHolder.tvTitle.setTextColor(Color.WHITE);
+//        viewHolder.tvTitle.setTextColor(Color.WHITE);
         viewHolder.tvContent.setText(data.getContent());
-        viewHolder.tvContent.setTextColor(Color.WHITE);
-        viewHolder.tvDate.setText(data.getnDate());
+//        viewHolder.tvContent.setTextColor(Color.WHITE);
+        viewHolder.tvDate.setText(data.getCreated_date());
         Glide.with(context)
-                .load(data.getImageUrl())
+                .load(data.getImage_link())
                 .bitmapTransform(new CenterCrop(context)
                         , new BlurTransformation(context, 10)
                         , new ColorFilterTransformation(context, Color.argb(100, 100, 100, 100)))
                 .into(viewHolder.imgImage);
 
-        Glide.with(context).load(data.getEmotionUrl())
-                .into(viewHolder.imgEmotion);
-        emotionTextSetting(data.getEmotionUrl(), viewHolder.tvEmotion);
+        statusSetting(data.getStatus_code(), viewHolder, viewHolder.tvEmotion);
+
         return convertView;
     }
 
-    private void emotionTextSetting(int emotionUrl, TextView tvEmotion) {
-        switch (emotionUrl){
-            case R.drawable.emotion_inlove_white:
-                tvEmotion.setText("행복해요");
+    private void statusSetting(int statusCode, ViewHolder viewHolder, TextView tvEmotion) {
+        int res;
+        String emotionText;
+        switch (statusCode){
+            case 1:
+                res = R.drawable.emotion_inlove_white;
+                emotionText = "행복해요";
                 break;
-            case R.drawable.emotion_soso_white:
-                tvEmotion.setText("그저그래요");
+            case 2:
+                res = R.drawable.emotion_soso_white;
+                emotionText = "그저그래요";
                 break;
-            case R.drawable.emotion_zzaing_white6:
-                tvEmotion.setText("짜증나요");
+            case 3:
+                res = R.drawable.emotion_sad_white;
+                emotionText = "슬퍼요";
                 break;
-            case R.drawable.emotion_sad_white:
-                tvEmotion.setText("슬퍼요");
+            case 4:
+                res = R.drawable.emotion_zzaing_white6;
+                emotionText = "짜증나요";
                 break;
-            case R.drawable.emotion_angry_white:
-                tvEmotion.setText("화가나요");
+            case 5:
+                res = R.drawable.emotion_angry_white;
+                emotionText = "화가나요";
                 break;
+            default:
+                res = R.drawable.emotion_soso_white;
+                emotionText = "그저그래요";
         }
+        Glide.with(context).load(res).into(viewHolder.imgEmotion);
+        tvEmotion.setText(emotionText);
     }
 
     public class ViewHolder

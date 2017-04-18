@@ -35,7 +35,7 @@
         android:ems="15"
         android:maxLength="15"
         android:maxLines="1"
-        android:text="이제 당신의 이야기를 시작하세요"
+        android:text="당신의 이야기를 시작하세요"
         android:textAlignment="center"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         android:textColor="@color/mainIconColor"

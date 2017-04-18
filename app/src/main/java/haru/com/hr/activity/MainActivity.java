@@ -11,8 +11,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.AppBarLayout;
-import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.util.Log;
 import android.view.View;
@@ -20,7 +18,6 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.animation.Animation;
 import android.widget.AdapterView;
 import android.widget.Toast;
 
@@ -39,18 +36,26 @@ import java.util.List;
 import java.util.Locale;
 
 import haru.com.hr.BaseActivity;
+import haru.com.hr.HostInterface;
+import haru.com.hr.RealData.RealDataStore;
+import haru.com.hr.RealData.Results;
 import haru.com.hr.adapter.MainMoaAdapter;
 import haru.com.hr.adapter.MainStackViewAdapter;
 import haru.com.hr.R;
 import haru.com.hr.adapter.EmotionSpinnerAdapter;
 import haru.com.hr.databinding.ActivityMainBinding;
-import haru.com.hr.domain.DataStore;
 import haru.com.hr.domain.EmotionSpinnerData;
-import haru.com.hr.domain.FirstLoadingData;
 import haru.com.hr.domain.MainMoaSpinnerDataLoader;
-import haru.com.hr.domain.PostingData;
-import haru.com.hr.util.AnimationUtil;
 import haru.com.hr.util.BackPressCloseHandler;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
+import static haru.com.hr.HTTP_ResponseCode.CODE_NOT_FOUND;
+import static haru.com.hr.HTTP_ResponseCode.CODE_OK;
+import static haru.com.hr.HostInterface.URL;
 
 public class MainActivity extends  BaseActivity<ActivityMainBinding>
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -58,18 +63,18 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
     private static final String TAG = "MainActivity";
     private final int REQ_PERMISSION = 100;
     private MainStackViewAdapter stackViewAdapter;
-    private List<PostingData> postingDatas;
-    private List<PostingData> moaSelectedData = new ArrayList<>();;
+
+    private boolean emptyDataSet = true;
+    private List<Results> realDatas;
+    private List<Results> moaSelectedData = new ArrayList<>();
+
     private SwipeFlingAdapterView flingContainer;
     private BackPressCloseHandler backPressCloseHandler;
     private MainMoaAdapter mainMoaAdapter;
-    private int emptyDataCount = 0;
     private CompactCalendarView calendarView;
     private SimpleDateFormat dateFormatForMonth = new SimpleDateFormat("yyyy-MM");
-    private SimpleDateFormat selectedDate = new SimpleDateFormat("yyyy. M. d");
+    private SimpleDateFormat selectedDate = new SimpleDateFormat("yyyy-MM-dd");
     private Calendar event = Calendar.getInstance(Locale.KOREA);
-    public static final String SITE_URL = "http://192.168.1.225:80/";
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,13 +83,13 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         checkVersion(REQ_PERMISSION);
         backPressCloseHandler = new BackPressCloseHandler(this);
 
-        dataLoader(); // 튜토리얼 데이터를 임의생성. 나중에 TODO 삭제할것
+//        dataLoader(); // 튜토리얼 데이터를 임의생성. 나중에 TODO 삭제할것
 
         cardStackSetting();
 
         getBinding().navView.setNavigationItemSelectedListener(this);
 
-        mainMoaRecyclerSetting(postingDatas);
+        mainMoaRecyclerSetting(realDatas);
         mainMoaSpnSetting(MainMoaSpinnerDataLoader.getInstance().getDatas());
         appBarCollapsingCheckerForBlur();
 
@@ -103,11 +108,12 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
     private void loadEventOnCalendar() {
         // 데이터를 받아서 날짜를 가져와서 파싱해서 넣어준다.
 
-        Log.e(TAG,postingDatas.size()+"");
-        for( PostingData data : postingDatas) {
-            Log.e(TAG, "데이터 번호 : " + data.get_id());
-            Log.e(TAG, "ndate : " + data.getnDate());
-            String[] date = data.getnDate().split("\\.");
+        Log.e(TAG,realDatas.size()+"");
+
+        for( Results data : realDatas) {
+            Log.e(TAG, "데이터 번호 : " + data.getId());
+            Log.e(TAG, "ndate : " + data.getCreated_date());
+            String[] date = data.getCreated_date().split("-|T|:|\\.");
             int year = dateStrToInt(date[0]);
             int month = dateStrToInt(date[1]) - 1;
             int day = dateStrToInt(date[2]) - 1;
@@ -130,7 +136,7 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
 
     public void calMenuClickListener(View view) {
         switch (view.getId()) {
-            case R.id.tvCalSendEmail:
+            case R.id.tvCalSendEmailToDev:
                 Intent email = new Intent(Intent.ACTION_SEND);
                 email.putExtra(Intent.EXTRA_EMAIL, new String[]{"rocher0724.dev@gmail.com"});
                 email.putExtra(Intent.EXTRA_SUBJECT, "하루한장 앱에서 메일드립니다.");
@@ -156,15 +162,18 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
 
             Toast.makeText(MainActivity.this, selectedDate.format(dateClicked), Toast.LENGTH_SHORT).show(); // TODO 나중에 지워야함.
 
-            for( PostingData data : postingDatas) {
-                if( !data.get_id().equals("-2") && data.getnDate().startsWith(selectedDate.format(dateClicked))) {
+            for( Results data : realDatas) {
+                if( data.getId() != -2 && data.getCreated_date().startsWith(selectedDate.format(dateClicked))) {
+
+//                    getDetailData(data);
+
                     Intent intent = new Intent(MainActivity.this, CalToDetailActivity.class);
-                    intent.putExtra("id",data.get_id());
+                    intent.putExtra("id",data.getId());
                     intent.putExtra("title",data.getTitle());
                     intent.putExtra("content",data.getContent());
-                    intent.putExtra("imageUrl",data.getImageUrl());
-                    intent.putExtra("emotionUrl",data.getEmotionUrl());
-                    intent.putExtra("nDate",data.getnDate());
+                    intent.putExtra("image_link",data.getImage_link());
+                    intent.putExtra("status_code",data.getStatus_code());
+                    intent.putExtra("created_date",data.getCreated_date());
                     startActivity(intent);
                 }
             }
@@ -176,6 +185,50 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
 
         }
     };
+
+    // 디테일 액티비티로 가기전에 데이터세팅 하려했으나 이미 있는 데이터로 처리가능할것같다.
+    private void getDetailData(Results data) {
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL) // 포트까지가 베이스url이다.
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        // 2. 사용할 인터페이스를 설정한다.
+        HostInterface localhost = retrofit.create(HostInterface.class);
+        // 3. 데이터를 가져온다
+
+        String token = getToken();
+        Call<Results> call = localhost.getDetailData(token, data.getId());
+
+        call.enqueue(new Callback<Results>() {
+            @Override
+            public void onResponse(Call<Results> call, Response<Results> response) {
+                // 값이 정상적으로 리턴되었을 경우
+                if (response.isSuccessful()) {
+                    if(response.code() == CODE_OK) {
+
+                    } else if ( response.code() == CODE_NOT_FOUND) {
+
+                    }
+
+                } else {
+                    //정상적이지 않을 경우 message에 오류내용이 담겨 온다.
+                    Log.e("onResponse", "값이 비정상적으로 리턴되었다. = " + response.message());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Results> call, Throwable t) {
+
+            }
+        });
+    }
+
+    private String getToken() {
+        SharedPreferences sharedPref = getSharedPreferences("Token", Context.MODE_PRIVATE);
+        String token = sharedPref.getString("token", null);
+        return token;
+    }
 
     // 달력 안에 아이템 색깔 지정하는 메소드
     private List<Event> getEvents(long timeInMillis) {
@@ -195,7 +248,6 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         List<Event> events = getEvents(timeInMillis);
         calendarView.addEvents(events);
     }
-    // ----
 
     private void appBarCollapsingCheckerForBlur() {
         getBinding().mainInclude.mainMoa.appBar.addOnOffsetChangedListener((appBarLayout, verticalOffset) -> {
@@ -208,10 +260,10 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
     }
 
     private void cardStackSetting() {
-        postingDatas = new ArrayList<>();
+        realDatas = new ArrayList<>();
         flingContainer = (SwipeFlingAdapterView) findViewById(R.id.swipeImgView);
-        postingDatas = DataStore.getInstance().getDatas();
-        stackViewAdapter = new MainStackViewAdapter(this, R.layout.main_stack_item, R.id.tvTitle, postingDatas);
+        realDatas = RealDataStore.getInstance().getDatas();
+        stackViewAdapter = new MainStackViewAdapter(this, R.layout.main_stack_item, R.id.tvTitle, realDatas);
         flingContainer.setAdapter(stackViewAdapter);
         flingContainer.setFlingListener(flingListener);
     }
@@ -227,14 +279,13 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
             moaSelectedData.clear();
             if( position == 0 ) {
-                moaSelectedData.addAll(postingDatas);
+                moaSelectedData.addAll(realDatas);
             } else {
-                for (PostingData item : postingDatas) {
-                    if (item.getEmotionUrl() == MainMoaSpinnerDataLoader.getInstance().getDatas().get(position).getImgInDrawable()) {
+                for (Results item : realDatas) {// todo 내가 감정탭을 어떻게 디자인해놨는지 잘 모르겠다. 살펴보고 수정해야 할것같다.
+                    if (item.getStatus_code() == MainMoaSpinnerDataLoader.getInstance().getDatas().get(position).getStatus_code()) {
                         moaSelectedData.add(item);
                     }
                 }
-                Log.e(TAG,"데이터의 크기는 " + moaSelectedData.size()+"");
             }
             Log.e(TAG, "데이터의 크기는 " + moaSelectedData.size() + "");
             refreshAdapter(moaSelectedData);
@@ -246,12 +297,12 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         }
     };
 
-    public void refreshAdapter(List<PostingData> data){
+    public void refreshAdapter(List<Results> data){
         mainMoaRecyclerSetting(data);
         mainMoaAdapter.notifyDataSetChanged();
     }
 
-    private void mainMoaRecyclerSetting(List<PostingData> data) {
+    private void mainMoaRecyclerSetting(List<Results> data) {
         mainMoaAdapter = new MainMoaAdapter(data, this);
         getBinding().mainInclude.mainMoa.recyclerMainMoa.setAdapter(mainMoaAdapter);
         getBinding().mainInclude.mainMoa.recyclerMainMoa.setLayoutManager(new GridLayoutManager(this,3));
@@ -300,9 +351,9 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         getBinding().mainInclude.imgLogo.setVisibility(View.GONE);
         getBinding().mainInclude.imgBottomBlur.setVisibility(View.VISIBLE);
         getBinding().mainInclude.imgMainTopLogo.setVisibility(View.VISIBLE);
-        refreshAdapter(postingDatas); // 사진 모아보기 클릭했을때 데이터 셋을 체인지
+        refreshAdapter(realDatas); // 사진 모아보기 클릭했을때 데이터 셋을 체인지
 
-        // 튜토리얼자료를 제외한 자료의 개수를 통해서 textview를 띄워줄지 결정한다.
+        // 튜토리얼자료를 제외한 자료의 개수를 통해서 moaview 내부의 textview를 띄워줄지 결정한다.
         int isVisible = (realDataSize() == 0)? View.VISIBLE : View.GONE;
         getBinding().mainInclude.mainMoa.tvIfEmpty.setVisibility(isVisible);
         // 자료의 개수를 표시해준다.
@@ -322,14 +373,14 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         getBinding().mainInclude.imgMainTopLogo.setVisibility(View.GONE);
     }
 
+    // 튜토리얼과 데이터가 없을때 나오는 메시지데이터를 제외한 진짜데이터의 크기 -> 사진 모아보기 표시를 위해 사용
     private int realDataSize(){
-        List<PostingData> realdata = new ArrayList<>();
-        for ( PostingData item : postingDatas ) {
-            Log.e(TAG,"아이디값 : "+item.get_id());
-            if( !item.get_id().equals("-1") && !item.get_id().equals("-2") ) {
+        List<Results> realdata = new ArrayList<>();
+        for ( Results item : realDatas ) {
+            Log.e(TAG,"아이디값 : "+item.getId());
+            if( item.getId() !=-1 && item.getId() != -2 ) {
                 realdata.add(item);
-                Log.e(TAG,"리얼데이터 아이디 : "+item.get_id());
-
+                Log.e(TAG,"리얼데이터 아이디 : "+item.getId());
             }
         }
         Log.e(TAG,"리얼데이터 사이즈 : " + realdata.size());
@@ -339,12 +390,6 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
     public void writeButtonClickListener(View view) {
         Intent intent = new Intent(MainActivity.this, WriteActivity.class);
         startActivity(intent);
-    }
-
-    private void dataLoader() { // TODO 아마 나중에는 스플래시에서 데이터가 로딩되기때문에  지우거나 바뀌어야할것
-        LoginActivity login = new LoginActivity();
-        login.dataSetting(true);
-        Log.e(TAG,"데이터로더");
     }
 
     public void openDrawer(View view){
@@ -414,7 +459,7 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
     }
 
     private void sharedpreferenceForLogOut() {
-        // TODO 이거 로그아웃할때 실행해줘야하는 메소드임.
+        // TODO 로그아웃할때 실행해줘야하는 메소드.
         SharedPreferences sharedPref = getSharedPreferences("LoginCheck", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.remove("LoginCheck");
@@ -501,13 +546,16 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
     SwipeFlingAdapterView.onFlingListener flingListener = new SwipeFlingAdapterView.onFlingListener() {
         @Override
         public void removeFirstObjectInAdapter() {
-            if( !postingDatas.get(0).get_id().equals("-1") ) {
-                // 임의로 집어넣은 데이터 (get_id 가 -1)가 아닌경우에만 다시 넣어주기.
-                postingDatas.add(postingDatas.get(0));
+            if( realDatas.get(0).getId() != -2 && realDatas.size() != 1) {
+
+                if (realDatas.get(0).getId() != -1 ) {
+                    // 작성 장려 데이터 (get_id 가 -1)가 아닌경우에만 다시 넣어주기.
+                    realDatas.add(realDatas.get(0));
+                }
+                realDatas.remove(0);
+//            stackViewAdapter.notifyDataSetChanged(); //todo 이걸 해줘야하나?  4/17
+                Log.e(TAG, "데이터의 크기는 : " + realDatas.size() + "");
             }
-            postingDatas.remove(0);
-            stackViewAdapter.notifyDataSetChanged();
-            Log.e(TAG,"데이터의 크기는 : " + postingDatas.size() + "");
         }
 
         @Override
@@ -519,26 +567,24 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         public void onRightCardExit(Object o) {
 
         }
+
         @Override
         public void onAdapterAboutToEmpty(int i) {
             // 데이터 셋에서 id값이 -1 인 경우는 날렸을때 돌아오지 않게 설정했기 때문에 -2로 주었다.
             // 사진 모아보기 창에서는 id가 -1, -2인 값을 표시하지 않도록 했다.
-            Log.e(TAG,"데이터가 없을때 체크한다. emptyDataCount = " + emptyDataCount);
-            if (emptyDataCount < 2) {
-                PostingData data = new PostingData();
-                data.set_id("-2");
-//                data.setTitle("당신의 오늘은 어떤가요?");
-//                data.setContent("생각을 자유롭게 적어보세요");
+            Log.e(TAG,"데이터가 없을때 체크한다. emptyDataSet = " + emptyDataSet);
+            if (emptyDataSet) {
+                Results data = new Results();
+                data.setId(-2);
                 data.setTitle("당신의 이야기를 시작하세요");
                 data.setContent("당신의 하루를 응원합니다.");
-//            data.setImageUrl(Uri.parse("http://cfile29.uf.tistory.com/image/197005455139E816267525"));
-                data.setImageUrl(Uri.parse("android.resource://" + MainActivity.this.getPackageName() + "/drawable/splash2"));
-                Log.e(TAG, "empty데이터 이미지url" + data.getImageUrl() );
-                data.setEmotionUrl(FirstLoadingData.getInstance().getEmotionUrl0());
-                data.setnDate(DateFormat.getDateTimeInstance().format(new Date()));
-                postingDatas.add(data);
+                data.setImage_link("android.resource://" + MainActivity.this.getPackageName() + "/drawable/splash2");
+                data.setStatus_code(1);
+                data.setCreated_date(DateFormat.getDateTimeInstance().format(new Date()));
+                realDatas.add(data);
                 stackViewAdapter.notifyDataSetChanged();
-                emptyDataCount++;
+                emptyDataSet = false;
+
             }
         }
 
@@ -555,15 +601,15 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         super.onResume();
     }
 
-    private void dataLog(List<PostingData> postingDatas){
-        for( PostingData item : postingDatas) {
-            Log.e(TAG, "메인액티비티. 현재 postingData의 크기는 : " + postingDatas.size());
-            Log.e(TAG, "id : " + item.get_id());
-            Log.e(TAG, "title : " + item.getTitle());
-            Log.e(TAG, "content : " + item.getContent());
-            Log.e(TAG, "imageUrl : " + item.getImageUrl());
-            Log.e(TAG, "emotionUrl : " + item.getEmotionUrl());
-            Log.e(TAG, "                           .                 ");
-        }
-    }
+//    private void dataLog(List<PostingData> postingDatas){
+//        for( PostingData item : postingDatas) {
+//            Log.e(TAG, "메인액티비티. 현재 postingData의 크기는 : " + postingDatas.size());
+//            Log.e(TAG, "id : " + item.get_id());
+//            Log.e(TAG, "title : " + item.getTitle());
+//            Log.e(TAG, "content : " + item.getContent());
+//            Log.e(TAG, "imageUrl : " + item.getImageUrl());
+//            Log.e(TAG, "emotionUrl : " + item.getEmotionUrl());
+//            Log.e(TAG, "                           .                 ");
+//        }
+//    }
 }

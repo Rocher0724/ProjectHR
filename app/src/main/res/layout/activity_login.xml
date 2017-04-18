@@ -28,7 +28,7 @@
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="1.0"
-                app:srcCompat="@drawable/splash2" />
+                app:srcCompat="@drawable/login_back2" />
 
             <android.support.design.widget.TextInputLayout
                 android:id="@+id/activity_login_address"
@@ -199,7 +199,7 @@
 
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.0"
-                app:srcCompat="@drawable/splash2" />
+                app:srcCompat="@drawable/login_back" />
 
             <android.support.design.widget.TextInputLayout
                 android:id="@+id/activity_loginCreate_address"

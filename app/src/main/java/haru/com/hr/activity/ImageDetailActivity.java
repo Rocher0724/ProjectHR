@@ -24,10 +24,8 @@ public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding
         setBinding(R.layout.activity_image_detail);
 
         Intent intent = getIntent();
-        String imgAddress = intent.getExtras().getString("imgAddress");
         Uri imgUri  = intent.getExtras().getParcelable("imgUri");
         Glide.with(this).load(imgUri).into(getBinding().imgDetail);
-//        Glide.with(this).load(R.drawable.facebook_icon).into(getBinding().imgDetail);
         Log.e(TAG,"");
 
 

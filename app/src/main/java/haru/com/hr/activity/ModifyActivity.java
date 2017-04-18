@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.provider.MediaStore;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -17,21 +16,38 @@ import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 
+import java.io.File;
+
 import haru.com.hr.BaseActivity;
+import haru.com.hr.HostInterface;
 import haru.com.hr.R;
+import haru.com.hr.RealData.RealDataStore;
+import haru.com.hr.RealData.Results;
 import haru.com.hr.adapter.EmotionSpinnerAdapter;
 import haru.com.hr.databinding.ActivityModifyBinding;
-import haru.com.hr.domain.DataStore;
-import haru.com.hr.domain.PostingData;
+import haru.com.hr.domain.Token;
 import haru.com.hr.domain.WriteSpinnerDataLoader;
+import haru.com.hr.util.FileUtils;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import jp.wasabeef.glide.transformations.ColorFilterTransformation;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
+import static haru.com.hr.HostInterface.URL;
 
 public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
     private static final int REQ_GALLERY = 100;
     private static final String TAG = "ModifyActivity";
-    private PostingData pData;
-    private int selectedEmotionPosition;
+//    private PostingData pData;
+    private Results pData;
+    private int selectedStatusPosition;
     private WriteSpinnerDataLoader writeSpinnerDataLoader;
     private int dataPosition;
     private boolean isPictureSelect = false;
@@ -43,32 +59,36 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
         super.onCreate(savedInstanceState);
         setBinding(R.layout.activity_modify);
 
-        pData = new PostingData();
+//        pData = new Results();
         getIntentMethod();
         getPosition(); // 넘어온 데이터가 전체데이터 안에서 몇번째 position인지 체크
         viewInit();
-
     }
 
     private void getPosition() {
-        int dataSize = DataStore.getInstance().getDatas().size();
+        int dataSize = RealDataStore.getInstance().getDatas().size();
         int index = 0;
         while ( index < dataSize ) {
-            if( DataStore.getInstance().getDatas().get(index).get_id().equals(pData.get_id())) {
+            if( RealDataStore.getInstance().getDatas().get(index).getId() == pData.getId()) {
                 dataPosition = index;
+                Log.e(TAG, "dataPosition : " + dataPosition);
+                break;
             }
-            break;
+            index++;
         }
     }
 
     private void getIntentMethod() {
         Intent intent = getIntent();
-        pData.set_id(intent.getExtras().getString("id"));
-        pData.setTitle(intent.getExtras().getString("title"));
-        pData.setContent(intent.getExtras().getString("content"));
-        pData.setImageUrl(intent.getExtras().getParcelable("imageUrl"));
-        pData.setEmotionUrl(intent.getExtras().getInt("emotionUrl"));
-        pData.setnDate(intent.getExtras().getString("nDate"));
+        int id = intent.getExtras().getInt("id");
+
+        RealDataStore realDataStore = RealDataStore.getInstance();
+
+        for ( Results item : realDataStore.getDatas() ) {
+            if( item.getId() == id ) {
+                pData = item; // todo 넘겨줄때도 id값만 넘겨주면 되는거아니야?
+            }
+        }
     }
 
     private void viewInit() {
@@ -76,17 +96,17 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
         getBinding().etModifyTitle.setText(pData.getTitle());
         getBinding().etModifyContent.setText(pData.getContent());
         Glide.with(this)
-                .load(pData.getImageUrl())
-                .listener(new RequestListener<Uri, GlideDrawable>() {
+                .load(pData.getImage_link())
+                .listener(new RequestListener<String, GlideDrawable>() {
                     @Override
-                    public boolean onException(Exception e, Uri model, Target<GlideDrawable> target, boolean isFirstResource) {
+                    public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
                         getBinding().pbModify.setVisibility(View.GONE);
                         Toast.makeText(ModifyActivity.this, "오류가 발생하였습니다.", Toast.LENGTH_SHORT).show();
                         return false;
                     }
 
                     @Override
-                    public boolean onResourceReady(GlideDrawable resource, Uri model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                    public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
                         getBinding().pbModify.setVisibility(View.GONE);
                         return false;
                     }
@@ -97,7 +117,7 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
                 .into(getBinding().imgModifyActivity);
 
         spinnerSetting();
-        getBinding().tvModifyDate.setText(pData.getnDate());
+        getBinding().tvModifyDate.setText(pData.getCreated_date());
     }
 
     private void spinnerSetting() {
@@ -107,32 +127,15 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
         getBinding().spnModifyEmotion.setAdapter(emotionSpinnerAdapter);
         getBinding().spnModifyEmotion.setOnItemSelectedListener(spnItemClickListener);
 
-        getBinding().spnModifyEmotion.setSelection(emotionChecker(pData.getEmotionUrl()));
+        getBinding().spnModifyEmotion.setSelection(pData.getStatus_code() - 1);
     }
 
-    // 넘어온 이모션의 포지션을 체크하는 함수
-    private int emotionChecker(int emotionUrl) {
-        switch (emotionUrl){
-            case R.drawable.emotion_inlove_white:
-                return 0;
-            case R.drawable.emotion_soso_white:
-                return 1;
-            case R.drawable.emotion_zzaing_white6:
-                return 2;
-            case R.drawable.emotion_sad_white:
-                return 3;
-            case R.drawable.emotion_angry_white:
-                return 4;
-            default: return 0;
-        }
-
-    }
 
     AdapterView.OnItemSelectedListener spnItemClickListener = new AdapterView.OnItemSelectedListener() {
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
             // TODO 만약에 서버에서 이모션 값을 인덱스로 주고받기를 원하면 아래 setEmotion은 position으로 수정해야한다.
-            selectedEmotionPosition = position;
+            selectedStatusPosition = position;
         }
         @Override
         public void onNothingSelected(AdapterView<?> parent) {
@@ -165,23 +168,105 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
         // id값과 ndate는 수정할수없다.
         // todo 서버에 고정데이터와 변동데이터를 쏴줘서 수정해야할것같다. api 나오면 해보자.
 
-        DataStore.getInstance().getDatas().get(dataPosition)
-                .setTitle(blankCheck(getBinding().etModifyTitle.getText().toString()));
-        DataStore.getInstance().getDatas().get(dataPosition)
-                .setContent(getBinding().etModifyContent.getText().toString());
-        DataStore.getInstance().getDatas().get(dataPosition)
-                .setEmotionUrl(writeSpinnerDataLoader.getDatas().get(selectedEmotionPosition).getImgInDrawable());
+        pData.setTitle(blankCheck(getBinding().etModifyTitle.getText().toString()));
+        pData.setContent(getBinding().etModifyContent.getText().toString());
+        pData.setStatus_code(selectedStatusPosition);
 
         if( isPictureSelect ) {
-            // TODO 사용자가 데이터를 선택한경우 사용자 핸드폰에 있는 정보를 쏴줘야한다.
-            // 변경하지 않았으면 기존 이미지 그대로 간다.
+            modifyPostingWithImage(selectedImageUrl, pData);
+        } else {
+            // 변경하지 않았으면 이미지파일이 필요가없다.
+            modifyPostingWithoutImage(pData);
         }
+
+        RealDataStore.getInstance().getDatas().get(dataPosition)
+                .setTitle(blankCheck(getBinding().etModifyTitle.getText().toString()));;
+        RealDataStore.getInstance().getDatas().get(dataPosition)
+                .setContent(getBinding().etModifyContent.getText().toString());
+        RealDataStore.getInstance().getDatas().get(dataPosition)
+                .setStatus_code(selectedStatusPosition + 1); // 선택된 포지션은 0부터시작
 
 
         Toast.makeText(this, "저장되었습니다.", Toast.LENGTH_SHORT).show();
         Log.e(TAG,"데이터가 추가되었습니다.");
 
     }
+
+    // 이미지 선택변경시
+    private void modifyPostingWithImage(Uri fileUri, Results pData) {
+
+        String token = Token.getInstance().getToken();
+
+        RequestBody pDataTitle = RequestBody.create(MultipartBody.FORM, pData.getTitle());
+        RequestBody pDataContent = RequestBody.create(MultipartBody.FORM, pData.getContent());
+        int statusCode = pData.getStatus_code();
+
+
+        File originalFile = FileUtils.getFile(this, fileUri);
+
+        RequestBody filePart = RequestBody.create(
+                MediaType.parse(getContentResolver().getType(fileUri)),
+                originalFile
+        );
+        // 이미지 넣을때 키값
+        MultipartBody.Part file = MultipartBody.Part.createFormData("image", originalFile.getName() , filePart);
+
+        Retrofit.Builder builder = new Retrofit.Builder()
+                .baseUrl(URL)
+                .addConverterFactory(GsonConverterFactory.create());
+
+        Retrofit retrofit = builder.build();
+        HostInterface client = retrofit.create(HostInterface.class);
+
+        Call<ResponseBody> call = client.modifyWithImage(token,pData.getId(),pDataTitle, pDataContent, statusCode, file);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call,
+                                   Response<ResponseBody> response) {
+                Toast.makeText(ModifyActivity.this, "변경되었습니다.", Toast.LENGTH_SHORT).show();
+                Log.v("Upload", "success");
+                finish();
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Toast.makeText(ModifyActivity.this, "변경되지않았습니다.", Toast.LENGTH_SHORT).show();
+                Log.e("Upload error:", t.getMessage());
+            }
+        });
+    }
+
+    // 이미지 변경없이 수정시
+    private void modifyPostingWithoutImage(Results pData) {
+
+        String token = Token.getInstance().getToken();
+
+        Retrofit.Builder builder = new Retrofit.Builder()
+                .baseUrl(URL)
+                .addConverterFactory(GsonConverterFactory.create());
+
+        Retrofit retrofit = builder.build();
+        HostInterface client = retrofit.create(HostInterface.class);
+
+        Call<ResponseBody> call = client.modifyWithoutImage(token,pData.getId(), pData);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call,
+                                   Response<ResponseBody> response) {
+                Toast.makeText(ModifyActivity.this, "변경되었습니다.", Toast.LENGTH_SHORT).show();
+                Log.v("Upload", "success");
+                finish();
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Toast.makeText(ModifyActivity.this, "변경되지않았습니다.", Toast.LENGTH_SHORT).show();
+                Log.e("Upload error:", t.getMessage());
+            }
+        });
+    }
+
+
 
     private String blankCheck(String text) {
         return (text.equals(""))? "" : text;

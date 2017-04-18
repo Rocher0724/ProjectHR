@@ -5,6 +5,7 @@ package haru.com.hr.domain;
  */
 
 public class EmotionSpinnerData {
+    private int status_code;
     private int imgInDrawable;
     private String emotionText;
 
@@ -12,13 +13,22 @@ public class EmotionSpinnerData {
 
     }
 
-    public EmotionSpinnerData(int imgInDrawable, String emotionText){
+    public EmotionSpinnerData(int status_code, int imgInDrawable, String emotionText){
+        this.status_code = status_code;
         this.imgInDrawable = imgInDrawable;
         this.emotionText = emotionText;
     }
 
     public int getImgInDrawable() {
         return imgInDrawable;
+    }
+
+    public int getStatus_code() {
+        return status_code;
+    }
+
+    public void setStatus_code(int status_code) {
+        this.status_code = status_code;
     }
 
     public void setImgInDrawable(int imgInDrawable) {

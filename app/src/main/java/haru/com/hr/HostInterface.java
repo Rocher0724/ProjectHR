@@ -2,6 +2,8 @@ package haru.com.hr;
 
 import java.util.Map;
 
+import haru.com.hr.RealData.RealData;
+import haru.com.hr.RealData.Results;
 import haru.com.hr.domain.Data;
 import haru.com.hr.domain.EmailSet;
 import haru.com.hr.domain.Token;
@@ -10,12 +12,17 @@ import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.Multipart;
+import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
 import retrofit2.http.PartMap;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 /**
  * Created by myPC on 2017-03-24.
@@ -23,32 +30,75 @@ import retrofit2.http.PartMap;
 
 public interface HostInterface {
 
+    String URL = "http://haru-eb.ap-northeast-2.elasticbeanstalk.com/";
+
+
     // 중에서 포트 이하 부분을 get 이하에 쓴다.
 //    @GET("566d677961726f6331397471525a50/json/SearchParkingInfo/1/10/{gu}")
 
-    @GET("post") // TODO skip과 limit 는  api문서에서 제공할예정
-    Call<Data> getData(); // path는 리스트 리포함수를 통해서 데이터를 가져오게되는데 거기 들어오는 값을 path를 통해 url을 세팅한다.
+    @GET("posts") // TODO skip과 limit 는  api문서에서 제공할예정
+    Call<RealData> getData(@Header("token") String token, @Query("page") int page); // path는 리스트 리포함수를 통해서 데이터를 가져오게되는데 거기 들어오는 값을 path를 통해 url을 세팅한다.
 
     // {gu} 부분을 설정하는 String user를 가져온다. 이부분은 서울시 공공데이터를 이용한 주차장 정보 세팅에서 가져왔다.
 
 
     @Multipart
-    @POST("upload")
-    Call<ResponseBody> upload(
-            @PartMap Map<String, RequestBody> params,
+    @POST("posts")
+    Call<Results> uploadWithSelectedImage(
+            @Header("token") String token,
+            @Part ("title") RequestBody title,
+            @Part("content") RequestBody content,
+            @Part("status_code") int code,
+            @Part MultipartBody.Part file
+    );
+
+    @Multipart
+    @POST("posts")
+    Call<Results> uploadWithDrawable(
+            @Header("token") String token,
+            @Part ("title") RequestBody title,
+            @Part("content") RequestBody content,
+            @Part("status_code") int code,
             @Part MultipartBody.Part file
     );
 
 
     // 헤더에 토큰을 날려야할거같은데..
 
-    @POST("singin")
-    @Headers("")
-    Call<Token> email(@Body EmailSet emailSet);
+    @POST("signup")
+//    @Headers("")
+    Call<Token> signup(@Body EmailSet emailSet);
 
-    @POST("tokencheck")
-    Call<String> tokenCheck (@Body String token);
+    @POST("login")
+    Call<Token> signin (@Body EmailSet emailset);
+
+    @POST("login")
+    Call<Token> login (@Body EmailSet emailset);
+
+    @GET("posts/{post_id}")
+    Call<Results> getDetailData(@Header("token") String token,
+                                @Path("post_id") int id); // path는 리스트 리포함수를 통해서 데이터를 가져오게되는데 거기 들어오는 값을 path를 통해 url을 세팅한다.
+
+    @DELETE("posts/{post_id}")
+    Call deleteData(@Header("token") String token, @Path("post_id") int id); // path는 리스트 리포함수를 통해서 데이터를 가져오게되는데 거기 들어오는 값을 path를 통해 url을 세팅한다.
 
 
+    @Multipart // 사진 변경했을 때
+    @PATCH("post/{post_id}")
+    Call<ResponseBody> modifyWithImage(
+            @Header("Authorization") String token,
+            @Path("post_id") int id,
+            @Part ("title") RequestBody title,
+            @Part("content") RequestBody content,
+            @Part("status_code") int code,
+            @Part MultipartBody.Part file
+    );
 
+    // 사진 변경안했을때 - 파일빠지면 멀티파트는 오류날꺼임. 다른거 실험해봐야함
+    @PATCH("post/{post_id}")
+    Call<ResponseBody> modifyWithoutImage(
+            @Header("token") String token,
+            @Path("post_id") int id,
+            @Body Results results
+    );
 }

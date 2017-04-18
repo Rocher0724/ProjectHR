@@ -3,22 +3,24 @@ package haru.com.hr.domain;
 import java.util.ArrayList;
 import java.util.List;
 
+import haru.com.hr.RealData.Results;
+
 
 /**
  * Created by myPC on 2017-03-24.
  */
 
-public class DataStore {
-    private static DataStore instance = null;
-    private DataStore() { datas = new ArrayList<>(); }
-    public static DataStore getInstance () {
+public class DataStoreTemp {
+    private static DataStoreTemp instance = null;
+    private DataStoreTemp() { datas = new ArrayList<>(); }
+    public static DataStoreTemp getInstance () {
         if(instance == null) {
-            instance = new DataStore();
+            instance = new DataStoreTemp();
         }
         return instance;
     }
 
-    private List<PostingData> datas;
+    private List<Results> datas;
 
     public List<PostingData> getDatas() {
         return datas;

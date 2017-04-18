@@ -19,6 +19,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import haru.com.hr.R;
+import haru.com.hr.RealData.Results;
 import haru.com.hr.activity.ImageDetailActivity;
 import haru.com.hr.activity.MainActivity;
 import haru.com.hr.domain.PostingData;
@@ -30,26 +31,27 @@ import haru.com.hr.domain.PostingData;
 public class MainMoaAdapter extends RecyclerView.Adapter<MainMoaAdapter.ViewHolder> {
 
     private static final String TAG = "MainMoaAdapter";
-    private List<PostingData> datas;
+    private List<Results> datas;
     private Context context;
 
-    public MainMoaAdapter(List<PostingData> datas , Context context) {
+    public MainMoaAdapter(List<Results> datas , Context context) {
         // realData는 id값이 -1 인 더미데이터를 제외한 값이다.
-        List<PostingData> realData = moaDataSetting(datas);
+        List<Results> realData = moaDataSetting(datas);
         this.datas = realData;
         this.context = context;
     }
 
-    private List<PostingData> moaDataSetting(List<PostingData> datas) {
-        List<PostingData> realdata = new ArrayList<>();
-        for ( PostingData item : datas ) {
-            if( !item.get_id().equals("-1") && !item.get_id().equals("-2") ) {
+    private List<Results> moaDataSetting(List<Results> datas) {
+        List<Results> realdata = new ArrayList<>();
+        for ( Results item : datas ) {
+            if( item.getId() >= 0 ) {
                 realdata.add(item);
             }
         }
         Log.e(TAG, "realdata의 크기는 : " + realdata.size());
         // 가독성은 매우 떨어지지만 realdata의 id 값을 비교해서 내림차순으로 정렬해주는 코딩이다.
-        Collections.sort(realdata, (o1, o2) -> (Integer.parseInt(o1.get_id()) > Integer.parseInt(o2.get_id())) ? -1: (Integer.parseInt(o1.get_id()) > Integer.parseInt(o2.get_id())) ? 1:0);
+        Collections.sort(realdata, (o1, o2) -> (o1.getId() > o2.getId()) ?
+                -1: (o1.getId() > o2.getId()) ? 1:0);
         return realdata;
     }
 
@@ -61,11 +63,10 @@ public class MainMoaAdapter extends RecyclerView.Adapter<MainMoaAdapter.ViewHold
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
 
-        PostingData pData = datas.get(position);
-        pData.getImageUrl();
-        Glide.with(context).load(pData.getImageUrl()).thumbnail(0.1f).into(holder.imgPostingPicture);
-        holder.imgAddress = pData.getImageUrl() + "";
-        holder.imgUri = pData.getImageUrl();
+        Results pData = datas.get(position);
+        pData.getImage_link();
+        Glide.with(context).load(pData.getImage_link()).thumbnail(0.1f).into(holder.imgPostingPicture);
+        holder.imgUri = Uri.parse(pData.getImage_link());
     }
 
     @Override
@@ -76,18 +77,15 @@ public class MainMoaAdapter extends RecyclerView.Adapter<MainMoaAdapter.ViewHold
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         ImageView imgPostingPicture;
-        String imgAddress;
         Uri imgUri;
 
         public ViewHolder(View view) {
             super(view);
             imgPostingPicture = (ImageView) view.findViewById(R.id.imgInMoa);
-            imgAddress = null;
             imgUri = null;
 
             imgPostingPicture.setOnClickListener( v -> {
                 Intent intent = new Intent(context, ImageDetailActivity.class);
-                intent.putExtra("imgAddress", imgAddress);
                 intent.putExtra("imgUri", imgUri);
                 context.startActivity(intent);
             });

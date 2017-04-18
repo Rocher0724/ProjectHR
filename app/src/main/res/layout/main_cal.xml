@@ -94,7 +94,7 @@
             app:layout_constraintTop_toBottomOf="@+id/appBarInCal" />
 
         <TextView
-            android:id="@+id/tvCalSendEmail"
+            android:id="@+id/tvCalSendEmailToDev"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="0dp"
@@ -153,7 +153,7 @@
             android:scaleType="centerCrop"
             app:srcCompat="@drawable/line_black"
             android:layout_marginTop="0dp"
-            app:layout_constraintTop_toBottomOf="@+id/tvCalSendEmail"
+            app:layout_constraintTop_toBottomOf="@+id/tvCalSendEmailToDev"
             android:layout_marginRight="0dp"
             app:layout_constraintRight_toRightOf="parent"
             android:layout_marginLeft="0dp"
