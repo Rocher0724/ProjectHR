@@ -197,7 +197,7 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
         Intent intent = loadSharedpreference()?
                 new Intent(SplashActivity.this, LoginActivity.class)
                 : new Intent(SplashActivity.this, MainActivity.class);
-
+        intent.putExtra("email",email);
         startActivity(intent);
         finish();
     }
@@ -205,7 +205,6 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
     private class splashHandler implements Runnable {
         @Override
         public void run() {
-            activityChange();
         }
     }
 }

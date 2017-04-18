@@ -19,6 +19,7 @@ import android.support.v4.view.GravityCompat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AdapterView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.sundeepk.compactcalendarview.CompactCalendarView;
@@ -64,7 +65,6 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
     private final int REQ_PERMISSION = 100;
     private MainStackViewAdapter stackViewAdapter;
 
-    private boolean emptyDataSet = true;
     private List<Results> realDatas;
     private List<Results> moaSelectedData = new ArrayList<>();
 
@@ -75,6 +75,7 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
     private SimpleDateFormat dateFormatForMonth = new SimpleDateFormat("yyyy-MM");
     private SimpleDateFormat selectedDate = new SimpleDateFormat("yyyy-MM-dd");
     private Calendar event = Calendar.getInstance(Locale.KOREA);
+    private boolean emptyDataSetFlag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,7 +83,7 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         setBinding(R.layout.activity_main);
         checkVersion(REQ_PERMISSION);
         backPressCloseHandler = new BackPressCloseHandler(this);
-
+        userInfoSetting();
 //        dataLoader(); // 튜토리얼 데이터를 임의생성. 나중에 TODO 삭제할것
 
         cardStackSetting();
@@ -94,6 +95,15 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         appBarCollapsingCheckerForBlur();
 
         MainCalSetting();
+    }
+
+    private void userInfoSetting() {
+        Intent intent = getIntent();
+        String email = intent.getExtras().getString("email");
+        View v = getBinding().navView.getHeaderView(0);
+        TextView tvDrawerEmail = (TextView) v.findViewById(R.id.tvDrawerEmail);
+        tvDrawerEmail.setText(email);
+        emptyDataSetFlag = getEmptyDataFlag();
     }
 
     // -- Main Calendar 부분 --
@@ -229,6 +239,19 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         String token = sharedPref.getString("token", null);
         return token;
     }
+
+    private boolean getEmptyDataFlag() {
+        SharedPreferences sharedPref = getSharedPreferences("EmptyData", Context.MODE_PRIVATE);
+        boolean emptyDataFlag = sharedPref.getBoolean("emptydata", true);
+        return emptyDataFlag;
+    }
+    private void setEmptyDataFlag(boolean flag) {
+        SharedPreferences sharedPref = getSharedPreferences("EmptyData", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putBoolean("emptydata", flag);
+        editor.commit();
+    }
+
 
     // 달력 안에 아이템 색깔 지정하는 메소드
     private List<Event> getEvents(long timeInMillis) {
@@ -464,12 +487,14 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.remove("LoginCheck");
         editor.clear();
-        editor.commit();
+        editor.apply();
 
-        SharedPreferences sharedPref2 = getSharedPreferences("postIdCount", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor2 = sharedPref2.edit();
-        editor2.putInt("_id" , 1 );
-        editor.commit();
+        // emptydata에 대한 sharedpreference를 삭제해주기위해 임의로 여기 놓음.
+        SharedPreferences sharedPref1 = getSharedPreferences("EmptyData", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor1 = sharedPref1.edit();
+        editor1.remove("emptydata");
+        editor1.clear();
+        editor1.apply();
     }
 
     // 퍼미션체크
@@ -546,16 +571,14 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
     SwipeFlingAdapterView.onFlingListener flingListener = new SwipeFlingAdapterView.onFlingListener() {
         @Override
         public void removeFirstObjectInAdapter() {
-            if( realDatas.get(0).getId() != -2 && realDatas.size() != 1) {
+            Log.e("card삭제메소드","0번포지션 아이디값 " + realDatas.get(0).getId());
+            Log.e("card삭제메소드","realdatas size " + realDatas.size());
 
-                if (realDatas.get(0).getId() != -1 ) {
-                    // 작성 장려 데이터 (get_id 가 -1)가 아닌경우에만 다시 넣어주기.
-                    realDatas.add(realDatas.get(0));
-                }
-                realDatas.remove(0);
-//            stackViewAdapter.notifyDataSetChanged(); //todo 이걸 해줘야하나?  4/17
-                Log.e(TAG, "데이터의 크기는 : " + realDatas.size() + "");
-            }
+            realDatas.add(realDatas.get(0));
+            realDatas.remove(0);
+            stackViewAdapter.notifyDataSetChanged(); // 이거 안해주면 안됌
+
+            Log.e(TAG, "데이터의 크기는 : " + realDatas.size() + "");
         }
 
         @Override
@@ -572,19 +595,28 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         public void onAdapterAboutToEmpty(int i) {
             // 데이터 셋에서 id값이 -1 인 경우는 날렸을때 돌아오지 않게 설정했기 때문에 -2로 주었다.
             // 사진 모아보기 창에서는 id가 -1, -2인 값을 표시하지 않도록 했다.
-            Log.e(TAG,"데이터가 없을때 체크한다. emptyDataSet = " + emptyDataSet);
-            if (emptyDataSet) {
+            Log.e(TAG,"데이터가 없을때 체크한다. emptyDataSet = " + emptyDataSetFlag);
+            if (emptyDataSetFlag) {
                 Results data = new Results();
                 data.setId(-2);
-                data.setTitle("당신의 이야기를 시작하세요");
-                data.setContent("당신의 하루를 응원합니다.");
+                data.setTitle("");
+                data.setContent("페이지를 좌우로 넘겨가며 \n\r 사용해보세요");
                 data.setImage_link("android.resource://" + MainActivity.this.getPackageName() + "/drawable/splash2");
                 data.setStatus_code(1);
                 data.setCreated_date(DateFormat.getDateTimeInstance().format(new Date()));
                 realDatas.add(data);
+            }
+            if (emptyDataSetFlag) {
+                Results data1 = new Results();
+                data1.setId(-2);
+                data1.setTitle("당신의 이야기를 시작하세요");
+                data1.setContent("당신의 하루를 응원합니다.");
+                data1.setImage_link("android.resource://" + MainActivity.this.getPackageName() + "/drawable/splash2");
+                data1.setStatus_code(2);
+                data1.setCreated_date(DateFormat.getDateTimeInstance().format(new Date()));
+                realDatas.add(data1);
                 stackViewAdapter.notifyDataSetChanged();
-                emptyDataSet = false;
-
+                setEmptyDataFlag(false);
             }
         }
 

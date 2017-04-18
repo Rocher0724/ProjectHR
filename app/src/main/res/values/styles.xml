@@ -24,7 +24,7 @@
         <!--loginTextInputLayout-->
         <!-- 텍스트 선택시 물방울로 위치 표시해주는 마커의 색 -->
         <item name="colorControlActivated">@color/textmarker</item>
-        <item name="android:textCursorDrawable">@color/textmarker</item>
+        <item name="android:textCursorDrawable">@color/loginTextInputLayout</item>
         <item name="android:textColor">@color/loginTextInputLayout</item>
         <item name="android:textColorHint">@color/loginTextInputLayout</item>
         <item name="android:textColorHighlight">@color/textHighLight</item>

@@ -1,6 +1,8 @@
 package haru.com.hr.activity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -138,7 +140,7 @@ public class CalToDetailActivity extends BaseActivity<ActivityCalToDetailBinding
     }
 
     private void dataRemove(int id) {
-        String token = Token.getInstance().getToken();
+        String token = getToken();
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(URL) // 포트까지가 베이스url이다.
                 .addConverterFactory(GsonConverterFactory.create())
@@ -183,4 +185,11 @@ public class CalToDetailActivity extends BaseActivity<ActivityCalToDetailBinding
             }
         }
     }
+
+    private String getToken() {
+        SharedPreferences sharedPref = getSharedPreferences("Token", Context.MODE_PRIVATE);
+        String token = sharedPref.getString("token", null);
+        return token;
+    }
+
 }

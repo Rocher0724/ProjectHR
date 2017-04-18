@@ -68,7 +68,9 @@
                 android:id="@+id/tvDrawerEmail"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="android.studio@android.com" />
+                android:layout_marginLeft="50dp"
+                android:text="android.studio@android.com"
+                android:textAlignment="viewStart" />
 
         </LinearLayout>
     </android.support.constraint.ConstraintLayout>
