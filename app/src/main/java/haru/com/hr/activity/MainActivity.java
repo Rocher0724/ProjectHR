@@ -37,7 +37,7 @@ import java.util.Locale;
 
 import haru.com.hr.BaseActivity;
 import haru.com.hr.HostInterface;
-import haru.com.hr.DataSet.DataStore;
+import haru.com.hr.DataSet.ResultsDataStore;
 import haru.com.hr.DataSet.Results;
 import haru.com.hr.adapter.MainMoaAdapter;
 import haru.com.hr.adapter.MainStackViewAdapter;
@@ -262,7 +262,7 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
     private void cardStackSetting() {
         realDatas = new ArrayList<>();
         flingContainer = (SwipeFlingAdapterView) findViewById(R.id.swipeImgView);
-        realDatas = DataStore.getInstance().getDatas();
+        realDatas = ResultsDataStore.getInstance().getDatas();
         stackViewAdapter = new MainStackViewAdapter(this, R.layout.main_stack_item, R.id.tvTitle, realDatas);
         flingContainer.setAdapter(stackViewAdapter);
         flingContainer.setFlingListener(flingListener);

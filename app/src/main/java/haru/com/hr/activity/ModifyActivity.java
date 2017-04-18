@@ -1,6 +1,8 @@
 package haru.com.hr.activity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.provider.MediaStore;
@@ -21,7 +23,7 @@ import java.io.File;
 import haru.com.hr.BaseActivity;
 import haru.com.hr.HostInterface;
 import haru.com.hr.R;
-import haru.com.hr.DataSet.DataStore;
+import haru.com.hr.DataSet.ResultsDataStore;
 import haru.com.hr.DataSet.Results;
 import haru.com.hr.adapter.EmotionSpinnerAdapter;
 import haru.com.hr.databinding.ActivityModifyBinding;
@@ -52,13 +54,13 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
     private int dataPosition;
     private boolean isPictureSelect = false;
     private Uri selectedImageUrl;
-
+    String token;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setBinding(R.layout.activity_modify);
-
+        token = getToken();
 //        pData = new Results();
         getIntentMethod();
         getPosition(); // 넘어온 데이터가 전체데이터 안에서 몇번째 position인지 체크
@@ -66,10 +68,10 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
     }
 
     private void getPosition() {
-        int dataSize = DataStore.getInstance().getDatas().size();
+        int dataSize = ResultsDataStore.getInstance().getDatas().size();
         int index = 0;
         while ( index < dataSize ) {
-            if( DataStore.getInstance().getDatas().get(index).getId() == pData.getId()) {
+            if( ResultsDataStore.getInstance().getDatas().get(index).getId() == pData.getId()) {
                 dataPosition = index;
                 Log.e(TAG, "dataPosition : " + dataPosition);
                 break;
@@ -82,9 +84,9 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
         Intent intent = getIntent();
         int id = intent.getExtras().getInt("id");
 
-        DataStore dataStore = DataStore.getInstance();
+        ResultsDataStore resultsDataStore = ResultsDataStore.getInstance();
 
-        for ( Results item : dataStore.getDatas() ) {
+        for ( Results item : resultsDataStore.getDatas() ) {
             if( item.getId() == id ) {
                 pData = item; // todo 넘겨줄때도 id값만 넘겨주면 되는거아니야?
             }
@@ -179,11 +181,11 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
             modifyPostingWithoutImage(pData);
         }
 
-        DataStore.getInstance().getDatas().get(dataPosition)
+        ResultsDataStore.getInstance().getDatas().get(dataPosition)
                 .setTitle(blankCheck(getBinding().etModifyTitle.getText().toString()));;
-        DataStore.getInstance().getDatas().get(dataPosition)
+        ResultsDataStore.getInstance().getDatas().get(dataPosition)
                 .setContent(getBinding().etModifyContent.getText().toString());
-        DataStore.getInstance().getDatas().get(dataPosition)
+        ResultsDataStore.getInstance().getDatas().get(dataPosition)
                 .setStatus_code(selectedStatusPosition + 1); // 선택된 포지션은 0부터시작
 
 
@@ -194,8 +196,6 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
 
     // 이미지 선택변경시
     private void modifyPostingWithImage(Uri fileUri, Results pData) {
-
-        String token = Token.getInstance().getToken();
 
         RequestBody pDataTitle = RequestBody.create(MultipartBody.FORM, pData.getTitle());
         RequestBody pDataContent = RequestBody.create(MultipartBody.FORM, pData.getContent());
@@ -238,8 +238,6 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
 
     // 이미지 변경없이 수정시
     private void modifyPostingWithoutImage(Results pData) {
-
-        String token = Token.getInstance().getToken();
 
         Retrofit.Builder builder = new Retrofit.Builder()
                 .baseUrl(URL)
@@ -331,4 +329,11 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
                 .into(getBinding().imgModifyActivity);
         isPictureSelect = true;
     }
+
+    private String getToken() {
+        SharedPreferences sharedPref = getSharedPreferences("Token", Context.MODE_PRIVATE);
+        String token = sharedPref.getString("token", null);
+        return token;
+    }
+
 }

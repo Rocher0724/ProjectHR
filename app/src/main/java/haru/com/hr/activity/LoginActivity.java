@@ -17,7 +17,7 @@ import haru.com.hr.BaseActivity;
 import haru.com.hr.HostInterface;
 import haru.com.hr.R;
 import haru.com.hr.DataSet.Data;
-import haru.com.hr.DataSet.DataStore;
+import haru.com.hr.DataSet.ResultsDataStore;
 import haru.com.hr.DataSet.Results;
 import haru.com.hr.databinding.ActivityLoginBinding;
 import haru.com.hr.domain.EmailSet;
@@ -25,14 +25,18 @@ import haru.com.hr.domain.Token;
 import haru.com.hr.util.AnimationUtil;
 import haru.com.hr.util.BackPressCloseHandler;
 import haru.com.hr.util.SignUtil;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import static haru.com.hr.HTTP_ResponseCode.CODE_BAD_REQUEST;
 import static haru.com.hr.HTTP_ResponseCode.CODE_CONFLICT;
 import static haru.com.hr.HTTP_ResponseCode.CODE_CREATED;
+import static haru.com.hr.HTTP_ResponseCode.CODE_NOT_FOUND;
+import static haru.com.hr.HTTP_ResponseCode.CODE_OK;
 import static haru.com.hr.HostInterface.URL;
 
 public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
@@ -42,15 +46,15 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
     AnimationUtil anim = null;
     Animation loginActLogoAnim = null;
     Animation loginTextAnim = null;
-
+    String token;
     private BackPressCloseHandler backPressCloseHandler;
-    private int responseCode = 0;
+    private int id = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setBinding(R.layout.activity_login);
-
+        token = getToken();
         backPressCloseHandler = new BackPressCloseHandler(this);
 
 //        // TODO 임의 로그인을 위해서 롱클릭으로 메인액티비티 들어가도록 설정한것임. 나중에 지워야함
@@ -130,7 +134,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
                 String confirm = getBinding().etActivityLoginCreateConfirm.getText().toString();
                 if( infoCheck(email, password, confirm) ) { // 이메일 형식체크 비밀번호 길이 , confirm 체크
 
-                    regist(email, password);
+                    signup(email, password);
                 }
 
                 break;
@@ -242,7 +246,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
                 // 값이 정상적으로 리턴되었을 경우
                 if (response.isSuccessful()) {
                     Token token = response.body();
-                    token.setToken(token.getKey());
+                    setToken(token.getKey());
 
                 } else {
                     //정상적이지 않을 경우 message에 오류내용이 담겨 온다.
@@ -257,7 +261,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
         });
     }
 
-    private void regist(String email, String password) {
+    private void signup(String email, String password) {
 
         Log.e(TAG,"regist 들어왔다.");
         Retrofit retrofit = new Retrofit.Builder()
@@ -268,15 +272,13 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
         HostInterface localhost = retrofit.create(HostInterface.class);
         EmailSet emailSet = new EmailSet(email, password);
 
-        Call<Token> call = localhost.signup(emailSet);
+        Call<RequestBody> call = localhost.signup(emailSet);
 
-        call.enqueue(new Callback<Token>() {
+        call.enqueue(new Callback<RequestBody>() {
             @Override
-            public void onResponse(Call<Token> call, Response<Token> response) {
+            public void onResponse(Call<RequestBody> call, Response<RequestBody> response) {
                 if( response.isSuccessful() ){
                     if( response.code() == CODE_CREATED) {
-                        Token token = response.body();
-                        token.setToken(token.getKey());
 
                         onBackPressed(); // 계정이 생성된 경우 로그인할수 있게 뒤로가기를 눌러준다.
 
@@ -286,27 +288,18 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
                         Toast.makeText(LoginActivity.this, "동일한 정보의 사용자가 있습니다.", Toast.LENGTH_SHORT).show();
 
                     }
-                    responseCode = response.code();
                 } else {
                     Log.e("regist","비정상적으로 리턴되었다. = " + response.message());
                 }
             }
 
             @Override
-            public void onFailure(Call<Token> call, Throwable t) {
+            public void onFailure(Call<RequestBody> call, Throwable t) {
                 Log.e(TAG,"regist 서버통신 실패");
                 Log.e(TAG,t.toString());
             }
         });
     }
-
-//    private void setToken(String token) {
-//        SharedPreferences sharedPref = getSharedPreferences("Token", Context.MODE_PRIVATE);
-//        SharedPreferences.Editor editor = sharedPref.edit();
-//        editor.putString("token", token);
-//        editor.commit();
-//    }
-
 
     //TODO 여기는 어떻게해야할까 튜토리얼 정보세팅?
     public void dataSetting(boolean loginCheck) {
@@ -317,14 +310,12 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
 
         } else { // 기로그인이면 사용자 정보 세팅
 
-            getData();
+            getData(id);
         }
     }
 
-    private void getData() {
+    private void getData(int id) {
         // todo 아마 여기서 이메일을 보내고 데이터를 받아오는것도 좋을것같다.
-
-        String token = Token.getInstance().getToken();
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(URL) // 포트까지가 베이스url이다.
@@ -333,17 +324,30 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
         // 2. 사용할 인터페이스를 설정한다.
         HostInterface localhost = retrofit.create(HostInterface.class);
         // 3. 토큰을 보내 데이터를 가져온다
-        Call<Data> result = localhost.getData(token, 1);
+        Call<Data> result = localhost.getData(token, id);
 
         result.enqueue(new Callback<Data>() {
             @Override
             public void onResponse(Call<Data> call, Response<Data> response) {
-                // 값이 정상적으로 리턴되었을 경우
                 if (response.isSuccessful()) {
-                    Results results = response.body().getResults();
-                    DataStore dataStore = DataStore.getInstance();
-                    List<Results> list = new ArrayList<>(Arrays.asList(results));
-                    dataStore.setDatas(list);
+                    if( response.code() == CODE_OK ) {
+                        Data data = response.body();
+                        ResultsDataStore resultsDataStore = ResultsDataStore.getInstance();
+                        Results results = response.body().getResults();
+                        resultsDataStore.addData(results);
+                        Log.e(TAG, resultsDataStore.getDatas().size() + "");
+
+                        if (data.getNext() != null) {
+                            getData(id + 1);
+                            Log.e(TAG, "재귀적 작용 작동!");
+                        } else {
+                            Log.e(TAG, "getData 정상작동!");
+                        }
+                    } else if (response.code() == CODE_BAD_REQUEST ) {
+                        Log.e(TAG, "잘못된 요청입니다.");
+                    } else if ( response.code() == CODE_NOT_FOUND ) {
+                        Log.e(TAG, "잘못된 페이지번호입니다.");
+                    }
 
                 } else {
                     //정상적이지 않을 경우 message에 오류내용이 담겨 온다.
@@ -358,11 +362,18 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
         });
     }
 
-//    private String getToken() {
-//        SharedPreferences sharedPref = getSharedPreferences("Token", Context.MODE_PRIVATE);
-//        String token = sharedPref.getString("token", null);
-//        return token;
-//    }
+    private String getToken() {
+        SharedPreferences sharedPref = getSharedPreferences("Token", Context.MODE_PRIVATE);
+        String token = sharedPref.getString("token", null);
+        return token;
+    }
+
+    private void setToken(String token) {
+        SharedPreferences sharedPref = getSharedPreferences("Token", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString("token", token);
+        editor.commit();
+    }
 
     // 로그인후 설정에서 따로 로그아웃 전까지 true로 유지
     private void saveSharedpreference(String email, String password) {

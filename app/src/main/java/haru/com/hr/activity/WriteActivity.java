@@ -35,7 +35,7 @@ import java.util.Random;
 import haru.com.hr.BaseActivity;
 import haru.com.hr.HostInterface;
 import haru.com.hr.R;
-import haru.com.hr.DataSet.DataStore;
+import haru.com.hr.DataSet.ResultsDataStore;
 import haru.com.hr.DataSet.Results;
 import haru.com.hr.adapter.EmotionSpinnerAdapter;
 import haru.com.hr.databinding.ActivityWriteBinding;
@@ -79,7 +79,7 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setBinding(R.layout.activity_write);
-        setToken();
+        token = getToken();
         randomImageSetting();
 
         isPictureSelect = false;
@@ -90,8 +90,10 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
         contentEditTextMaxLineSetting();
     }
 
-    private void setToken() {
-        token = Token.getInstance().getToken();
+    private String getToken() {
+        SharedPreferences sharedPref = getSharedPreferences("Token", Context.MODE_PRIVATE);
+        String token = sharedPref.getString("token", null);
+        return token;
     }
 
     private void randomImageSetting() {
@@ -361,7 +363,7 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
                 if( response.isSuccessful() ) {
                     switch (response.code()) {
                         case CODE_CREATED:
-                            DataStore.getInstance().addData(response.body());
+                            ResultsDataStore.getInstance().addData(response.body());
                             Log.v(TAG, "create success");
                             finish();
                             break;
@@ -411,7 +413,7 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
                 if( response.isSuccessful() ) {
                     switch (response.code()) {
                         case CODE_CREATED:
-                            DataStore.getInstance().addData(response.body());
+                            ResultsDataStore.getInstance().addData(response.body());
                             Log.v(TAG, "create success");
                             finish();
                             break;

@@ -3,6 +3,7 @@ package haru.com.hr.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -16,7 +17,7 @@ import haru.com.hr.BaseActivity;
 import haru.com.hr.HostInterface;
 import haru.com.hr.R;
 import haru.com.hr.DataSet.Data;
-import haru.com.hr.DataSet.DataStore;
+import haru.com.hr.DataSet.ResultsDataStore;
 import haru.com.hr.DataSet.Results;
 import haru.com.hr.databinding.ActivitySplashBinding;
 import haru.com.hr.domain.EmailSet;
@@ -38,6 +39,8 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
     private static final String TAG = "SplashActivity";
     private String email;
     private String password;
+    int id = 1;
+    String token;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,9 +49,11 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
         // 뷰는 getBinding으로 받아온다.
         getBinding().splashPB.setVisibility(View.VISIBLE);
 
-        if( !checkFirstLogin()/* 첫 로그인인지 체크 */) {
-            // 첫로그인이 아니면 입력되었던 이메일을 토대로 데이터를 로딩해야함
-            getData();
+        token = getToken();
+
+        if( !autoLogin()/* 자동 로그인인지 체크 */) {
+            // 자동 로그인이면 입력되었던 데이터를 토대로 데이터를 로딩해야함
+            getData(id);
             loadSharedpreference(); // 이메일을 꺼냄. 비밀번호를 꺼내고싶지않았는데 서버쪽에서 자동로그인 구현을 이런식으로..
             // 방어코딩
             if( email != null) {
@@ -68,9 +73,9 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
 
     }
 
-    private boolean checkFirstLogin() {
+    private boolean autoLogin() {
         // 토큰이 있으면 토큰을 날려서 서버에 인증한다.
-        String token = Token.getInstance().getToken();
+        String token = getToken();
 
         if( token != null ) { // 토큰이 널이 아니면 토큰을 날려서 확인을한다.
             return false;
@@ -78,19 +83,6 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
             return true;
         }
     }
-
-//    private String getToken() {
-//        SharedPreferences sharedPref = getSharedPreferences("Token", Context.MODE_PRIVATE);
-//        String token = sharedPref.getString("token", null);
-//        return token;
-//    }
-
-//    private void setToken(String token) {
-//        SharedPreferences sharedPref = getSharedPreferences("Token", Context.MODE_PRIVATE);
-//        SharedPreferences.Editor editor = sharedPref.edit();
-//        editor.putString("token", token);
-//        editor.commit();
-//    }
 
     private boolean loadSharedpreference() {
         SharedPreferences sharedPref = getSharedPreferences("LoginCheck", Context.MODE_PRIVATE);
@@ -121,7 +113,7 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
                 if (response.isSuccessful()) {
                     Token token = response.body();
                     Log.e(TAG, token.toString());
-                    token.setToken(token.getKey());
+                    setToken(token.getKey());
 
                 } else {
                     //정상적이지 않을 경우 message에 오류내용이 담겨 온다.
@@ -139,10 +131,8 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
 
 
 
-    private void getData() {
+    private void getData(int id) {
         // todo 아마 여기서 이메일을 보내고 데이터를 받아오는것도 좋을것같다.
-
-        String token = Token.getInstance().getToken();
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(URL) // 포트까지가 베이스url이다.
@@ -150,20 +140,28 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
                 .build();
         // 2. 사용할 인터페이스를 설정한다.
         HostInterface localhost = retrofit.create(HostInterface.class);
+
         // 3. 토큰을 보내 데이터를 가져온다
-        Call<Data> result = localhost.getData(token, 1);
+        Call<Data> result = localhost.getData(token, id);
 
         result.enqueue(new Callback<Data>() {
             @Override
             public void onResponse(Call<Data> call, Response<Data> response) {
                 // 값이 정상적으로 리턴되었을 경우
                 if (response.isSuccessful()) {
+                    Data data = response.body();
+                    ResultsDataStore resultsDataStore = ResultsDataStore.getInstance();
                     Results results = response.body().getResults();
-                    DataStore dataStore = DataStore.getInstance();
-                    List<Results> list = new ArrayList<>(Arrays.asList(results));
-                    dataStore.setDatas(list);
+                    resultsDataStore.addData(results);
+                    Log.e(TAG, resultsDataStore.getDatas().size() + "" );
 
+                    if( data.getNext() != null ) {
+                        getData(id + 1);
+                        Log.e(TAG,"재귀적 작용 작동!");
+                    } else {
+                        Log.e(TAG,"getData 정상작동!");
 
+                    }
 
                 } else {
                     //정상적이지 않을 경우 message에 오류내용이 담겨 온다.
@@ -176,6 +174,19 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
 
             }
         });
+    }
+
+    private String getToken() {
+        SharedPreferences sharedPref = getSharedPreferences("Token", Context.MODE_PRIVATE);
+        String token = sharedPref.getString("token", null);
+        return token;
+    }
+
+    private void setToken(String token) {
+        SharedPreferences sharedPref = getSharedPreferences("Token", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString("token", token);
+        editor.commit();
     }
 
 

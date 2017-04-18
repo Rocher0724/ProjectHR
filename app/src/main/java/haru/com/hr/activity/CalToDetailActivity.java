@@ -16,7 +16,7 @@ import com.bumptech.glide.request.target.Target;
 import haru.com.hr.BaseActivity;
 import haru.com.hr.HostInterface;
 import haru.com.hr.R;
-import haru.com.hr.DataSet.DataStore;
+import haru.com.hr.DataSet.ResultsDataStore;
 import haru.com.hr.DataSet.Results;
 import haru.com.hr.databinding.ActivityCalToDetailBinding;
 import haru.com.hr.domain.DataTemp;
@@ -176,7 +176,7 @@ public class CalToDetailActivity extends BaseActivity<ActivityCalToDetailBinding
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Log.e(TAG,"onActivityResult 작동!!!");
-        for(Results item : DataStore.getInstance().getDatas()) {
+        for(Results item : ResultsDataStore.getInstance().getDatas()) {
             if( item.getId() == pData.getId() ) {
                 pData = item;
                 viewInit(item);

@@ -7,12 +7,12 @@ import java.util.List;
  * Created by myPC on 2017-04-17.
  */
 
-public class DataStore {
-    private static DataStore instance = null;
-    private DataStore() { datas = new ArrayList<>(); }
-    public static DataStore getInstance () {
+public class ResultsDataStore {
+    private static ResultsDataStore instance = null;
+    private ResultsDataStore() { datas = new ArrayList<>(); }
+    public static ResultsDataStore getInstance () {
         if(instance == null) {
-            instance = new DataStore();
+            instance = new ResultsDataStore();
         }
         return instance;
     }

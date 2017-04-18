@@ -31,7 +31,7 @@ public interface HostInterface {
     // 중에서 포트 이하 부분을 get 이하에 쓴다.
 //    @GET("566d677961726f6331397471525a50/json/SearchParkingInfo/1/10/{gu}")
 
-    @GET("posts") // TODO skip과 limit 는  api문서에서 제공할예정
+    @GET("posts")
     Call<Data> getData(@Header("token") String token, @Query("page") int page); // path는 리스트 리포함수를 통해서 데이터를 가져오게되는데 거기 들어오는 값을 path를 통해 url을 세팅한다.
 
     // {gu} 부분을 설정하는 String user를 가져온다. 이부분은 서울시 공공데이터를 이용한 주차장 정보 세팅에서 가져왔다.
@@ -62,7 +62,7 @@ public interface HostInterface {
 
     @POST("signup")
 //    @Headers("")
-    Call<Token> signup(@Body EmailSet emailSet);
+    Call<RequestBody> signup(@Body EmailSet emailSet);
 
     @POST("login")
     Call<Token> signin (@Body EmailSet emailset);
