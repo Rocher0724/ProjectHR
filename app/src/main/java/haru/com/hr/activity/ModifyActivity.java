@@ -21,8 +21,8 @@ import java.io.File;
 import haru.com.hr.BaseActivity;
 import haru.com.hr.HostInterface;
 import haru.com.hr.R;
-import haru.com.hr.RealData.RealDataStore;
-import haru.com.hr.RealData.Results;
+import haru.com.hr.DataSet.DataStore;
+import haru.com.hr.DataSet.Results;
 import haru.com.hr.adapter.EmotionSpinnerAdapter;
 import haru.com.hr.databinding.ActivityModifyBinding;
 import haru.com.hr.domain.Token;
@@ -66,10 +66,10 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
     }
 
     private void getPosition() {
-        int dataSize = RealDataStore.getInstance().getDatas().size();
+        int dataSize = DataStore.getInstance().getDatas().size();
         int index = 0;
         while ( index < dataSize ) {
-            if( RealDataStore.getInstance().getDatas().get(index).getId() == pData.getId()) {
+            if( DataStore.getInstance().getDatas().get(index).getId() == pData.getId()) {
                 dataPosition = index;
                 Log.e(TAG, "dataPosition : " + dataPosition);
                 break;
@@ -82,9 +82,9 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
         Intent intent = getIntent();
         int id = intent.getExtras().getInt("id");
 
-        RealDataStore realDataStore = RealDataStore.getInstance();
+        DataStore dataStore = DataStore.getInstance();
 
-        for ( Results item : realDataStore.getDatas() ) {
+        for ( Results item : dataStore.getDatas() ) {
             if( item.getId() == id ) {
                 pData = item; // todo 넘겨줄때도 id값만 넘겨주면 되는거아니야?
             }
@@ -179,11 +179,11 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
             modifyPostingWithoutImage(pData);
         }
 
-        RealDataStore.getInstance().getDatas().get(dataPosition)
+        DataStore.getInstance().getDatas().get(dataPosition)
                 .setTitle(blankCheck(getBinding().etModifyTitle.getText().toString()));;
-        RealDataStore.getInstance().getDatas().get(dataPosition)
+        DataStore.getInstance().getDatas().get(dataPosition)
                 .setContent(getBinding().etModifyContent.getText().toString());
-        RealDataStore.getInstance().getDatas().get(dataPosition)
+        DataStore.getInstance().getDatas().get(dataPosition)
                 .setStatus_code(selectedStatusPosition + 1); // 선택된 포지션은 0부터시작
 
 

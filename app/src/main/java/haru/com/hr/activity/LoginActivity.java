@@ -16,9 +16,9 @@ import java.util.List;
 import haru.com.hr.BaseActivity;
 import haru.com.hr.HostInterface;
 import haru.com.hr.R;
-import haru.com.hr.RealData.RealData;
-import haru.com.hr.RealData.RealDataStore;
-import haru.com.hr.RealData.Results;
+import haru.com.hr.DataSet.Data;
+import haru.com.hr.DataSet.DataStore;
+import haru.com.hr.DataSet.Results;
 import haru.com.hr.databinding.ActivityLoginBinding;
 import haru.com.hr.domain.EmailSet;
 import haru.com.hr.domain.Token;
@@ -333,17 +333,17 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
         // 2. 사용할 인터페이스를 설정한다.
         HostInterface localhost = retrofit.create(HostInterface.class);
         // 3. 토큰을 보내 데이터를 가져온다
-        Call<RealData> result = localhost.getData(token, 1);
+        Call<Data> result = localhost.getData(token, 1);
 
-        result.enqueue(new Callback<RealData>() {
+        result.enqueue(new Callback<Data>() {
             @Override
-            public void onResponse(Call<RealData> call, Response<RealData> response) {
+            public void onResponse(Call<Data> call, Response<Data> response) {
                 // 값이 정상적으로 리턴되었을 경우
                 if (response.isSuccessful()) {
                     Results results = response.body().getResults();
-                    RealDataStore realDataStore =RealDataStore.getInstance();
+                    DataStore dataStore = DataStore.getInstance();
                     List<Results> list = new ArrayList<>(Arrays.asList(results));
-                    realDataStore.setDatas(list);
+                    dataStore.setDatas(list);
 
                 } else {
                     //정상적이지 않을 경우 message에 오류내용이 담겨 온다.
@@ -352,7 +352,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
             }
 
             @Override
-            public void onFailure(Call<RealData> call, Throwable t) {
+            public void onFailure(Call<Data> call, Throwable t) {
 
             }
         });

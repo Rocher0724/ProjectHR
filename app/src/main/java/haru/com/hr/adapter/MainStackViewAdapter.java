@@ -20,7 +20,7 @@ import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import java.util.List;
 
 import haru.com.hr.R;
-import haru.com.hr.RealData.Results;
+import haru.com.hr.DataSet.Results;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import jp.wasabeef.glide.transformations.ColorFilterTransformation;
 

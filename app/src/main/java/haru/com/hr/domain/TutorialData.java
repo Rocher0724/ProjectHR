@@ -2,25 +2,22 @@ package haru.com.hr.domain;
 
 import android.net.Uri;
 
-import java.text.DateFormat;
-import java.util.Date;
-
 import haru.com.hr.R;
 
 /**
  * Created by myPC on 2017-03-28.
  */
 
-public class FirstLoadingData {
+public class TutorialData {
 
-    private static FirstLoadingData instance;
+    private static TutorialData instance;
 
-    private FirstLoadingData() {
+    private TutorialData() {
     }
 
-    public static FirstLoadingData getInstance() {
+    public static TutorialData getInstance() {
         if (instance == null) {
-            instance = new FirstLoadingData();
+            instance = new TutorialData();
         }
         return instance;
     }

@@ -35,8 +35,8 @@ import java.util.Random;
 import haru.com.hr.BaseActivity;
 import haru.com.hr.HostInterface;
 import haru.com.hr.R;
-import haru.com.hr.RealData.RealDataStore;
-import haru.com.hr.RealData.Results;
+import haru.com.hr.DataSet.DataStore;
+import haru.com.hr.DataSet.Results;
 import haru.com.hr.adapter.EmotionSpinnerAdapter;
 import haru.com.hr.databinding.ActivityWriteBinding;
 import haru.com.hr.domain.Token;
@@ -361,7 +361,7 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
                 if( response.isSuccessful() ) {
                     switch (response.code()) {
                         case CODE_CREATED:
-                            RealDataStore.getInstance().addData(response.body());
+                            DataStore.getInstance().addData(response.body());
                             Log.v(TAG, "create success");
                             finish();
                             break;
@@ -411,7 +411,7 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
                 if( response.isSuccessful() ) {
                     switch (response.code()) {
                         case CODE_CREATED:
-                            RealDataStore.getInstance().addData(response.body());
+                            DataStore.getInstance().addData(response.body());
                             Log.v(TAG, "create success");
                             finish();
                             break;

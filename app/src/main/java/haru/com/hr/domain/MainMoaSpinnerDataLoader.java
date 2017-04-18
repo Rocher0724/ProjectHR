@@ -26,15 +26,6 @@ public class MainMoaSpinnerDataLoader {
         return instance;
     }
 
-//    private void dataloader() {
-//        EmotionSpinnerData writeSpinnerData = new EmotionSpinnerData();
-//        writeSpinnerData.setEmotionText("행복해요");
-//        writeSpinnerData.setImgInDrawable(R.drawable.emotion_soso_white);
-//        datas.add(writeSpinnerData);
-//    }
-
-
-
     private void dataloader() {
         datas.add(new EmotionSpinnerData(0, R.drawable.emotion_dummy, "전체보기"));
         datas.add(new EmotionSpinnerData(1, R.drawable.emotion_inlove_white, "행복해요"));

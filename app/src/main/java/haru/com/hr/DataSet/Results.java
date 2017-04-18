@@ -1,4 +1,4 @@
-package haru.com.hr.RealData;
+package haru.com.hr.DataSet;
 
 /**
  * Created by myPC on 2017-04-17.

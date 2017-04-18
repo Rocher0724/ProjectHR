@@ -1,4 +1,4 @@
-package haru.com.hr.RealData;
+package haru.com.hr.DataSet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,12 +7,12 @@ import java.util.List;
  * Created by myPC on 2017-04-17.
  */
 
-public class RealDataStore {
-    private static RealDataStore instance = null;
-    private RealDataStore() { datas = new ArrayList<>(); }
-    public static RealDataStore getInstance () {
+public class DataStore {
+    private static DataStore instance = null;
+    private DataStore() { datas = new ArrayList<>(); }
+    public static DataStore getInstance () {
         if(instance == null) {
-            instance = new RealDataStore();
+            instance = new DataStore();
         }
         return instance;
     }

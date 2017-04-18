@@ -1,10 +1,7 @@
 package haru.com.hr;
 
-import java.util.Map;
-
-import haru.com.hr.RealData.RealData;
-import haru.com.hr.RealData.Results;
-import haru.com.hr.domain.Data;
+import haru.com.hr.DataSet.Data;
+import haru.com.hr.DataSet.Results;
 import haru.com.hr.domain.EmailSet;
 import haru.com.hr.domain.Token;
 import okhttp3.MultipartBody;
@@ -15,12 +12,10 @@ import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
-import retrofit2.http.Headers;
 import retrofit2.http.Multipart;
 import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
-import retrofit2.http.PartMap;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
@@ -37,7 +32,7 @@ public interface HostInterface {
 //    @GET("566d677961726f6331397471525a50/json/SearchParkingInfo/1/10/{gu}")
 
     @GET("posts") // TODO skip과 limit 는  api문서에서 제공할예정
-    Call<RealData> getData(@Header("token") String token, @Query("page") int page); // path는 리스트 리포함수를 통해서 데이터를 가져오게되는데 거기 들어오는 값을 path를 통해 url을 세팅한다.
+    Call<Data> getData(@Header("token") String token, @Query("page") int page); // path는 리스트 리포함수를 통해서 데이터를 가져오게되는데 거기 들어오는 값을 path를 통해 url을 세팅한다.
 
     // {gu} 부분을 설정하는 String user를 가져온다. 이부분은 서울시 공공데이터를 이용한 주차장 정보 세팅에서 가져왔다.
 

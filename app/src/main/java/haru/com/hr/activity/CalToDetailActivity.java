@@ -2,9 +2,7 @@ package haru.com.hr.activity;
 
 import android.content.Intent;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.TabLayout;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -18,10 +16,10 @@ import com.bumptech.glide.request.target.Target;
 import haru.com.hr.BaseActivity;
 import haru.com.hr.HostInterface;
 import haru.com.hr.R;
-import haru.com.hr.RealData.RealDataStore;
-import haru.com.hr.RealData.Results;
+import haru.com.hr.DataSet.DataStore;
+import haru.com.hr.DataSet.Results;
 import haru.com.hr.databinding.ActivityCalToDetailBinding;
-import haru.com.hr.domain.Data;
+import haru.com.hr.domain.DataTemp;
 import haru.com.hr.domain.Token;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import jp.wasabeef.glide.transformations.ColorFilterTransformation;
@@ -150,7 +148,7 @@ public class CalToDetailActivity extends BaseActivity<ActivityCalToDetailBinding
         // 3. 데이터를 가져온다
         Call result = localhost.deleteData(token, id);
 
-        result.enqueue(new Callback<Data>() {
+        result.enqueue(new Callback<DataTemp>() {
             @Override
             public void onResponse(Call call, Response response) {
                 // 값이 정상적으로 리턴되었을 경우
@@ -178,7 +176,7 @@ public class CalToDetailActivity extends BaseActivity<ActivityCalToDetailBinding
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Log.e(TAG,"onActivityResult 작동!!!");
-        for(Results item : RealDataStore.getInstance().getDatas()) {
+        for(Results item : DataStore.getInstance().getDatas()) {
             if( item.getId() == pData.getId() ) {
                 pData = item;
                 viewInit(item);

@@ -3,7 +3,6 @@ package haru.com.hr.adapter;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.support.design.widget.TabLayout;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,14 +14,11 @@ import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import haru.com.hr.R;
-import haru.com.hr.RealData.Results;
+import haru.com.hr.DataSet.Results;
 import haru.com.hr.activity.ImageDetailActivity;
-import haru.com.hr.activity.MainActivity;
-import haru.com.hr.domain.PostingData;
 
 /**
  * Created by myPC on 2017-03-31.
