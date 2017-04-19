@@ -4,15 +4,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.design.widget.BaseTransientBottomBar;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.widget.Toast;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import haru.com.hr.BaseActivity;
 import haru.com.hr.HostInterface;
@@ -26,7 +21,6 @@ import haru.com.hr.domain.Token;
 import haru.com.hr.util.AnimationUtil;
 import haru.com.hr.util.BackPressCloseHandler;
 import haru.com.hr.util.SignUtil;
-import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -35,13 +29,11 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import static haru.com.hr.HTTP_ResponseCode.CODE_BAD_REQUEST;
-import static haru.com.hr.HTTP_ResponseCode.CODE_CONFLICT;
 import static haru.com.hr.HTTP_ResponseCode.CODE_CREATED;
 import static haru.com.hr.HTTP_ResponseCode.CODE_INTERNAL_SERVER_ERROR;
 import static haru.com.hr.HTTP_ResponseCode.CODE_NOT_FOUND;
 import static haru.com.hr.HTTP_ResponseCode.CODE_OK;
 import static haru.com.hr.HostInterface.URL;
-import static haru.com.hr.HostInterface.URLL;
 
 public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
 
@@ -232,15 +224,15 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
                 switch (response.code()) {
                     case CODE_OK:
                         signinInit(response, email, password);
-                        Log.e("onResponse", "정상 리턴");
+                        Log.e(TAG, "signin 정상 리턴");
                         break;
                     case CODE_BAD_REQUEST:
                         Toast.makeText(LoginActivity.this, "아이디와 비밀번호를 입력해주세요", Toast.LENGTH_SHORT).show();
-                        Log.e("onResponse", "값이 비정상적으로 리턴되었다. = " + response.message());
+                        Log.e(TAG, "signin 값이 비정상적으로 리턴되었다. = " + response.message());
                         break;
                     case CODE_INTERNAL_SERVER_ERROR:
                         Toast.makeText(LoginActivity.this, "아이디 또는 비밀번호를 확인하세요.", Toast.LENGTH_SHORT).show();
-                        Log.e("onResponse", "값이 비정상적으로 리턴되었다. = " + response.message());
+                        Log.e(TAG, "signin 값이 비정상적으로 리턴되었다. = " + response.message());
                         break;
                 }
                 pbAndBtnEnableSetting(true);
@@ -283,11 +275,11 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
                 if( response.code() == CODE_CREATED ){
                     Toast.makeText(LoginActivity.this, "계정이 생성되었습니다.", Toast.LENGTH_SHORT).show();
                     onBackPressed(); // 계정이 생성된 경우 로그인할수 있게 뒤로가기를 눌러준다.
-                    Log.e("값이","정상리턴");
+                    Log.e(TAG,"signup 정상리턴");
 
                 } else if (response.code() == CODE_BAD_REQUEST) {
                     Toast.makeText(LoginActivity.this, "이미 사용중인 이메일입니다.", Toast.LENGTH_SHORT).show();
-                    Log.e("onResponse","값이 비정상적으로 리턴되었다. = " + response.message());
+                    Log.e(TAG, "signup 값이 비정상적으로 리턴되었다. = " + response.message());
                 }
 
                 pbAndBtnEnableSetting(true);
@@ -319,21 +311,12 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
 
     private void signinInit(Response<Token> response, String email, String password) {
         Token token = response.body();
-        Log.e(TAG,"token 값 : " + token);
+        Log.e(TAG,"token 값 : " + token.getKey());
         setToken(token.getKey());
-        dataSetting(); // 데이터 세팅. 기 로그인자면 사용데이터, 최초사용자면 튜토리얼 세팅
-        saveSharedpreference(email, password); // 자동로그인을 위한 shared preference 저장
-        editTextVisibleChanger(); //현재 비지블이므로 로그인하면서 텍스트 숨김
-        activityChange(email);
+        dataSetting(id, email, password); // 데이터 세팅. 기 로그인자면 사용데이터, 최초사용자면 튜토리얼 세팅
     }
 
-    //TODO 여기는 어떻게해야할까 튜토리얼 정보세팅?
-//    public void dataSetting(boolean loginCheck) {
-    public void dataSetting() {
-        getData(id);
-    }
-
-    private void getData(int id) {
+    private void dataSetting(int id, String email, String password) {
         // todo 아마 여기서 이메일을 보내고 데이터를 받아오는것도 좋을것같다.
 
         Retrofit retrofit = new Retrofit.Builder()
@@ -348,33 +331,38 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
         result.enqueue(new Callback<Data>() {
             @Override
             public void onResponse(Call<Data> call, Response<Data> response) {
-                if( response.code() == CODE_OK ) {
-                    Data data = response.body();
-                    ResultsDataStore resultsDataStore = ResultsDataStore.getInstance();
-                    Results results = response.body().getResults();
-                    resultsDataStore.addData(results);
-                    Log.e(TAG, resultsDataStore.getDatas().size() + "");
+                switch (response.code()) {
+                    case CODE_OK:
+                        Data data = response.body();
+                        ResultsDataStore resultsDataStore = ResultsDataStore.getInstance();
+                        Results results = response.body().getResults();
+                        resultsDataStore.addData(results);
+                        Log.e(TAG, "dataSetting " + resultsDataStore.getDatas().size());
 
-                    if (data.getNext() != null) {
-                        getData(id + 1);
-                        Log.e(TAG, "재귀적 작용 작동!");
-                    } else {
-                        Log.e(TAG, "getData 정상작동!");
-                    }
-                } else if (response.code() == CODE_BAD_REQUEST ) {
-                    Log.e(TAG, "잘못된 요청입니다.");
-                } else if ( response.code() == CODE_NOT_FOUND ) {
-                    Log.e(TAG, "잘못된 페이지번호입니다.");
+                        if (data.getNext() != null) {
+                            dataSetting(id + 1, email, password);
+                            Log.e(TAG , "dataSetting 재귀적 작용 작동!");
+                        } else {
+                            Log.e(TAG, "dataSetting next 는 null이다!");
+                        }
+                        break;
+                    case CODE_BAD_REQUEST:
+                        Log.e(TAG, "dataSetting 잘못된 요청입니다.");
+                        break;
+                    case CODE_NOT_FOUND:
+                        Log.e(TAG, "dataSetting 잘못된 페이지번호입니다.");
+                        break;
                 }
 
-                //정상적이지 않을 경우 message에 오류내용이 담겨 온다.
-                Log.e("onResponse", "값이 비정상적으로 리턴되었다. = " + response.message());
-
+                saveSharedpreference(email, password); // 자동로그인을 위한 shared preference 저장
+                editTextVisibleChanger(); //현재 비지블이므로 로그인하면서 텍스트 숨김
+                activityChange(email);
             }
 
             @Override
             public void onFailure(Call<Data> call, Throwable t) {
-
+                Log.e(TAG,"dataSetting 서버통신 실패");
+                Log.e(TAG,t.toString());
             }
         });
     }
@@ -390,7 +378,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
         SharedPreferences sharedPref = getSharedPreferences("Token", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putString("token", "Token " + token);
-        editor.commit();
+        editor.apply();
     }
 
     // 로그인후 설정에서 따로 로그아웃 전까지 true로 유지
@@ -413,10 +401,4 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
         finish(); // 종료해준다.
     }
 
-
-    @Override
-    protected void onStop() {
-//        nullCheck();
-        super.onStop();
-    }
 }

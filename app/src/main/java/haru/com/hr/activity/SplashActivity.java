@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,6 +29,9 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import static haru.com.hr.HTTP_ResponseCode.CODE_BAD_REQUEST;
+import static haru.com.hr.HTTP_ResponseCode.CODE_INTERNAL_SERVER_ERROR;
+import static haru.com.hr.HTTP_ResponseCode.CODE_NOT_FOUND;
 import static haru.com.hr.HTTP_ResponseCode.CODE_OK;
 import static haru.com.hr.HostInterface.URL;
 
@@ -54,13 +58,10 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
         if( !autoLogin()/* 자동 로그인인지 체크 */) {
             // 자동 로그인이면 입력되었던 데이터를 토대로 데이터를 로딩해야함
             Log.e(TAG,"로그인쿠키가 있다.");
-            getData(id);
             loadSharedpreference(); // 이메일을 꺼냄. 비밀번호를 꺼내고싶지않았는데 서버쪽에서 자동로그인 구현을 이런식으로..
             // 방어코딩
             if( email != null) {
-                Log.e(TAG, "방어코딩 안으로 들어왔다" );
                 signin(email, password);
-                activityChange(false);
             } else {
                 Log.e(TAG,"email이 null입니다.");
                 activityChange(true);
@@ -107,20 +108,25 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
         HostInterface localhost = retrofit.create(HostInterface.class);
         // 3. 데이터를 가져온다
         EmailSet emailSet = new EmailSet(email, password);
+
         Call<Token> signin = localhost.signin(emailSet);
 
         signin.enqueue(new Callback<Token>() {
             @Override
             public void onResponse(Call<Token> call, Response<Token> response) {
-                // 값이 정상적으로 리턴되었을 경우
-                if (response.code() == CODE_OK) {
-                    Token token = response.body();
-                    Log.e(TAG, "token은 : " + token.getKey());
-                    setToken(token.getKey());
-
-                } else {
-                    //정상적이지 않을 경우 message에 오류내용이 담겨 온다.
-                    Log.e("onResponse", "값이 비정상적으로 리턴되었다. = " + response.message());
+                switch (response.code()) {
+                    case CODE_OK:
+                        signinInit(response, email, password);
+                        Log.e(TAG, "signin 정상 리턴");
+                        break;
+                    case CODE_BAD_REQUEST:
+                        Toast.makeText(SplashActivity.this, "아이디와 비밀번호를 입력해주세요", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "signin 값이 비정상적으로 리턴되었다. = " + response.message());
+                        break;
+                    case CODE_INTERNAL_SERVER_ERROR:
+                        Toast.makeText(SplashActivity.this, "아이디 또는 비밀번호를 확인하세요.", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "signin 값이 비정상적으로 리턴되었다. = " + response.message());
+                        break;
                 }
             }
 
@@ -132,9 +138,16 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
 
     }
 
+    private void signinInit(Response<Token> response, String email, String password) {
+        Token token = response.body();
+        Log.e(TAG,"token 값 : " + token.getKey());
+        setToken(token.getKey());
+        dataSetting(id); // 데이터 세팅. 기 로그인자면 사용데이터, 최초사용자면 튜토리얼 세팅
+    }
 
 
-    private void getData(int id) {
+
+    private void dataSetting(int id) {
         // todo 아마 여기서 이메일을 보내고 데이터를 받아오는것도 좋을것같다.
 
         Retrofit retrofit = new Retrofit.Builder()
@@ -150,26 +163,30 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
         result.enqueue(new Callback<Data>() {
             @Override
             public void onResponse(Call<Data> call, Response<Data> response) {
-                // 값이 정상적으로 리턴되었을 경우
-                if (response.isSuccessful()) {
-                    Data data = response.body();
-                    ResultsDataStore resultsDataStore = ResultsDataStore.getInstance();
-                    Results results = response.body().getResults();
-                    resultsDataStore.addData(results);
-                    Log.e(TAG, resultsDataStore.getDatas().size() + "" );
+                switch (response.code()) {
+                    case CODE_OK:
+                        Data data = response.body();
+                        ResultsDataStore resultsDataStore = ResultsDataStore.getInstance();
+                        Results results = response.body().getResults();
+                        resultsDataStore.addData(results);
+                        Log.e(TAG, "dataSetting " + resultsDataStore.getDatas().size());
 
-                    if( data.getNext() != null ) {
-                        getData(id + 1);
-                        Log.e(TAG,"재귀적 작용 작동!");
-                    } else {
-                        Log.e(TAG,"getData 정상작동!");
-
-                    }
-
-                } else {
-                    //정상적이지 않을 경우 message에 오류내용이 담겨 온다.
-                    Log.e("onResponse", "값이 비정상적으로 리턴되었다. = " + response.message());
+                        if (data.getNext() != null) {
+                            dataSetting(id + 1);
+                            Log.e(TAG , "dataSetting 재귀적 작용 작동!");
+                        } else {
+                            Log.e(TAG, "dataSetting next 는 null이다!");
+                        }
+                        break;
+                    case CODE_BAD_REQUEST:
+                        Log.e(TAG, "dataSetting 잘못된 요청입니다.");
+                        break;
+                    case CODE_NOT_FOUND:
+                        Log.e(TAG, "dataSetting 잘못된 페이지번호입니다.");
+                        break;
                 }
+
+                activityChange();
             }
 
             @Override
