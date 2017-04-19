@@ -48,7 +48,6 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
         setBinding(R.layout.activity_splash);
         // 뷰는 getBinding으로 받아온다.
         getBinding().splashPB.setVisibility(View.VISIBLE);
-
         token = getToken();
 
         if( !autoLogin()/* 자동 로그인인지 체크 */) {

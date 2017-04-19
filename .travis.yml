@@ -1,0 +1,16 @@
+language : android
+
+jdk : oraclejdk8
+
+android:
+  components:
+  - platform-tools #ADB(디바이스 또는 에뮬레이터 통신)
+  - tools # 실제 안드로이드 SDK
+  - build-tools-25.0.2 # 빌드툴 버전
+  - android-25
+  - extra-android-m2repository
+
+before_install:
+  - chmod +x gradlew
+
+script: ./gradlew build
