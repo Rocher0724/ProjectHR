@@ -349,9 +349,14 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
         // 이미지 넣을때 키값
         MultipartBody.Part file = MultipartBody.Part.createFormData("image", originalFile.getName() , filePart);
 
+
+
         Retrofit.Builder builder = new Retrofit.Builder()
                 .baseUrl(URL)
                 .addConverterFactory(GsonConverterFactory.create());
+
+
+
 
         Retrofit retrofit = builder.build();
         HostInterface client = retrofit.create(HostInterface.class);

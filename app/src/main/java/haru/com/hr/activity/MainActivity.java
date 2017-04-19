@@ -468,7 +468,7 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
             Toast.makeText(this, "shared preference가 삭제됨", Toast.LENGTH_SHORT).show();
 
         } else if (id == R.id.nav_gallery) {
-
+            dataReset();
         } else if (id == R.id.nav_slideshow) {
 
         } else if (id == R.id.nav_manage) {
@@ -479,6 +479,13 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
 
         getBinding().drawerLayout.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void dataReset() {
+        while (realDatas.size() > 2) {
+            realDatas.remove(realDatas.size() -1);
+        }
+        stackViewAdapter.notifyDataSetChanged();
     }
 
     private void sharedpreferenceForLogOut() {
@@ -495,7 +502,15 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         editor1.remove("emptydata");
         editor1.clear();
         editor1.apply();
+
+        SharedPreferences sharedPref2 = getSharedPreferences("Token", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor2 = sharedPref2.edit();
+        editor1.remove("token");
+        editor1.clear();
+        editor1.apply();
+        Log.e(TAG,"첫로그인체크, 튜토리얼 데이터세팅플래그, 토큰 삭제");
     }
+
 
     // 퍼미션체크
     public final String PERMISSION_ARRAY[] = {

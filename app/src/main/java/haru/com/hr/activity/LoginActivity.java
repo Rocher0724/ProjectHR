@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.design.widget.BaseTransientBottomBar;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
@@ -26,6 +27,7 @@ import haru.com.hr.util.AnimationUtil;
 import haru.com.hr.util.BackPressCloseHandler;
 import haru.com.hr.util.SignUtil;
 import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -38,6 +40,7 @@ import static haru.com.hr.HTTP_ResponseCode.CODE_CREATED;
 import static haru.com.hr.HTTP_ResponseCode.CODE_NOT_FOUND;
 import static haru.com.hr.HTTP_ResponseCode.CODE_OK;
 import static haru.com.hr.HostInterface.URL;
+import static haru.com.hr.HostInterface.URLL;
 
 public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
 
@@ -55,28 +58,12 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
         super.onCreate(savedInstanceState);
         setBinding(R.layout.activity_login);
         token = getToken();
-        backPressCloseHandler = new BackPressCloseHandler(this);
-
-//        // TODO 임의 로그인을 위해서 롱클릭으로 메인액티비티 들어가도록 설정한것임. 나중에 지워야함
-//        getBinding().btnGoToCreateAccountView.setOnLongClickListener(v -> {
-//            activityChange();
-//            return false;
-//        });
-//        // TODO 임의 로그인을 위해서 롱클릭으로 메인액티비티 들어가도록 설정한것임. 나중에 지워야함
-//        getBinding().btnCreateAccount.setOnLongClickListener(v -> {
-//            activityChange();
-//            return false;
-//        });
-
-        //TODO 로그인 처리후 액티비티 변환 처리해야함 intent 이동하는거 그거
     }
 
     private void animationSetting() {
         anim = new AnimationUtil(this, TAG);
         loginActLogoAnim = anim.getLoginActivityMainLogoAnim();
-        Log.e(TAG,loginActLogoAnim + "");
         loginTextAnim = anim.getLoginActivityTextAnim();
-        Log.e(TAG,loginTextAnim + "");
     }
 
 
@@ -93,16 +80,16 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
             if(loginActLogoAnim != null) {
                 getBinding().imgLogoWithName.startAnimation(loginActLogoAnim);
             }
-            Log.e(TAG,loginActLogoAnim + "");
         } else {
             getBinding().activityLoginAddress.setVisibility(View.INVISIBLE);
             getBinding().activityLoginPassword.setVisibility(View.INVISIBLE);
         }
     }
-    private boolean checkSignUp() {
+    @Deprecated
+    private void checkSignUp() {
         SharedPreferences sharedPref = getSharedPreferences("LoginCheck", Context.MODE_PRIVATE);
         boolean loginCheck = sharedPref.getBoolean("FirstLoginCheck", true );
-        return loginCheck;
+//        return loginCheck;
     }
 
     public void clickListener(View view) {
@@ -118,10 +105,6 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
                     // 로그인시 이메일 형식 체크
                     if ( infoCheck(email, password) ) {
                         signin(email, password); // 서버에 정보 넘겨주고 토큰 받아옴
-                        dataSetting(checkSignUp()); // 데이터 세팅. 기 로그인자면 사용데이터, 최초사용자면 튜토리얼 세팅
-                        saveSharedpreference(email, password); // 자동로그인을 위한 shared preference 저장
-                        editTextVisibleChanger(); //현재 비지블이므로 로그인하면서 텍스트 숨김
-                        activityChange();
                     }
                 }
                 break;
@@ -133,10 +116,8 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
                 String password = getBinding().etActivityLoginCreatePassword.getText().toString();
                 String confirm = getBinding().etActivityLoginCreateConfirm.getText().toString();
                 if( infoCheck(email, password, confirm) ) { // 이메일 형식체크 비밀번호 길이 , confirm 체크
-
                     signup(email, password);
                 }
-
                 break;
 
             // if posible TODO 페이스북로그인 api 붙이기
@@ -166,6 +147,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
             return;
         }
         // 로그인화면에서 백키를 누르면 한번더 누르겠냐고 묻는다.
+        backPressCloseHandler = new BackPressCloseHandler(this);
         backPressCloseHandler.onBackPressed();
     }
     private void createAccountExplanationRemove() {
@@ -245,8 +227,13 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
             public void onResponse(Call<Token> call, Response<Token> response) {
                 // 값이 정상적으로 리턴되었을 경우
                 if (response.isSuccessful()) {
-                    Token token = response.body();
-                    setToken(token.getKey());
+                    if( response.code() == CODE_OK ) {
+                        signinInit(response, email, password);
+                    } else if (response.code() == CODE_BAD_REQUEST ) {
+                        Toast.makeText(LoginActivity.this, "아이디와 비밀번호를 입력해주세요", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(LoginActivity.this, "잘못된 정보입니다.", Toast.LENGTH_SHORT).show();
+                    }
 
                 } else {
                     //정상적이지 않을 경우 message에 오류내용이 담겨 온다.
@@ -261,57 +248,70 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
         });
     }
 
+    private void signinInit(Response<Token> response, String email, String password) {
+        Token token = response.body();
+        Log.e(TAG,"token 값 : " + token);
+        setToken(token.getKey());
+        dataSetting(); // 데이터 세팅. 기 로그인자면 사용데이터, 최초사용자면 튜토리얼 세팅
+        saveSharedpreference(email, password); // 자동로그인을 위한 shared preference 저장
+        editTextVisibleChanger(); //현재 비지블이므로 로그인하면서 텍스트 숨김
+        activityChange(email);
+    }
     private void signup(String email, String password) {
+        Log.e(TAG,"signup 들어왔다.");
 
-        Log.e(TAG,"regist 들어왔다.");
+        // 버튼 두번 누르지못하게 하고 프로그레스바 visible
+        getBinding().btnCreateAccount.setEnabled(false);
+        getBinding().pbLogin.setVisibility(View.VISIBLE);
+
+
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
         HostInterface localhost = retrofit.create(HostInterface.class);
+
         EmailSet emailSet = new EmailSet(email, password);
 
-        Call<RequestBody> call = localhost.signup(emailSet);
+        Call<ResponseBody> result = localhost.signup1(emailSet);
 
-        call.enqueue(new Callback<RequestBody>() {
+        result.enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(Call<RequestBody> call, Response<RequestBody> response) {
-                if( response.isSuccessful() ){
-                    if( response.code() == CODE_CREATED) {
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                // 값이 정상적으로 리턴되었을 때
+                Log.e("asdaasd","리스폰코드 : " + response.code());
 
-                        onBackPressed(); // 계정이 생성된 경우 로그인할수 있게 뒤로가기를 눌러준다.
+                if( response.code() == CODE_CREATED ){
+                    Toast.makeText(LoginActivity.this, "계정이 생성되었습니다.", Toast.LENGTH_SHORT).show();
+                    onBackPressed(); // 계정이 생성된 경우 로그인할수 있게 뒤로가기를 눌러준다.
+                    Log.e("값이","정상리턴");
 
-                        Log.e(TAG, "regist : 정상리턴");
-                    } else if (response.code() == CODE_CONFLICT) {
-                        // 동일한 정보를 가진 사용자가 있다.
-                        Toast.makeText(LoginActivity.this, "동일한 정보의 사용자가 있습니다.", Toast.LENGTH_SHORT).show();
-
-                    }
-                } else {
-                    Log.e("regist","비정상적으로 리턴되었다. = " + response.message());
+                } else if (response.code() == CODE_BAD_REQUEST) {
+                    Toast.makeText(LoginActivity.this, "이미 사용중인 이메일입니다.", Toast.LENGTH_SHORT).show();
+                    Log.e("onResponse","값이 비정상적으로 리턴되었다. = " + response.message());
                 }
+                getBinding().btnCreateAccount.setEnabled(false);
+                getBinding().pbLogin.setVisibility(View.GONE);
             }
 
             @Override
-            public void onFailure(Call<RequestBody> call, Throwable t) {
-                Log.e(TAG,"regist 서버통신 실패");
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.e(TAG,"signup 서버통신 실패");
                 Log.e(TAG,t.toString());
+                getBinding().pbLogin.setVisibility(View.GONE);
+                getBinding().btnCreateAccount.setEnabled(false);
+
             }
+
         });
+
     }
 
     //TODO 여기는 어떻게해야할까 튜토리얼 정보세팅?
-    public void dataSetting(boolean loginCheck) {
-        if(loginCheck) {
-            // 튜토리얼 세팅
-            // todo 첫 로그인이면 튜토리얼 정보 세팅
-
-
-        } else { // 기로그인이면 사용자 정보 세팅
-
-            getData(id);
-        }
+//    public void dataSetting(boolean loginCheck) {
+    public void dataSetting() {
+        getData(id);
     }
 
     private void getData(int id) {
@@ -365,6 +365,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
     private String getToken() {
         SharedPreferences sharedPref = getSharedPreferences("Token", Context.MODE_PRIVATE);
         String token = sharedPref.getString("token", null);
+        Log.e(TAG,"token은 " + token);
         return token;
     }
 
@@ -388,8 +389,9 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
         editor.commit();
     }
 
-    private void activityChange() {
+    private void activityChange(String email) {
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+        intent.putExtra("email", email);
         startActivity(intent);
         finish(); // 종료해준다.
     }
@@ -397,15 +399,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
 
     @Override
     protected void onStop() {
-        nullCheck();
+//        nullCheck();
         super.onStop();
     }
-
-    private void nullCheck(){
-        anim = null;
-        loginActLogoAnim = null;
-        loginTextAnim = null;
-        backPressCloseHandler = null;
-    }
-
 }

@@ -26,7 +26,6 @@ public class AnimationUtil {
         this.context = context;
 
         if(activity.equals("LoginActivity")){
-            Log.e(TAG,"스위치문 들어왔다.");
             loginActivityAnimation();
         }
 
@@ -37,13 +36,11 @@ public class AnimationUtil {
 
     private void loginActivityAnimation () {
         if (loginActivityTextAnim == null) {
-            Log.e(TAG,"loginActivityAnimation 작업");
 
             loginActivityTextAnim = new AlphaAnimation(0, 1);
             loginActivityTextAnim.setDuration(1000);
             loginActivityMainLogoAnim = AnimationUtils.loadAnimation
-                    (context,
-                            R.anim.login_logo_anim);   // 애니메이션 설정 파일
+                    (context, R.anim.login_logo_anim);   // 애니메이션 설정 파일
         }
 
     }

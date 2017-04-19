@@ -10,6 +10,8 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Multipart;
@@ -25,20 +27,21 @@ import retrofit2.http.Query;
 
 public interface HostInterface {
 
-    String URL = "http://haru-eb.ap-northeast-2.elasticbeanstalk.com/";
+    String URL = "https://haru.ycsinabro.com/";
+    String URLL = "http://192.168.0.194/";
 
 
     // 중에서 포트 이하 부분을 get 이하에 쓴다.
 //    @GET("566d677961726f6331397471525a50/json/SearchParkingInfo/1/10/{gu}")
 
-    @GET("posts")
+    @GET("posts/")
     Call<Data> getData(@Header("token") String token, @Query("page") int page); // path는 리스트 리포함수를 통해서 데이터를 가져오게되는데 거기 들어오는 값을 path를 통해 url을 세팅한다.
 
     // {gu} 부분을 설정하는 String user를 가져온다. 이부분은 서울시 공공데이터를 이용한 주차장 정보 세팅에서 가져왔다.
 
 
     @Multipart
-    @POST("posts")
+    @POST("posts/")
     Call<Results> uploadWithSelectedImage(
             @Header("token") String token,
             @Part ("title") RequestBody title,
@@ -48,7 +51,7 @@ public interface HostInterface {
     );
 
     @Multipart
-    @POST("posts")
+    @POST("posts/")
     Call<Results> uploadWithDrawable(
             @Header("token") String token,
             @Part ("title") RequestBody title,
@@ -60,26 +63,36 @@ public interface HostInterface {
 
     // 헤더에 토큰을 날려야할거같은데..
 
-    @POST("signup")
-//    @Headers("")
+    @POST("signup/")
     Call<RequestBody> signup(@Body EmailSet emailSet);
 
-    @POST("login")
+    @POST("signup/")
+    Call<ResponseBody> signup1(
+            @Body EmailSet emailSet
+    );
+
+//    @FormUrlEncoded
+//    @POST("signup")
+//    Call<String> signup1(
+//            @Field("email") String email , @Field("password") String password
+//    );
+
+    @POST("login/")
     Call<Token> signin (@Body EmailSet emailset);
 
-    @POST("login")
+    @POST("login/")
     Call<Token> login (@Body EmailSet emailset);
 
-    @GET("posts/{post_id}")
+    @GET("posts/{post_id}/")
     Call<Results> getDetailData(@Header("token") String token,
                                 @Path("post_id") int id); // path는 리스트 리포함수를 통해서 데이터를 가져오게되는데 거기 들어오는 값을 path를 통해 url을 세팅한다.
 
-    @DELETE("posts/{post_id}")
+    @DELETE("posts/{post_id}/")
     Call deleteData(@Header("token") String token, @Path("post_id") int id); // path는 리스트 리포함수를 통해서 데이터를 가져오게되는데 거기 들어오는 값을 path를 통해 url을 세팅한다.
 
 
     @Multipart // 사진 변경했을 때
-    @PATCH("post/{post_id}")
+    @PATCH("post/{post_id}/")
     Call<ResponseBody> modifyWithImage(
             @Header("Authorization") String token,
             @Path("post_id") int id,
@@ -90,7 +103,7 @@ public interface HostInterface {
     );
 
     // 사진 변경안했을때 - 파일빠지면 멀티파트는 오류날꺼임. 다른거 실험해봐야함
-    @PATCH("post/{post_id}")
+    @PATCH("post/{post_id}/")
     Call<ResponseBody> modifyWithoutImage(
             @Header("token") String token,
             @Path("post_id") int id,
