@@ -28,6 +28,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import static haru.com.hr.HTTP_ResponseCode.CODE_OK;
 import static haru.com.hr.HostInterface.URL;
 
 /**
@@ -112,9 +113,9 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
             @Override
             public void onResponse(Call<Token> call, Response<Token> response) {
                 // 값이 정상적으로 리턴되었을 경우
-                if (response.isSuccessful()) {
+                if (response.code() == CODE_OK) {
                     Token token = response.body();
-                    Log.e(TAG, token.toString());
+                    Log.e(TAG, "token은 : " + token.getKey());
                     setToken(token.getKey());
 
                 } else {
@@ -187,7 +188,7 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
     private void setToken(String token) {
         SharedPreferences sharedPref = getSharedPreferences("Token", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString("token", token);
+        editor.putString("token", "Token " + token);
         editor.commit();
     }
     private void activityChange() {

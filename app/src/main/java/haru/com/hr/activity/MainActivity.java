@@ -214,12 +214,9 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
             @Override
             public void onResponse(Call<Results> call, Response<Results> response) {
                 // 값이 정상적으로 리턴되었을 경우
-                if (response.isSuccessful()) {
-                    if(response.code() == CODE_OK) {
+                if(response.code() == CODE_OK) {
 
-                    } else if ( response.code() == CODE_NOT_FOUND) {
-
-                    }
+                } else if ( response.code() == CODE_NOT_FOUND) {
 
                 } else {
                     //정상적이지 않을 경우 message에 오류내용이 담겨 온다.

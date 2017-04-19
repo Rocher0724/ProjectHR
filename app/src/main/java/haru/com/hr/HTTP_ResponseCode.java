@@ -12,4 +12,5 @@ public class HTTP_ResponseCode {
     public static final int CODE_Unauthorized = 401; // 토큰 만료 or 잘못된 토큰
     public static final int CODE_NOT_FOUND = 404;
     public static final int CODE_CONFLICT = 409;
+    public static final int CODE_INTERNAL_SERVER_ERROR = 500;
 }

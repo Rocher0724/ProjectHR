@@ -35,7 +35,7 @@ public interface HostInterface {
 //    @GET("566d677961726f6331397471525a50/json/SearchParkingInfo/1/10/{gu}")
 
     @GET("posts/")
-    Call<Data> getData(@Header("token") String token, @Query("page") int page); // path는 리스트 리포함수를 통해서 데이터를 가져오게되는데 거기 들어오는 값을 path를 통해 url을 세팅한다.
+    Call<Data> getData(@Header("Authorization") String token, @Query("page") int page); // path는 리스트 리포함수를 통해서 데이터를 가져오게되는데 거기 들어오는 값을 path를 통해 url을 세팅한다.
 
     // {gu} 부분을 설정하는 String user를 가져온다. 이부분은 서울시 공공데이터를 이용한 주차장 정보 세팅에서 가져왔다.
 
