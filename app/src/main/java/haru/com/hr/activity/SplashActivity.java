@@ -52,24 +52,25 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
 
         if( !autoLogin()/* 자동 로그인인지 체크 */) {
             // 자동 로그인이면 입력되었던 데이터를 토대로 데이터를 로딩해야함
+            Log.e(TAG,"로그인쿠키가 있다.");
             getData(id);
             loadSharedpreference(); // 이메일을 꺼냄. 비밀번호를 꺼내고싶지않았는데 서버쪽에서 자동로그인 구현을 이런식으로..
             // 방어코딩
             if( email != null) {
                 Log.e(TAG, "방어코딩 안으로 들어왔다" );
                 signin(email, password);
+                activityChange(false);
             } else {
                 Log.e(TAG,"email이 null입니다.");
+                activityChange(true);
             }
-
         } else {
             // 첫 로그인인경우 스플래시만 보여주고 로그인화면으로 넘어간다
             // 로그인 쿠키가 없는경우  1초간 스플래시에서 머문후 로그인페이지로 이동
+            Log.e(TAG,"로그인쿠키가 없어서 0.5초간 머문다.");
             Handler handler = new Handler();
-            handler.postDelayed(new splashHandler(), 1000);
+            handler.postDelayed(new splashHandler(), 500); // splashHandler 내부에 activityChange() 가 있다.
         }
-        activityChange();
-
     }
 
     private boolean autoLogin() {
@@ -83,6 +84,8 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
         }
     }
 
+    // 최초 로그인체크는 튜토리얼의 삽입과 연관이 있어야하고
+    // 자동로그인은 토큰의 유무로 해야한다.
     private boolean loadSharedpreference() {
         SharedPreferences sharedPref = getSharedPreferences("LoginCheck", Context.MODE_PRIVATE);
         boolean loginCheck = sharedPref.getBoolean("FirstLoginCheck", true );
@@ -187,13 +190,8 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
         editor.putString("token", token);
         editor.commit();
     }
-
-
     private void activityChange() {
-        //TODO 기 로그인자는 메인으로 바로이동시켜야하나?
-        Log.e(TAG,"액티비티를 바꾸자");
-
-        Intent intent = loadSharedpreference()?
+        Intent intent = autoLogin()?
                 new Intent(SplashActivity.this, LoginActivity.class)
                 : new Intent(SplashActivity.this, MainActivity.class);
         intent.putExtra("email",email);
@@ -201,9 +199,22 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
         finish();
     }
 
+    private void activityChange(boolean flag) {
+        Intent intent;
+        if( flag ) {
+            intent = new Intent(SplashActivity.this, LoginActivity.class);
+        } else {
+            intent = new Intent(SplashActivity.this, MainActivity.class);
+            intent.putExtra("email", email);
+        }
+        startActivity(intent);
+        finish();
+    }
+
     private class splashHandler implements Runnable {
         @Override
         public void run() {
+            activityChange();
         }
     }
 }
