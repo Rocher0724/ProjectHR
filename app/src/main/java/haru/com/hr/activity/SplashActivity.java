@@ -77,7 +77,7 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
 
     private boolean autoLogin() {
         // 토큰이 있으면 토큰을 날려서 서버에 인증한다.
-        String token = getToken();
+//        String token = getToken();
 
         if( token != null ) { // 토큰이 널이 아니면 토큰을 날려서 확인을한다.
             return false;
@@ -129,10 +129,10 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
                         break;
                 }
             }
-
             @Override
             public void onFailure(Call<Token> call, Throwable t) {
-
+                Log.e(TAG,"signin 서버통신 실패");
+                Log.e(TAG,t.toString());
             }
         });
 
@@ -145,10 +145,7 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
         dataSetting(id); // 데이터 세팅. 기 로그인자면 사용데이터, 최초사용자면 튜토리얼 세팅
     }
 
-
-
     private void dataSetting(int id) {
-        // todo 아마 여기서 이메일을 보내고 데이터를 받아오는것도 좋을것같다.
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(URL) // 포트까지가 베이스url이다.
@@ -176,6 +173,9 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
                             Log.e(TAG , "dataSetting 재귀적 작용 작동!");
                         } else {
                             Log.e(TAG, "dataSetting next 는 null이다!");
+                            // 사용자가 작성한 자료를 전부 로드하고 next가 null 일때 끝나므로 else에서 처리한다.
+                            // 1번만 실행되기 위해서 이렇게 처리했다.
+                            activityChange();
                         }
                         break;
                     case CODE_BAD_REQUEST:
@@ -183,15 +183,15 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
                         break;
                     case CODE_NOT_FOUND:
                         Log.e(TAG, "dataSetting 잘못된 페이지번호입니다.");
+                        // 사용자가 작성한 데이터가 없을때 404 에러가 나며 그냥 액티비티 체인지시켜주면됀다.
+                        activityChange();
                         break;
                 }
-
-                activityChange();
             }
-
             @Override
             public void onFailure(Call<Data> call, Throwable t) {
-
+                Log.e(TAG,"dataSetting 서버통신 실패");
+                Log.e(TAG,t.toString());
             }
         });
     }

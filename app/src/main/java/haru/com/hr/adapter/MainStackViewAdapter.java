@@ -43,7 +43,6 @@ public class MainStackViewAdapter extends ArrayAdapter<Results> {
         this.context = context;
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mLayout = resource;
-        Log.e(TAG,"생성자 : 작동중");
     }
 
     @NonNull
@@ -52,7 +51,6 @@ public class MainStackViewAdapter extends ArrayAdapter<Results> {
 //        View myView =  super.getView(position, convertView, parent);
 
         ViewHolder viewHolder;
-        Log.e(TAG,"겟뷰야 작동해라");
 
         if(convertView == null)
         {
@@ -74,11 +72,8 @@ public class MainStackViewAdapter extends ArrayAdapter<Results> {
         }
 
         Results data = datas.get(position);
-        Log.e(TAG,"타이틀 : " + data.getTitle());
         viewHolder.tvTitle.setText(data.getTitle());
-//        viewHolder.tvTitle.setTextColor(Color.WHITE);
         viewHolder.tvContent.setText(data.getContent());
-//        viewHolder.tvContent.setTextColor(Color.WHITE);
         viewHolder.tvDate.setText(data.getCreated_date());
         Glide.with(context)
                 .load(data.getImage_link())
