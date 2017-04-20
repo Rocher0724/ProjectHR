@@ -128,7 +128,7 @@
             android:layout_marginRight="8dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="2dp"
-            android:text="2017.4.4.오전 10:00:00"
+            android:text="2017-04-04"
             android:textColor="@color/mainIconColor"
             app:layout_constraintHorizontal_bias="0.06"
             app:layout_constraintLeft_toLeftOf="parent"
@@ -167,12 +167,14 @@
             android:id="@+id/imgWriteImgSelect"
             android:layout_width="23dp"
             android:layout_height="23dp"
-            android:layout_marginLeft="16dp"
+            android:layout_marginLeft="8dp"
             android:layout_marginTop="0dp"
-            app:layout_constraintLeft_toRightOf="@+id/tvWriteDate"
             app:layout_constraintTop_toBottomOf="@+id/imgWriteLine"
             app:srcCompat="@drawable/gallery_white"
-            android:onClick="writeAcitivityClickListener"/>
+            android:onClick="writeAcitivityClickListener"
+            android:layout_marginRight="8dp"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent" />
 
         <ProgressBar
             android:id="@+id/pbWrite"
@@ -183,7 +185,7 @@
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
             android:layout_marginTop="8dp"
-            android:theme="@style/progressbarColor"
+            android:theme="@style/pbWriteColor"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"

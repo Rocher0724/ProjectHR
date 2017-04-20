@@ -10,6 +10,7 @@
     <color name="moaTopColor">#5e4236</color>
     <color name="writeSpinnerColor">#000000</color>
     <color name="progressBarColor">#5e4236</color>
+    <color name="pbWriteColor">#F4FDC2</color>
     <color name="textmarker">#5e4236</color>
     <color name="textHighLight">#F4C0AB</color>
     <color name="pbColorinLogin">#857F62</color>

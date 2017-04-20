@@ -28,12 +28,12 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import static haru.com.hr.BaseURL.URL;
 import static haru.com.hr.HTTP_ResponseCode.CODE_BAD_REQUEST;
 import static haru.com.hr.HTTP_ResponseCode.CODE_CREATED;
 import static haru.com.hr.HTTP_ResponseCode.CODE_INTERNAL_SERVER_ERROR;
 import static haru.com.hr.HTTP_ResponseCode.CODE_NOT_FOUND;
 import static haru.com.hr.HTTP_ResponseCode.CODE_OK;
-import static haru.com.hr.HostInterface.URL;
 
 public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
 

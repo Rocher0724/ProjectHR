@@ -27,18 +27,11 @@ import retrofit2.http.Query;
 
 public interface HostInterface {
 
-    String URL = "https://haru.ycsinabro.com/";
-    String URLL = "http://192.168.0.194/";
-
-
     // 중에서 포트 이하 부분을 get 이하에 쓴다.
 //    @GET("566d677961726f6331397471525a50/json/SearchParkingInfo/1/10/{gu}")
 
-    @GET("posts/")
+    @GET("posts")
     Call<Data> getData(@Header("Authorization") String token, @Query("page") int page); // path는 리스트 리포함수를 통해서 데이터를 가져오게되는데 거기 들어오는 값을 path를 통해 url을 세팅한다.
-
-    // {gu} 부분을 설정하는 String user를 가져온다. 이부분은 서울시 공공데이터를 이용한 주차장 정보 세팅에서 가져왔다.
-
 
     @Multipart
     @POST("posts/")
@@ -59,9 +52,6 @@ public interface HostInterface {
             @Part("status_code") int code,
             @Part MultipartBody.Part file
     );
-
-
-    // 헤더에 토큰을 날려야할거같은데..
 
     @POST("signup/")
     Call<RequestBody> signup(@Body EmailSet emailSet);

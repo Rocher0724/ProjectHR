@@ -42,7 +42,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-import static haru.com.hr.HostInterface.URL;
+import static haru.com.hr.BaseURL.URL;
 
 public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
     private static final int REQ_GALLERY = 100;

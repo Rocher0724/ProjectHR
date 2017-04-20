@@ -15,8 +15,8 @@
             android:icon="@drawable/ic_menu_slideshow"
             android:title="open source license" />
         <item
-            android:id="@+id/nav_manage"
-            android:icon="@drawable/ic_menu_manage"
+            android:id="@+id/nav_sign_out"
+            android:icon="@drawable/icon_signout"
             android:title="sign out" />
     </group>
 

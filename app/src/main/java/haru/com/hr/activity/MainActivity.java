@@ -56,7 +56,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 import static haru.com.hr.HTTP_ResponseCode.CODE_NOT_FOUND;
 import static haru.com.hr.HTTP_ResponseCode.CODE_OK;
-import static haru.com.hr.HostInterface.URL;
+import static haru.com.hr.BaseURL.URL;
 
 public class MainActivity extends  BaseActivity<ActivityMainBinding>
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -75,7 +75,6 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
     private SimpleDateFormat dateFormatForMonth = new SimpleDateFormat("yyyy-MM");
     private SimpleDateFormat selectedDate = new SimpleDateFormat("yyyy-MM-dd");
     private Calendar event = Calendar.getInstance(Locale.KOREA);
-    private boolean emptyDataSetFlag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,9 +83,9 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         checkVersion(REQ_PERMISSION);
         backPressCloseHandler = new BackPressCloseHandler(this);
         userInfoSetting();
-//        dataLoader(); // 튜토리얼 데이터를 임의생성. 나중에 TODO 삭제할것
 
         cardStackSetting();
+        tutorialDataSetting(); // 튜토리얼 데이터생성
 
         getBinding().navView.setNavigationItemSelectedListener(this);
 
@@ -97,13 +96,35 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         MainCalSetting();
     }
 
+    private void tutorialDataSetting() {
+        if( realDatas.size() == 0) {
+            Results data = new Results();
+            data.setId(-2);
+            data.setTitle("");
+            data.setContent("페이지를 좌우로 넘겨가며 \n\r 사용해보세요");
+            data.setImage_link("android.resource://" + MainActivity.this.getPackageName() + "/drawable/splash2");
+            data.setStatus_code(1);
+            data.setCreated_date(DateFormat.getDateTimeInstance().format(new Date()));
+            realDatas.add(data);
+
+            Results data1 = new Results();
+            data1.setId(-2);
+            data1.setTitle("당신의 이야기를 시작하세요");
+            data1.setContent("당신의 하루를 응원합니다.");
+            data1.setImage_link("android.resource://" + MainActivity.this.getPackageName() + "/drawable/splash2");
+            data1.setStatus_code(2);
+            data1.setCreated_date(DateFormat.getDateTimeInstance().format(new Date()));
+            realDatas.add(data1);
+            stackViewAdapter.notifyDataSetChanged();
+        }
+    }
+
     private void userInfoSetting() {
         Intent intent = getIntent();
         String email = intent.getExtras().getString("email");
         View v = getBinding().navView.getHeaderView(0);
         TextView tvDrawerEmail = (TextView) v.findViewById(R.id.tvDrawerEmail);
         tvDrawerEmail.setText(email);
-        emptyDataSetFlag = getEmptyDataFlag();
     }
 
     // -- Main Calendar 부분 --
@@ -197,6 +218,7 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
     };
 
     // 디테일 액티비티로 가기전에 데이터세팅 하려했으나 이미 있는 데이터로 처리가능할것같다.
+    @Deprecated
     private void getDetailData(Results data) {
 
         Retrofit retrofit = new Retrofit.Builder()
@@ -236,19 +258,6 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         String token = sharedPref.getString("token", null);
         return token;
     }
-
-    private boolean getEmptyDataFlag() {
-        SharedPreferences sharedPref = getSharedPreferences("EmptyData", Context.MODE_PRIVATE);
-        boolean emptyDataFlag = sharedPref.getBoolean("emptydata", true);
-        return emptyDataFlag;
-    }
-    private void setEmptyDataFlag(boolean flag) {
-        SharedPreferences sharedPref = getSharedPreferences("EmptyData", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putBoolean("emptydata", flag);
-        editor.commit();
-    }
-
 
     // 달력 안에 아이템 색깔 지정하는 메소드
     private List<Event> getEvents(long timeInMillis) {
@@ -460,16 +469,14 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         int id = item.getItemId();
 
         if (id == R.id.nav_camera) {
-            sharedpreferenceForLogOut();
-
-            Toast.makeText(this, "shared preference가 삭제됨", Toast.LENGTH_SHORT).show();
 
         } else if (id == R.id.nav_gallery) {
             dataReset();
         } else if (id == R.id.nav_slideshow) {
 
-        } else if (id == R.id.nav_manage) {
-
+        } else if (id == R.id.nav_sign_out) {
+            sharedpreferenceForLogOut();
+            Toast.makeText(this, "shared preference가 삭제됨", Toast.LENGTH_SHORT).show();
         } else if (id == R.id.nav_send) {
 
         }
@@ -493,21 +500,13 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         editor.clear();
         editor.apply();
 
-        // emptydata에 대한 sharedpreference를 삭제해주기위해 임의로 여기 놓음.
-        SharedPreferences sharedPref1 = getSharedPreferences("EmptyData", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor1 = sharedPref1.edit();
-        editor1.remove("emptydata");
-        editor1.clear();
-        editor1.apply();
-
         SharedPreferences sharedPref2 = getSharedPreferences("Token", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor2 = sharedPref2.edit();
-        editor1.remove("token");
-        editor1.clear();
-        editor1.apply();
-        Log.e(TAG,"첫로그인체크, 튜토리얼 데이터세팅플래그, 토큰 삭제");
+        editor2.remove("token");
+        editor2.clear();
+        editor2.apply();
+        Log.e(TAG,"첫로그인체크, 토큰 삭제");
     }
-
 
     // 퍼미션체크
     public final String PERMISSION_ARRAY[] = {
@@ -605,31 +604,7 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
 
         @Override
         public void onAdapterAboutToEmpty(int i) {
-            // 데이터 셋에서 id값이 -1 인 경우는 날렸을때 돌아오지 않게 설정했기 때문에 -2로 주었다.
-            // 사진 모아보기 창에서는 id가 -1, -2인 값을 표시하지 않도록 했다.
-            Log.e(TAG,"데이터가 없을때 체크한다. emptyDataSet = " + emptyDataSetFlag);
-            if (emptyDataSetFlag) {
-                Results data = new Results();
-                data.setId(-2);
-                data.setTitle("");
-                data.setContent("페이지를 좌우로 넘겨가며 \n\r 사용해보세요");
-                data.setImage_link("android.resource://" + MainActivity.this.getPackageName() + "/drawable/splash2");
-                data.setStatus_code(1);
-                data.setCreated_date(DateFormat.getDateTimeInstance().format(new Date()));
-                realDatas.add(data);
-            }
-            if (emptyDataSetFlag) {
-                Results data1 = new Results();
-                data1.setId(-2);
-                data1.setTitle("당신의 이야기를 시작하세요");
-                data1.setContent("당신의 하루를 응원합니다.");
-                data1.setImage_link("android.resource://" + MainActivity.this.getPackageName() + "/drawable/splash2");
-                data1.setStatus_code(2);
-                data1.setCreated_date(DateFormat.getDateTimeInstance().format(new Date()));
-                realDatas.add(data1);
-                stackViewAdapter.notifyDataSetChanged();
-                setEmptyDataFlag(false);
-            }
+            // 데이터가 없을때 작동한다
         }
 
         @Override
@@ -644,16 +619,4 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         stackViewAdapter.notifyDataSetChanged();
         super.onResume();
     }
-
-//    private void dataLog(List<PostingData> postingDatas){
-//        for( PostingData item : postingDatas) {
-//            Log.e(TAG, "메인액티비티. 현재 postingData의 크기는 : " + postingDatas.size());
-//            Log.e(TAG, "id : " + item.get_id());
-//            Log.e(TAG, "title : " + item.getTitle());
-//            Log.e(TAG, "content : " + item.getContent());
-//            Log.e(TAG, "imageUrl : " + item.getImageUrl());
-//            Log.e(TAG, "emotionUrl : " + item.getEmotionUrl());
-//            Log.e(TAG, "                           .                 ");
-//        }
-//    }
 }

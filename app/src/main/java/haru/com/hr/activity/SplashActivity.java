@@ -33,7 +33,7 @@ import static haru.com.hr.HTTP_ResponseCode.CODE_BAD_REQUEST;
 import static haru.com.hr.HTTP_ResponseCode.CODE_INTERNAL_SERVER_ERROR;
 import static haru.com.hr.HTTP_ResponseCode.CODE_NOT_FOUND;
 import static haru.com.hr.HTTP_ResponseCode.CODE_OK;
-import static haru.com.hr.HostInterface.URL;
+import static haru.com.hr.BaseURL.URL;
 
 /**
  *  스플래시 액티비티
@@ -71,7 +71,7 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
             // 로그인 쿠키가 없는경우  1초간 스플래시에서 머문후 로그인페이지로 이동
             Log.e(TAG,"로그인쿠키가 없어서 0.5초간 머문다.");
             Handler handler = new Handler();
-            handler.postDelayed(new splashHandler(), 500); // splashHandler 내부에 activityChange() 가 있다.
+            handler.postDelayed(new splashHandler(), 100); // splashHandler 내부에 activityChange() 가 있다.
         }
     }
 

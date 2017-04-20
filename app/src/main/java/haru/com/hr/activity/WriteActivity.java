@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.os.Bundle;
@@ -55,8 +56,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 import static haru.com.hr.HTTP_ResponseCode.CODE_BAD_REQUEST;
 import static haru.com.hr.HTTP_ResponseCode.CODE_CREATED;
-import static haru.com.hr.HTTP_ResponseCode.CODE_Unauthorized;
-import static haru.com.hr.HostInterface.URL;
+import static haru.com.hr.HTTP_ResponseCode.CODE_UNAUTHORIZED;
+import static haru.com.hr.BaseURL.URL;
 
 
 public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
@@ -70,7 +71,7 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
     private Uri selectedImageUrl;
     int selectedImgInDrawable;
     private int selectedEmotionPosition;
-    private Uri imageUri;
+    private Uri imageUriInDrawable;
     private SimpleDateFormat selectedDate = new SimpleDateFormat("yyyy-MM-dd");
     String token;
 
@@ -81,8 +82,8 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
         setBinding(R.layout.activity_write);
         token = getToken();
         randomImageSetting();
-
         isPictureSelect = false;
+
 //        getSharedpreferenceFor_id(); // _id값은 서버에서준다.
         //Write Activity 진입후 시간 설정
         writeActivityDateSetText();
@@ -185,9 +186,7 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
         editor.commit();
     }
 
-
     private void writeActivityDateSetText() {
-//        getBinding().tvWriteDate.setText(DateFormat.getDateTimeInstance().format(new Date())); TODO 삭제
         getBinding().tvWriteDate.setText(selectedDate.format(new Date())); // 날짜까지만 표시되게 하고싶다.
     }
 
@@ -205,8 +204,6 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
             selectedEmotionPosition = position;
         }
 
-
-
         @Override
         public void onNothingSelected(AdapterView<?> parent) {
             // 최초 세팅에서 선택하지 않았을때 어떤 작업이 수행되는것으로 생각하였으나
@@ -222,9 +219,7 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
                 break;
             case R.id.tvWriteSave:
                 if(contentEmptyChecker()) {
-                    //TODO 글저장작업
                     dataSave();
-                    activityChange();
                 } else {
                     Toast.makeText(this, "글 내용은 입력되어야 합니다.", Toast.LENGTH_SHORT).show();
                 }
@@ -240,9 +235,10 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
     }
 
     private void goGallery() {
-        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        intent.setType("image/*"); // 외부저장소에 있는 이미지만 가져오기 위한 필터링
-        startActivityForResult( Intent.createChooser(intent, " Select Picture"), REQ_GALLERY);
+        Intent intent = new Intent(Intent.ACTION_PICK);
+        intent.setType(MediaStore.Images.Media.CONTENT_TYPE);
+        intent.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult( intent, REQ_GALLERY);
     }
 
     @Override
@@ -285,7 +281,6 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
                         , new BlurTransformation(this, 10)
                         , new ColorFilterTransformation(this, Color.argb(100, 100, 100, 100)))
                 .into(getBinding().imgWriteActivity);
-        imageUri = data.getData();
         isPictureSelect = true;
     }
 
@@ -295,7 +290,6 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
     }
 
     private void dataSave() {
-
         Results pData = new Results();
         pData.setTitle(blankCheck(getBinding().etWriteTitle.getText().toString()));
         pData.setContent(getBinding().etWriteContent.getText().toString());
@@ -305,30 +299,9 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
             // TODO 사용자가 데이터를 선택한경우 사용자 핸드폰에 있는 정보를 쏴줘야한다.
             selectedImagePosting(selectedImageUrl, pData);
         } else {
-            whenUserNoSelectImage(selectedImgInDrawable);
-            nonSelectedImagePosting(selectedImageUrl , pData);
-//            pData.setImageUrl(Uri.parse("android.resource://" + WriteActivity.this.getPackageName() + "/drawable/back" + selectedImgInDrawable));
+            whenUserNoSelectImage(selectedImgInDrawable, pData);
         }
-
-
-
-
-
-//        PostingData pData = new PostingData();
-//        pData.set_id(idCount + "");  // _id값은 서버에서 제공
-//        idCount = idCount + 1;        // _id값은 서버에서 제공
-//        setSharedpreferenceFor_id();  // _id값은 서버에서 제공
-
-
-        // TODO 날짜는 실제 시간과 표시될 날짜가 따로있다. 나중에 실제 데이터셋을 넣을때 표시될 날짜셋을 추가해야할것임.
-//        DataStoreTemp.getInstance().addData(pData);
-
-        Toast.makeText(this, "저장되었습니다.", Toast.LENGTH_SHORT).show();
-        Log.e(TAG,"데이터가 추가되었습니다.");
-
     }
-
-
 
     private String blankCheck(String text) {
         return (text.equals(""))? "" : text;
@@ -340,7 +313,6 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
         RequestBody pDataContent = RequestBody.create(MultipartBody.FORM, pData.getContent());
         int statusCode = pData.getStatus_code();
 
-
         File originalFile = FileUtils.getFile(this, fileUri);
         RequestBody filePart = RequestBody.create(
                 MediaType.parse(getContentResolver().getType(fileUri)),
@@ -349,14 +321,9 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
         // 이미지 넣을때 키값
         MultipartBody.Part file = MultipartBody.Part.createFormData("image", originalFile.getName() , filePart);
 
-
-
         Retrofit.Builder builder = new Retrofit.Builder()
                 .baseUrl(URL)
                 .addConverterFactory(GsonConverterFactory.create());
-
-
-
 
         Retrofit retrofit = builder.build();
         HostInterface client = retrofit.create(HostInterface.class);
@@ -365,29 +332,28 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
         call.enqueue(new Callback<Results>() {
             @Override
             public void onResponse(Call<Results> call, Response<Results> response) {
-                if( response.isSuccessful() ) {
-                    switch (response.code()) {
-                        case CODE_CREATED:
-                            ResultsDataStore.getInstance().addData(response.body());
-                            Log.v(TAG, "create success");
-                            finish();
-                            break;
-                        case CODE_BAD_REQUEST:
-                            Toast.makeText(WriteActivity.this, "입력값 오류입니다", Toast.LENGTH_SHORT).show();
-                            break;
-                        case CODE_Unauthorized:
-                            Toast.makeText(WriteActivity.this, "토큰이 만료되었습니다.", Toast.LENGTH_SHORT).show();
-                            break;
-                    }
-                } else {
-                    Log.e(TAG,"selectedImagePosting 통신의 상태가...? ");
+                Log.e(TAG,"코드 : " + response.code());
+                switch (response.code()) {
+                    case CODE_CREATED:
+                        ResultsDataStore.getInstance().addData(response.body());
+                        Toast.makeText(WriteActivity.this, "저장되었습니다.", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG,"데이터가 추가되었습니다.");
+                        activityChange();
+                        break;
+                    case CODE_BAD_REQUEST:
+                        Toast.makeText(WriteActivity.this, "입력값 오류입니다", Toast.LENGTH_SHORT).show();
+                        break;
+                    case CODE_UNAUTHORIZED:
+                        Toast.makeText(WriteActivity.this, "토큰이 만료되었습니다.", Toast.LENGTH_SHORT).show();
+                        break;
                 }
+                getBinding().pbWrite.setVisibility(View.GONE);
             }
-
             @Override
             public void onFailure(Call<Results> call, Throwable t) {
                 Toast.makeText(WriteActivity.this, "nooooo!!!", Toast.LENGTH_SHORT).show();
-                Log.e("error:", "selectedImagePosting : " + t.getMessage());
+                Log.e(TAG, "selectedImagePosting : error " + t.getMessage());
+                getBinding().pbWrite.setVisibility(View.GONE);
             }
         });
     }
@@ -401,8 +367,8 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
         File originalFile = new File(String.valueOf(fileUri));
         RequestBody filePart = RequestBody.create(MediaType.parse("multipart/form-data"), originalFile);
 
-                                                                // 이미지 넣을때 키값
-        MultipartBody.Part file = MultipartBody.Part.createFormData("image", originalFile.getName() , filePart);
+        // 이미지 넣을때 키값
+        MultipartBody.Part file = MultipartBody.Part.createFormData("image", originalFile.getName(), filePart);
 
         Retrofit.Builder builder = new Retrofit.Builder()
                 .baseUrl(URL)
@@ -415,73 +381,96 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
         call.enqueue(new Callback<Results>() {
             @Override
             public void onResponse(Call<Results> call, Response<Results> response) {
-                if( response.isSuccessful() ) {
-                    switch (response.code()) {
-                        case CODE_CREATED:
-                            ResultsDataStore.getInstance().addData(response.body());
-                            Log.v(TAG, "create success");
-                            finish();
-                            break;
-                        case CODE_BAD_REQUEST:
-                            Toast.makeText(WriteActivity.this, "입력값 오류입니다", Toast.LENGTH_SHORT).show();
-                            break;
-                        case CODE_Unauthorized:
-                            Toast.makeText(WriteActivity.this, "토큰이 만료되었습니다.", Toast.LENGTH_SHORT).show();
-                            break;
-                    }
-                } else {
-                    Log.e(TAG,"nonSelectedImagePosting 통신의 상태가...? ");
+                Log.e(TAG, "코드 : " + response.code());
+                switch (response.code()) {
+                    case CODE_CREATED:
+                        ResultsDataStore.getInstance().addData(response.body());
+                        Toast.makeText(WriteActivity.this, "저장되었습니다.", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "nonSelectedImagePosting 데이터가 추가되었습니다.");
+                        activityChange();
+                        break;
+                    case CODE_BAD_REQUEST:
+                        Toast.makeText(WriteActivity.this, "입력값 오류입니다", Toast.LENGTH_SHORT).show();
+                        break;
+                    case CODE_UNAUTHORIZED:
+                        Toast.makeText(WriteActivity.this, "토큰이 만료되었습니다.", Toast.LENGTH_SHORT).show();
+                        break;
+                    default:
+                        Toast.makeText(WriteActivity.this, "저장하지 못했습니다.", Toast.LENGTH_SHORT).show();
                 }
+                drawableImageRemove(fileUri);
+                getBinding().pbWrite.setVisibility(View.GONE);
             }
-
             @Override
             public void onFailure(Call<Results> call, Throwable t) {
                 Toast.makeText(WriteActivity.this, "nooooo!!!", Toast.LENGTH_SHORT).show();
                 Log.e("error:", "nonSelectedImagePosting : " + t.getMessage());
+                getBinding().pbWrite.setVisibility(View.GONE);
             }
         });
+    }
 
+    private void drawableImageRemove(Uri fileUri) {
         File imagefile = new File(String.valueOf(fileUri));
         imagefile.delete();
-        WriteActivity.this.deleteFile("temp.PNG");
-    }
 
-    private void whenUserNoSelectImage(int resid) {
-        Resources res = this.getResources();
-        Bitmap bitmap = BitmapFactory.decodeResource(res,
-                resid);
-        String extStorageDirectory = Environment.getExternalStorageDirectory().toString();
-
-        File file = new File(extStorageDirectory, "temp.PNG");
-        OutputStream outStream = null;
-        try {
-            outStream = new FileOutputStream(file);
-
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outStream);
-            outStream.flush();
-            outStream.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                outStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        imageUri = Uri.parse(file.getPath());
-        Log.e(TAG, imageUri + "");
-        if( file != null) {
-            Log.e(TAG, "파일이 있다");
-            return;
+        if( imagefile != null) {
+            Log.e(TAG, "drawable 파일이 아직 있다");
         } else {
-            Log.e(TAG, "파일이 없다");
-            return;
+            Log.e(TAG, "drawable 파일이 삭제됐다.");
         }
-
     }
 
+    private void whenUserNoSelectImage(int resid, Results pData) {
+        AsyncTask<Void,Void,Void> task = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                getBinding().pbWrite.setVisibility(View.VISIBLE);
+            }
 
+            @Override
+            protected Void doInBackground(Void... params) {
+
+                Resources res = WriteActivity.this.getResources();
+                Bitmap bitmap = BitmapFactory.decodeResource(res, resid);
+                String extStorageDirectory = Environment.getExternalStorageDirectory().toString();
+
+                File file = new File(extStorageDirectory, "temp.PNG");
+                OutputStream outStream = null;
+                try {
+                    outStream = new FileOutputStream(file);
+
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, outStream);
+                    outStream.flush();
+                    outStream.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        outStream.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                imageUriInDrawable = Uri.parse(file.getPath());
+                Log.e(TAG, imageUriInDrawable + "");
+                if( file != null) {
+                    Log.e(TAG, "파일이 있다");
+                } else {
+                    Log.e(TAG, "파일이 없다");
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                nonSelectedImagePosting(imageUriInDrawable , pData);
+            }
+        };
+        task.execute();
+    }
 
     @Override
     public void onBackPressed() {

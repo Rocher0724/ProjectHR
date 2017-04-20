@@ -31,8 +31,8 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import static haru.com.hr.BaseURL.URL;
 import static haru.com.hr.HTTP_ResponseCode.CODE_DELETE;
-import static haru.com.hr.HostInterface.URL;
 
 /**
  * Created by myPC on 2017-04-07.

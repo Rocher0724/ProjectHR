@@ -50,5 +50,8 @@
     <style name="pbColorinLogin">
         <item name="colorAccent">@color/pbColorinLogin</item> <!-- Whatever color you want-->
     </style>
+    <style name="pbWriteColor">
+        <item name="colorAccent">@color/pbWriteColor</item> <!-- Whatever color you want-->
+    </style>
 
 </resources>
