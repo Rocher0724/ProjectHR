@@ -36,7 +36,8 @@
         <item name="hintTextAppearance">@style/TextAppearance.Design.Hint</item>
         <item name="errorTextAppearance">@style/TextAppearance.Design.Error</item>
         <item name="counterTextAppearance">@style/TextAppearance.Design.Counter</item>
-        <item name="counterOverflowTextAppearance">@style/TextAppearance.Design.Counter.Overflow</item>
+        <item name="counterOverflowTextAppearance">@style/TextAppearance.Design.Counter.Overflow
+        </item>
         <item name="passwordToggleDrawable">@drawable/design_password_eye</item>
         <item name="passwordToggleTint">@color/textmarker</item>
         <item name="passwordToggleContentDescription">@string/password_toggle_content_description
@@ -47,9 +48,11 @@
     <style name="progressbarColor">
         <item name="colorAccent">@color/progressBarColor</item> <!-- Whatever color you want-->
     </style>
+
     <style name="pbColorinLogin">
         <item name="colorAccent">@color/pbColorinLogin</item> <!-- Whatever color you want-->
     </style>
+
     <style name="pbWriteColor">
         <item name="colorAccent">@color/pbWriteColor</item> <!-- Whatever color you want-->
     </style>

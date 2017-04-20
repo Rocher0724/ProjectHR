@@ -133,7 +133,7 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         calendarView.setFirstDayOfWeek(Calendar.SUNDAY);
         calendarView.setListener(calendarViewListener);
         getBinding().mainInclude.mainCal.tvMainCalTitle.setText(dateFormatForMonth.format(calendarView.getFirstDayOfCurrentMonth()));
-        loadEventOnCalendar(); // TODO 데이터 로드해서 캘린더에 넣어주는작업
+        loadEventOnCalendar();
     }
 
     private void loadEventOnCalendar() {
@@ -152,6 +152,20 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
             Log.e(TAG,"년 = " + year + ", 월 = " + month + ", 일 = " + day );
             addEvents( year , month , day );
         }
+    }
+
+    private void addEvents(int year, int month, int day) {
+        event.setTime(new Date());
+        event.set(Calendar.DAY_OF_MONTH, 1);
+        Date firstDayOfMonth = event.getTime();
+        event.setTime(firstDayOfMonth);
+        event.set(Calendar.MONTH, month);
+        event.set(Calendar.ERA, GregorianCalendar.AD);
+        event.set(Calendar.YEAR, year);
+        event.add(Calendar.DATE, day);
+        long timeInMillis = event.getTimeInMillis();
+        List<Event> events = getEvents(timeInMillis);
+        calendarView.addEvents(events);
     }
 
     private static int dateStrToInt(String s) {
@@ -264,20 +278,6 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         return Arrays.asList(new Event(Color.argb(255, 255, 255, 255), timeInMillis));
     }
 
-    private void addEvents(int year, int month, int day) {
-        event.setTime(new Date());
-        event.set(Calendar.DAY_OF_MONTH, 1);
-        Date firstDayOfMonth = event.getTime();
-        event.setTime(firstDayOfMonth);
-        event.set(Calendar.MONTH, month);
-        event.set(Calendar.ERA, GregorianCalendar.AD);
-        event.set(Calendar.YEAR, year);
-        event.add(Calendar.DATE, day);
-        long timeInMillis = event.getTimeInMillis();
-        List<Event> events = getEvents(timeInMillis);
-        calendarView.addEvents(events);
-    }
-
     private void appBarCollapsingCheckerForBlur() {
         getBinding().mainInclude.mainMoa.appBar.addOnOffsetChangedListener((appBarLayout, verticalOffset) -> {
             float percentage = 1 - ((float)Math.abs(verticalOffset)/appBarLayout.getTotalScrollRange());
@@ -370,7 +370,6 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         getBinding().mainInclude.imgLogo.setVisibility(View.GONE);
         getBinding().mainInclude.imgBottomBlur.setVisibility(View.VISIBLE);
         getBinding().mainInclude.imgMainTopLogo.setVisibility(View.GONE);
-//        getBinding().mainInclude.imgBottomBlur.setAnimation(bottomSpaceBlur); // TODO: 2017-04-04 나중에 봐서 애니메이션을 넣을 필요가 없으면 지우기
     }
 
     private void pressImgMainMoaViewChange() {
@@ -388,9 +387,6 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         // 자료의 개수를 표시해준다.
         String numberOfStory = ( realDataSize() == 0 )? "0 story" : realDataSize() + " stories";
         getBinding().mainInclude.mainMoa.tvInToolbarCount.setText(numberOfStory);
-
-
-//        getBinding().mainInclude.imgBottomBlur.setAnimation(bottomSpaceBlur); // TODO: 2017-04-04 애니메이션 삭제예정
     }
 
     private void pressImgMainStackViewChange() {
@@ -468,23 +464,32 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
+         if (id == R.id.nav_app_info) {
 
-        } else if (id == R.id.nav_gallery) {
-            dataReset();
-        } else if (id == R.id.nav_slideshow) {
-
+        } else if (id == R.id.nav_opensource) {
+            Intent intent = new Intent(MainActivity.this, OpenSourceActivity.class);
+             startActivity(intent);
         } else if (id == R.id.nav_sign_out) {
             sharedpreferenceForLogOut();
             Toast.makeText(this, "shared preference가 삭제됨", Toast.LENGTH_SHORT).show();
         } else if (id == R.id.nav_send) {
-
+             Intent email = new Intent(Intent.ACTION_SEND);
+             email.putExtra(Intent.EXTRA_EMAIL, new String[]{"rocher0724.dev@gmail.com"});
+             email.putExtra(Intent.EXTRA_SUBJECT, "하루한장 앱에서 메일드립니다.");
+             email.putExtra(Intent.EXTRA_TEXT, "메시지를 이곳에 적어주세요.");
+             email.setType("message/rfc822");
+             startActivity(Intent.createChooser(email, "Choose an Email client :"));
+        } else if (id == R.id.nav_review) {
+             Intent intent = new Intent(Intent.ACTION_VIEW);
+             intent.setData(Uri.parse("market://details?id=" + getPackageName()));
+             startActivity(intent);
         }
 
         getBinding().drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
 
+    // 데이터 2개빼고 나머지는 삭제하는 메소드
     private void dataReset() {
         while (realDatas.size() > 2) {
             realDatas.remove(realDatas.size() -1);

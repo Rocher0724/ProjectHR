@@ -20,6 +20,7 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -27,8 +28,7 @@
             android:name=".activity.LoginActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="adjustPan">
-        </activity>
+            android:windowSoftInputMode="adjustPan"></activity>
         <activity
             android:name=".activity.MainActivity"
             android:screenOrientation="portrait"
@@ -40,14 +40,20 @@
         <activity
             android:name=".activity.ImageDetailActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".activity.CalToDetailActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"/>
-        <activity android:name=".activity.ModifyActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".activity.ModifyActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".activity.OpenSourceActivity"
+            android:screenOrientation="portrait"
+            android:label="@string/title_activity_open_source"
+            android:theme="@style/AppTheme.OpenSourceActivity"></activity>
     </application>
 
 </manifest>

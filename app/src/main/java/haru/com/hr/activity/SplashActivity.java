@@ -120,11 +120,8 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
                         Log.e(TAG, "signin 정상 리턴");
                         break;
                     case CODE_BAD_REQUEST:
-                        Toast.makeText(SplashActivity.this, "아이디와 비밀번호를 입력해주세요", Toast.LENGTH_SHORT).show();
-                        Log.e(TAG, "signin 값이 비정상적으로 리턴되었다. = " + response.message());
-                        break;
                     case CODE_INTERNAL_SERVER_ERROR:
-                        Toast.makeText(SplashActivity.this, "아이디 또는 비밀번호를 확인하세요.", Toast.LENGTH_SHORT).show();
+                        activityChange(true);
                         Log.e(TAG, "signin 값이 비정상적으로 리턴되었다. = " + response.message());
                         break;
                 }
