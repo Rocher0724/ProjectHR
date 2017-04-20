@@ -344,6 +344,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
                             Log.e(TAG , "dataSetting 재귀적 작용 작동!");
                         } else {
                             Log.e(TAG, "dataSetting next 는 null이다!");
+                            afterDataSetting(email, password);
                         }
                         break;
                     case CODE_BAD_REQUEST:
@@ -351,12 +352,9 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
                         break;
                     case CODE_NOT_FOUND:
                         Log.e(TAG, "dataSetting 잘못된 페이지번호입니다.");
+                        afterDataSetting(email, password);
                         break;
                 }
-
-                saveSharedpreference(email, password); // 자동로그인을 위한 shared preference 저장
-                editTextVisibleChanger(); //현재 비지블이므로 로그인하면서 텍스트 숨김
-                activityChange(email);
             }
 
             @Override
@@ -365,6 +363,12 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
                 Log.e(TAG,t.toString());
             }
         });
+    }
+
+    private void afterDataSetting(String email, String password) {
+        saveSharedpreference(email, password); // 자동로그인을 위한 shared preference 저장
+        editTextVisibleChanger(); //현재 비지블이므로 로그인하면서 텍스트 숨김
+        activityChange(email);
     }
 
     private String getToken() {
