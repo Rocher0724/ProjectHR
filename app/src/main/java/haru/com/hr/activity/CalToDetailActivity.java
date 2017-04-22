@@ -25,6 +25,7 @@ import haru.com.hr.domain.DataTemp;
 import haru.com.hr.domain.Token;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import jp.wasabeef.glide.transformations.ColorFilterTransformation;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -32,7 +33,9 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import static haru.com.hr.BaseURL.URL;
-import static haru.com.hr.HTTP_ResponseCode.CODE_DELETE;
+import static haru.com.hr.HTTP_ResponseCode.CODE_NOT_FOUND;
+import static haru.com.hr.HTTP_ResponseCode.CODE_NO_CONTENT;
+import static haru.com.hr.HTTP_ResponseCode.CODE_UNAUTHORIZED;
 
 /**
  * Created by myPC on 2017-04-07.
@@ -41,7 +44,6 @@ import static haru.com.hr.HTTP_ResponseCode.CODE_DELETE;
 public class CalToDetailActivity extends BaseActivity<ActivityCalToDetailBinding> {
     private static final int REQ_MODIFY = 101;
     private static final String TAG = "CalToDetailActivity";
-//    PostingData pData;
     Results pData;
 
     @Override
@@ -148,28 +150,29 @@ public class CalToDetailActivity extends BaseActivity<ActivityCalToDetailBinding
         // 2. 사용할 인터페이스를 설정한다.
         HostInterface localhost = retrofit.create(HostInterface.class);
         // 3. 데이터를 가져온다
-        Call result = localhost.deleteData(token, id);
+        Call<ResponseBody> result = localhost.deleteData(token, id);
 
-        result.enqueue(new Callback<DataTemp>() {
+        result.enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(Call call, Response response) {
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 // 값이 정상적으로 리턴되었을 경우
-                if(response.isSuccessful()) {
-                    if(response.code() == CODE_DELETE) {
+                switch (response.code()) {
+                    case CODE_NO_CONTENT:
                         Toast.makeText(CalToDetailActivity.this, "삭제되었습니다.", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(CalToDetailActivity.this, "token or id가 잘못된 요청입니다.", Toast.LENGTH_SHORT).show();
-                    }
-
-                } else {
-                    //정상적이지 않을 경우 message에 오류내용이 담겨 온다.
-                    Log.e("onResponse","값이 비정상적으로 리턴되었다. = " + response.message());
+                        break;
+                    case CODE_UNAUTHORIZED:
+                        Toast.makeText(CalToDetailActivity.this, "토큰이 만료되었습니다. 재 로그인해야합니다.", Toast.LENGTH_SHORT).show();
+                        break;
+                    case CODE_NOT_FOUND:
+                        Toast.makeText(CalToDetailActivity.this, "유효하지 않은 post id입니다.", Toast.LENGTH_SHORT).show();
+                        break;
                 }
             }
 
             @Override
-            public void onFailure(Call call, Throwable t) {
-
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Toast.makeText(CalToDetailActivity.this, "실패하였습니다", Toast.LENGTH_SHORT).show();
+                Log.e(TAG , "dataRemove error :" + t.getMessage());
             }
         });
     }

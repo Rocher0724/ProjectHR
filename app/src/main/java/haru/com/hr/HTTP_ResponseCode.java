@@ -7,7 +7,7 @@ package haru.com.hr;
 public class HTTP_ResponseCode {
     public static final int CODE_OK = 200;
     public static final int CODE_CREATED = 201;
-    public static final int CODE_DELETE = 201;
+    public static final int CODE_NO_CONTENT = 204; // 삭제 성공 후
     public static final int CODE_BAD_REQUEST = 400; // 필수입력값 누락
     public static final int CODE_UNAUTHORIZED = 401; // 토큰 만료 or 잘못된 토큰
     public static final int CODE_NOT_FOUND = 404;

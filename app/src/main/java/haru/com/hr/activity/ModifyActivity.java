@@ -44,6 +44,9 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import static haru.com.hr.BaseURL.URL;
+import static haru.com.hr.HTTP_ResponseCode.CODE_BAD_REQUEST;
+import static haru.com.hr.HTTP_ResponseCode.CODE_OK;
+import static haru.com.hr.HTTP_ResponseCode.CODE_UNAUTHORIZED;
 
 public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
     private static final int REQ_GALLERY = 100;
@@ -156,7 +159,6 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
                 if(contentEmptyChecker()) {
                     //TODO 글저장작업
                     dataSave();
-                    activityChange();
                 } else {
                     Toast.makeText(this, "글 내용은 입력되어야 합니다.", Toast.LENGTH_SHORT).show();
                 }
@@ -225,15 +227,29 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
             @Override
             public void onResponse(Call<ResponseBody> call,
                                    Response<ResponseBody> response) {
-                Toast.makeText(ModifyActivity.this, "변경되었습니다.", Toast.LENGTH_SHORT).show();
-                Log.v("Upload", "success");
-                finish();
+                switch (response.code()) {
+                    case CODE_OK:
+                        Toast.makeText(ModifyActivity.this, "변경되었습니다.", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "modifyPostingWithImage 데이터가 변경되었습니다.");
+                        activityChange();
+                        break;
+                    case CODE_BAD_REQUEST:
+                        Toast.makeText(ModifyActivity.this, "수정하지 못했습니다.", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "modifyPostingWithImage status에 유효하지 않은 값이 포함되어있습니다.");
+                        break;
+                    case CODE_UNAUTHORIZED:
+                        Toast.makeText(ModifyActivity.this, "수정하지 못했습니다.", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "modifyPostingWithImage 토큰이 유효하지 않거나 keyname이 Authorization이 아닙니다");
+                        break;
+                    default:
+                        Toast.makeText(ModifyActivity.this, "수정하지 못했습니다.", Toast.LENGTH_SHORT).show();
+                }
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Toast.makeText(ModifyActivity.this, "변경되지않았습니다.", Toast.LENGTH_SHORT).show();
-                Log.e("Upload error:", t.getMessage());
+                Toast.makeText(ModifyActivity.this, "통신오류", Toast.LENGTH_SHORT).show();
+                Log.e(TAG , "modifyPostingWithImage error :" + t.getMessage());
             }
         });
     }
@@ -253,15 +269,29 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
             @Override
             public void onResponse(Call<ResponseBody> call,
                                    Response<ResponseBody> response) {
-                Toast.makeText(ModifyActivity.this, "변경되었습니다.", Toast.LENGTH_SHORT).show();
-                Log.v("Upload", "success");
-                finish();
+                switch (response.code()) {
+                    case CODE_OK:
+                        Toast.makeText(ModifyActivity.this, "변경되었습니다.", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "modifyPostingWithoutImage 데이터가 변경되었습니다.");
+                        activityChange();
+                        break;
+                    case CODE_BAD_REQUEST:
+                        Toast.makeText(ModifyActivity.this, "수정하지 못했습니다.", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "modifyPostingWithoutImage status에 유효하지 않은 값이 포함되어있습니다.");
+                        break;
+                    case CODE_UNAUTHORIZED:
+                        Toast.makeText(ModifyActivity.this, "수정하지 못했습니다.", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "modifyPostingWithoutImage 토큰이 유효하지 않거나 keyname이 Authorization이 아닙니다");
+                        break;
+                    default:
+                        Toast.makeText(ModifyActivity.this, "수정하지 못했습니다.", Toast.LENGTH_SHORT).show();
+                }
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Toast.makeText(ModifyActivity.this, "변경되지않았습니다.", Toast.LENGTH_SHORT).show();
-                Log.e("Upload error:", t.getMessage());
+                Toast.makeText(ModifyActivity.this, "통신오류", Toast.LENGTH_SHORT).show();
+                Log.e(TAG , "modifyPostingWithoutImage error :" + t.getMessage());
             }
         });
     }
