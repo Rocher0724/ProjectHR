@@ -59,9 +59,9 @@ public class CalToDetailActivity extends BaseActivity<ActivityCalToDetailBinding
         pData.setId(intent.getExtras().getInt("id"));
         pData.setTitle(intent.getExtras().getString("title"));
         pData.setContent(intent.getExtras().getString("content"));
-        pData.setImage_link(intent.getExtras().getParcelable("image_link"));
-        pData.setStatus_code(intent.getExtras().getInt("status_code"));
-        pData.setCreated_date(intent.getExtras().getString("create_date"));
+        pData.setImage(intent.getExtras().getParcelable("image"));
+        pData.setStatus(intent.getExtras().getInt("status"));
+        pData.setDay(intent.getExtras().getString("day"));
     }
 
     private void viewInit(Results data) {
@@ -69,7 +69,7 @@ public class CalToDetailActivity extends BaseActivity<ActivityCalToDetailBinding
         getBinding().tvCTDTitle.setText(data.getTitle());
         getBinding().tvCTDContent.setText(data.getContent());
         Glide.with(this)
-                .load(data.getImage_link())
+                .load(data.getImage())
                 .listener(new RequestListener<String, GlideDrawable>() {
                     @Override
                     public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
@@ -90,9 +90,9 @@ public class CalToDetailActivity extends BaseActivity<ActivityCalToDetailBinding
                 .into(getBinding().imgCTDBackGround);
 
         // 감정이미지 세팅
-        statusSetting(data.getStatus_code());
+        statusSetting(data.getStatus());
 
-        getBinding().tvCTDDate.setText(data.getCreated_date());
+        getBinding().tvCTDDate.setText(data.getDay());
 
     }
 
@@ -128,9 +128,9 @@ public class CalToDetailActivity extends BaseActivity<ActivityCalToDetailBinding
                 intent.putExtra("id", pData.getId());
                 intent.putExtra("title", pData.getTitle());
                 intent.putExtra("content", pData.getContent());
-                intent.putExtra("image_link", pData.getImage_link());
-                intent.putExtra("status_code", pData.getStatus_code());
-                intent.putExtra("created_date", pData.getCreated_date());
+                intent.putExtra("image", pData.getImage());
+                intent.putExtra("status", pData.getStatus());
+                intent.putExtra("day", pData.getDay());
                 startActivityForResult(intent, REQ_MODIFY);
                 break;
             case R.id.tvCTDremove:

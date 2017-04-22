@@ -74,15 +74,15 @@ public class MainStackViewAdapter extends ArrayAdapter<Results> {
         Results data = datas.get(position);
         viewHolder.tvTitle.setText(data.getTitle());
         viewHolder.tvContent.setText(data.getContent());
-        viewHolder.tvDate.setText(data.getCreated_date());
+        viewHolder.tvDate.setText(data.getDay());
         Glide.with(context)
-                .load(data.getImage_link())
+                .load(data.getImage())
                 .bitmapTransform(new CenterCrop(context)
                         , new BlurTransformation(context, 10)
                         , new ColorFilterTransformation(context, Color.argb(100, 100, 100, 100)))
                 .into(viewHolder.imgImage);
 
-        statusSetting(data.getStatus_code(), viewHolder, viewHolder.tvEmotion);
+        statusSetting(data.getStatus(), viewHolder, viewHolder.tvEmotion);
 
         return convertView;
     }

@@ -30,7 +30,7 @@ public interface HostInterface {
     // 중에서 포트 이하 부분을 get 이하에 쓴다.
 //    @GET("566d677961726f6331397471525a50/json/SearchParkingInfo/1/10/{gu}")
 
-    @GET("posts")
+    @GET("posts/")
     Call<Data> getData(@Header("Authorization") String token, @Query("page") int page); // path는 리스트 리포함수를 통해서 데이터를 가져오게되는데 거기 들어오는 값을 path를 통해 url을 세팅한다.
 
     @Multipart
@@ -39,7 +39,7 @@ public interface HostInterface {
             @Header("token") String token,
             @Part ("title") RequestBody title,
             @Part("content") RequestBody content,
-            @Part("status_code") int code,
+            @Part("status") int code,
             @Part MultipartBody.Part file
     );
 
@@ -49,7 +49,7 @@ public interface HostInterface {
             @Header("token") String token,
             @Part ("title") RequestBody title,
             @Part("content") RequestBody content,
-            @Part("status_code") int code,
+            @Part("status") int code,
             @Part MultipartBody.Part file
     );
 
@@ -88,7 +88,7 @@ public interface HostInterface {
             @Path("post_id") int id,
             @Part ("title") RequestBody title,
             @Part("content") RequestBody content,
-            @Part("status_code") int code,
+            @Part("status") int code,
             @Part MultipartBody.Part file
     );
 
@@ -99,4 +99,15 @@ public interface HostInterface {
             @Path("post_id") int id,
             @Body Results results
     );
+
+    @GET("user/")
+    Call<ResponseBody> getUserInfo(
+            @Header("token") String token,
+            @Path("post_id") int id,
+            @Body Results results
+    );
+
+
+
+
 }

@@ -60,9 +60,9 @@ public class MainMoaAdapter extends RecyclerView.Adapter<MainMoaAdapter.ViewHold
     public void onBindViewHolder(ViewHolder holder, int position) {
 
         Results pData = datas.get(position);
-        pData.getImage_link();
-        Glide.with(context).load(pData.getImage_link()).thumbnail(0.1f).into(holder.imgPostingPicture);
-        holder.imgUri = Uri.parse(pData.getImage_link());
+        pData.getImage();
+        Glide.with(context).load(pData.getImage()).thumbnail(0.1f).into(holder.imgPostingPicture);
+        holder.imgUri = Uri.parse(pData.getImage());
     }
 
     @Override

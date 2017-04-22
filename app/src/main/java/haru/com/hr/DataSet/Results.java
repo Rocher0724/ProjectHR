@@ -7,19 +7,29 @@ public class Results
 {
     private String content;
 
-    private String id;
+    private int id;
 
-    private String author;
+    private int author;
 
     private String title;
 
-    private String status;
+    private int status;
 
     private String image;
 
     private String day;
 
     private String url;
+
+    private String email;
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
     public String getContent ()
     {
@@ -31,22 +41,22 @@ public class Results
         this.content = content;
     }
 
-    public String getId ()
+    public int getId ()
     {
         return id;
     }
 
-    public void setId (String id)
+    public void setId (int id)
     {
         this.id = id;
     }
 
-    public String getAuthor ()
+    public int getAuthor ()
     {
         return author;
     }
 
-    public void setAuthor (String author)
+    public void setAuthor (int author)
     {
         this.author = author;
     }
@@ -61,12 +71,12 @@ public class Results
         this.title = title;
     }
 
-    public String getStatus ()
+    public int getStatus ()
     {
         return status;
     }
 
-    public void setStatus (String status)
+    public void setStatus (int status)
     {
         this.status = status;
     }

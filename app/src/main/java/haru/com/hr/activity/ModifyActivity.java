@@ -98,7 +98,7 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
         getBinding().etModifyTitle.setText(pData.getTitle());
         getBinding().etModifyContent.setText(pData.getContent());
         Glide.with(this)
-                .load(pData.getImage_link())
+                .load(pData.getImage())
                 .listener(new RequestListener<String, GlideDrawable>() {
                     @Override
                     public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
@@ -119,7 +119,7 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
                 .into(getBinding().imgModifyActivity);
 
         spinnerSetting();
-        getBinding().tvModifyDate.setText(pData.getCreated_date());
+        getBinding().tvModifyDate.setText(pData.getDay());
     }
 
     private void spinnerSetting() {
@@ -129,7 +129,7 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
         getBinding().spnModifyEmotion.setAdapter(emotionSpinnerAdapter);
         getBinding().spnModifyEmotion.setOnItemSelectedListener(spnItemClickListener);
 
-        getBinding().spnModifyEmotion.setSelection(pData.getStatus_code() - 1);
+        getBinding().spnModifyEmotion.setSelection(pData.getStatus() - 1);
     }
 
 
@@ -172,7 +172,7 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
 
         pData.setTitle(blankCheck(getBinding().etModifyTitle.getText().toString()));
         pData.setContent(getBinding().etModifyContent.getText().toString());
-        pData.setStatus_code(selectedStatusPosition);
+        pData.setStatus(selectedStatusPosition);
 
         if( isPictureSelect ) {
             modifyPostingWithImage(selectedImageUrl, pData);
@@ -186,7 +186,7 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
         ResultsDataStore.getInstance().getDatas().get(dataPosition)
                 .setContent(getBinding().etModifyContent.getText().toString());
         ResultsDataStore.getInstance().getDatas().get(dataPosition)
-                .setStatus_code(selectedStatusPosition + 1); // 선택된 포지션은 0부터시작
+                .setStatus(selectedStatusPosition + 1); // 선택된 포지션은 0부터시작
 
 
         Toast.makeText(this, "저장되었습니다.", Toast.LENGTH_SHORT).show();
@@ -199,7 +199,7 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
 
         RequestBody pDataTitle = RequestBody.create(MultipartBody.FORM, pData.getTitle());
         RequestBody pDataContent = RequestBody.create(MultipartBody.FORM, pData.getContent());
-        int statusCode = pData.getStatus_code();
+        int statusCode = pData.getStatus();
 
 
         File originalFile = FileUtils.getFile(this, fileUri);

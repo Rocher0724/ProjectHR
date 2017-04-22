@@ -293,7 +293,7 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
         Results pData = new Results();
         pData.setTitle(blankCheck(getBinding().etWriteTitle.getText().toString()));
         pData.setContent(getBinding().etWriteContent.getText().toString());
-        pData.setStatus_code(selectedEmotionPosition + 1); // 선택된 포지션은 0부터시작
+        pData.setStatus(selectedEmotionPosition + 1); // 선택된 포지션은 0부터시작
 
         if( isPictureSelect ) {
             // TODO 사용자가 데이터를 선택한경우 사용자 핸드폰에 있는 정보를 쏴줘야한다.
@@ -311,7 +311,7 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
 
         RequestBody pDataTitle = RequestBody.create(MultipartBody.FORM, pData.getTitle());
         RequestBody pDataContent = RequestBody.create(MultipartBody.FORM, pData.getContent());
-        int statusCode = pData.getStatus_code();
+        int statusCode = pData.getStatus();
 
         File originalFile = FileUtils.getFile(this, fileUri);
         RequestBody filePart = RequestBody.create(
@@ -362,7 +362,7 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
 
         RequestBody pDataTitle = RequestBody.create(MultipartBody.FORM, pData.getTitle());
         RequestBody pDataContent = RequestBody.create(MultipartBody.FORM, pData.getContent());
-        int statusCode = pData.getStatus_code();
+        int statusCode = pData.getStatus();
 
         File originalFile = new File(String.valueOf(fileUri));
         RequestBody filePart = RequestBody.create(MediaType.parse("multipart/form-data"), originalFile);

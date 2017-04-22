@@ -102,18 +102,18 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
             data.setId(-2);
             data.setTitle("");
             data.setContent("페이지를 좌우로 넘겨가며 \n\r 사용해보세요");
-            data.setImage_link("android.resource://" + MainActivity.this.getPackageName() + "/drawable/splash2");
-            data.setStatus_code(1);
-            data.setCreated_date(DateFormat.getDateTimeInstance().format(new Date()));
+            data.setImage("android.resource://" + MainActivity.this.getPackageName() + "/drawable/splash2");
+            data.setStatus(1);
+            data.setDay(selectedDate.format(new Date()));
             realDatas.add(data);
 
             Results data1 = new Results();
             data1.setId(-2);
             data1.setTitle("당신의 이야기를 시작하세요");
             data1.setContent("당신의 하루를 응원합니다.");
-            data1.setImage_link("android.resource://" + MainActivity.this.getPackageName() + "/drawable/splash2");
-            data1.setStatus_code(2);
-            data1.setCreated_date(DateFormat.getDateTimeInstance().format(new Date()));
+            data1.setImage("android.resource://" + MainActivity.this.getPackageName() + "/drawable/splash2");
+            data1.setStatus(2);
+            data1.setDay(selectedDate.format(new Date()));
             realDatas.add(data1);
             stackViewAdapter.notifyDataSetChanged();
         }
@@ -143,8 +143,8 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
 
         for( Results data : realDatas) {
             Log.e(TAG, "데이터 번호 : " + data.getId());
-            Log.e(TAG, "ndate : " + data.getCreated_date());
-            String[] date = data.getCreated_date().split("-|T|:|\\.");
+            Log.e(TAG, "ndate : " + data.getDay());
+            String[] date = data.getDay().split("-|T|:|\\.");
             int year = dateStrToInt(date[0]);
             int month = dateStrToInt(date[1]) - 1;
             int day = dateStrToInt(date[2]) - 1;
@@ -208,7 +208,7 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
             Toast.makeText(MainActivity.this, selectedDate.format(dateClicked), Toast.LENGTH_SHORT).show(); // TODO 나중에 지워야함.
 
             for( Results data : realDatas) {
-                if( data.getId() != -2 && data.getCreated_date().startsWith(selectedDate.format(dateClicked))) {
+                if( data.getId() != -2 && data.getDay().startsWith(selectedDate.format(dateClicked))) {
 
 //                    getDetailData(data);
 
@@ -216,9 +216,9 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
                     intent.putExtra("id",data.getId());
                     intent.putExtra("title",data.getTitle());
                     intent.putExtra("content",data.getContent());
-                    intent.putExtra("image_link",data.getImage_link());
-                    intent.putExtra("status_code",data.getStatus_code());
-                    intent.putExtra("created_date",data.getCreated_date());
+                    intent.putExtra("image",data.getImage());
+                    intent.putExtra("status",data.getStatus());
+                    intent.putExtra("day",data.getDay());
                     startActivity(intent);
                 }
             }
@@ -311,7 +311,7 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
                 moaSelectedData.addAll(realDatas);
             } else {
                 for (Results item : realDatas) {// todo 내가 감정탭을 어떻게 디자인해놨는지 잘 모르겠다. 살펴보고 수정해야 할것같다.
-                    if (item.getStatus_code() == MainMoaSpinnerDataLoader.getInstance().getDatas().get(position).getStatus_code()) {
+                    if (item.getStatus() == MainMoaSpinnerDataLoader.getInstance().getDatas().get(position).getStatus()) {
                         moaSelectedData.add(item);
                     }
                 }
