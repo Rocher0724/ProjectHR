@@ -38,6 +38,7 @@ import haru.com.hr.HostInterface;
 import haru.com.hr.R;
 import haru.com.hr.DataSet.ResultsDataStore;
 import haru.com.hr.DataSet.Results;
+import haru.com.hr.UserID;
 import haru.com.hr.adapter.EmotionSpinnerAdapter;
 import haru.com.hr.databinding.ActivityWriteBinding;
 import haru.com.hr.domain.Token;
@@ -328,7 +329,7 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
         Retrofit retrofit = builder.build();
         HostInterface client = retrofit.create(HostInterface.class);
 
-        Call<Results> call = client.uploadWithSelectedImage(token, pDataTitle, pDataContent, statusCode, file);
+        Call<Results> call = client.uploadWithSelectedImage(token, pDataTitle, pDataContent, UserID.ID, statusCode, file);
         call.enqueue(new Callback<Results>() {
             @Override
             public void onResponse(Call<Results> call, Response<Results> response) {
@@ -377,7 +378,7 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
         Retrofit retrofit = builder.build();
         HostInterface client = retrofit.create(HostInterface.class);
 
-        Call<Results> call = client.uploadWithDrawable(token, pDataTitle, pDataContent, statusCode, file);
+        Call<Results> call = client.uploadWithDrawable(token, pDataTitle, pDataContent, UserID.ID, statusCode, file);
         call.enqueue(new Callback<Results>() {
             @Override
             public void onResponse(Call<Results> call, Response<Results> response) {

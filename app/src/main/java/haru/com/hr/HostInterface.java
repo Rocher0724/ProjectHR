@@ -39,6 +39,7 @@ public interface HostInterface {
             @Header("token") String token,
             @Part ("title") RequestBody title,
             @Part("content") RequestBody content,
+            @Part("author") int author,
             @Part("status") int code,
             @Part MultipartBody.Part file
     );
@@ -49,6 +50,7 @@ public interface HostInterface {
             @Header("token") String token,
             @Part ("title") RequestBody title,
             @Part("content") RequestBody content,
+            @Part("author") int author,
             @Part("status") int code,
             @Part MultipartBody.Part file
     );
@@ -85,9 +87,9 @@ public interface HostInterface {
     @PATCH("post/{post_id}/")
     Call<ResponseBody> modifyWithImage(
             @Header("Authorization") String token,
-            @Path("post_id") int id,
             @Part ("title") RequestBody title,
             @Part("content") RequestBody content,
+            @Part("author") int author,
             @Part("status") int code,
             @Part MultipartBody.Part file
     );
@@ -96,18 +98,13 @@ public interface HostInterface {
     @PATCH("post/{post_id}/")
     Call<ResponseBody> modifyWithoutImage(
             @Header("token") String token,
-            @Path("post_id") int id,
             @Body Results results
     );
 
     @GET("user/")
-    Call<ResponseBody> getUserInfo(
-            @Header("token") String token,
-            @Path("post_id") int id,
-            @Body Results results
+    Call<Data> getAuthor(
+            @Header("token") String token
     );
-
-
 
 
 }

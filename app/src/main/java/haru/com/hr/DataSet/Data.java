@@ -14,6 +14,8 @@ public class Data
 
     private String next;
 
+    private String detail;
+
     public Results getResults ()
     {
         return results;
@@ -52,6 +54,14 @@ public class Data
     public void setNext (String next)
     {
         this.next = next;
+    }
+
+    public String getDetail() {
+        return detail;
+    }
+
+    public void setDetail(String detail) {
+        this.detail = detail;
     }
 
     @Override

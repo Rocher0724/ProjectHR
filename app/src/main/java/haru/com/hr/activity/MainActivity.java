@@ -26,6 +26,8 @@ import com.github.sundeepk.compactcalendarview.CompactCalendarView;
 import com.github.sundeepk.compactcalendarview.domain.Event;
 import com.lorentzos.flingswipe.SwipeFlingAdapterView;
 
+import org.json.JSONObject;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -37,9 +39,11 @@ import java.util.List;
 import java.util.Locale;
 
 import haru.com.hr.BaseActivity;
+import haru.com.hr.DataSet.Data;
 import haru.com.hr.HostInterface;
 import haru.com.hr.DataSet.ResultsDataStore;
 import haru.com.hr.DataSet.Results;
+import haru.com.hr.UserID;
 import haru.com.hr.adapter.MainMoaAdapter;
 import haru.com.hr.adapter.MainStackViewAdapter;
 import haru.com.hr.R;
@@ -57,6 +61,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import static haru.com.hr.HTTP_ResponseCode.CODE_NOT_FOUND;
 import static haru.com.hr.HTTP_ResponseCode.CODE_OK;
 import static haru.com.hr.BaseURL.URL;
+import static haru.com.hr.HTTP_ResponseCode.CODE_UNAUTHORIZED;
 
 public class MainActivity extends  BaseActivity<ActivityMainBinding>
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -125,6 +130,44 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         View v = getBinding().navView.getHeaderView(0);
         TextView tvDrawerEmail = (TextView) v.findViewById(R.id.tvDrawerEmail);
         tvDrawerEmail.setText(email);
+        setAuthor();
+    }
+
+    private void setAuthor() {
+        // todo 아마 여기서 이메일을 보내고 데이터를 받아오는것도 좋을것같다.
+        String token = getToken();
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL) // 포트까지가 베이스url이다.
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        // 2. 사용할 인터페이스를 설정한다.
+        HostInterface localhost = retrofit.create(HostInterface.class);
+        // 3. 토큰을 보내 데이터를 가져온다
+        Call<Data> result = localhost.getAuthor(token);
+
+        result.enqueue(new Callback<Data>() {
+            @Override
+            public void onResponse(Call<Data> call, Response<Data> response) {
+                switch (response.code()) {
+                    case CODE_OK:
+                        Data data = response.body();
+                        UserID.ID = data.getResults().getAuthor();
+                        break;
+                    case CODE_UNAUTHORIZED:
+                        Log.e(TAG, "setAuthor key 이름이 잘못되거나 유효하지 않은 token입니다.");
+                        String detail = response.body().getDetail();
+                        Log.e(TAG, "setAuthor detail : " + detail);
+                        break;
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Data> call, Throwable t) {
+                Log.e(TAG,"setAuthor 서버통신 실패");
+                Log.e(TAG,t.toString());
+            }
+        });
     }
 
     // -- Main Calendar 부분 --

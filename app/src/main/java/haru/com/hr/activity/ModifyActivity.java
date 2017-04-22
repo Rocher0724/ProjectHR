@@ -25,6 +25,7 @@ import haru.com.hr.HostInterface;
 import haru.com.hr.R;
 import haru.com.hr.DataSet.ResultsDataStore;
 import haru.com.hr.DataSet.Results;
+import haru.com.hr.UserID;
 import haru.com.hr.adapter.EmotionSpinnerAdapter;
 import haru.com.hr.databinding.ActivityModifyBinding;
 import haru.com.hr.domain.Token;
@@ -173,6 +174,7 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
         pData.setTitle(blankCheck(getBinding().etModifyTitle.getText().toString()));
         pData.setContent(getBinding().etModifyContent.getText().toString());
         pData.setStatus(selectedStatusPosition);
+        pData.setAuthor(UserID.ID);
 
         if( isPictureSelect ) {
             modifyPostingWithImage(selectedImageUrl, pData);
@@ -218,7 +220,7 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
         Retrofit retrofit = builder.build();
         HostInterface client = retrofit.create(HostInterface.class);
 
-        Call<ResponseBody> call = client.modifyWithImage(token,pData.getId(),pDataTitle, pDataContent, statusCode, file);
+        Call<ResponseBody> call = client.modifyWithImage(token, pDataTitle, pDataContent, UserID.ID, statusCode, file);
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call,
@@ -246,7 +248,7 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
         Retrofit retrofit = builder.build();
         HostInterface client = retrofit.create(HostInterface.class);
 
-        Call<ResponseBody> call = client.modifyWithoutImage(token,pData.getId(), pData);
+        Call<ResponseBody> call = client.modifyWithoutImage(token, pData);
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call,
