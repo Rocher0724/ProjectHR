@@ -3,42 +3,23 @@ package haru.com.hr.DataSet;
 /**
  * Created by myPC on 2017-04-17.
  */
-
 public class Results
 {
-    private String created_date;
-
-    private int status_code;
-
     private String content;
 
-    private int id;
+    private String id;
 
-    private Author author;
+    private String author;
 
     private String title;
 
-    private String image_link;
+    private String status;
 
-    public String getCreated_date ()
-    {
-        return created_date;
-    }
+    private String image;
 
-    public void setCreated_date (String created_date)
-    {
-        this.created_date = created_date;
-    }
+    private String day;
 
-    public int getStatus_code ()
-    {
-        return status_code;
-    }
-
-    public void setStatus_code (int status_code)
-    {
-        this.status_code = status_code;
-    }
+    private String url;
 
     public String getContent ()
     {
@@ -50,22 +31,22 @@ public class Results
         this.content = content;
     }
 
-    public int getId ()
+    public String getId ()
     {
         return id;
     }
 
-    public void setId (int id)
+    public void setId (String id)
     {
         this.id = id;
     }
 
-    public Author getAuthor ()
+    public String getAuthor ()
     {
         return author;
     }
 
-    public void setAuthor (Author author)
+    public void setAuthor (String author)
     {
         this.author = author;
     }
@@ -80,20 +61,50 @@ public class Results
         this.title = title;
     }
 
-    public String getImage_link ()
+    public String getStatus ()
     {
-        return image_link;
+        return status;
     }
 
-    public void setImage_link (String image_link)
+    public void setStatus (String status)
     {
-        this.image_link = image_link;
+        this.status = status;
+    }
+
+    public String getImage ()
+    {
+        return image;
+    }
+
+    public void setImage (String image)
+    {
+        this.image = image;
+    }
+
+    public String getDay ()
+    {
+        return day;
+    }
+
+    public void setDay (String day)
+    {
+        this.day = day;
+    }
+
+    public String getUrl ()
+    {
+        return url;
+    }
+
+    public void setUrl (String url)
+    {
+        this.url = url;
     }
 
     @Override
     public String toString()
     {
-        return "ClassPojo [created_date = "+created_date+", status_code = "+status_code+", content = "+content+", id = "+id+", author = "+author+", title = "+title+", image_link = "+image_link+"]";
+        return "ClassPojo [content = "+content+", id = "+id+", author = "+author+", title = "+title+", status = "+status+", image = "+image+", day = "+day+", url = "+url+"]";
     }
 }
 

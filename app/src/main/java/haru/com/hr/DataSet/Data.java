@@ -4,7 +4,8 @@ package haru.com.hr.DataSet;
  * Created by myPC on 2017-04-17.
  */
 
-public class Data {
+public class Data
+{
     private Results results;
 
     private String previous;
@@ -13,40 +14,51 @@ public class Data {
 
     private String next;
 
-    public Results getResults() {
+    public Results getResults ()
+    {
         return results;
     }
 
-    public void setResults(Results results) {
+    public void setResults (Results results)
+    {
         this.results = results;
     }
 
-    public String getPrevious() {
+    public String getPrevious ()
+    {
         return previous;
     }
 
-    public void setPrevious(String previous) {
+    public void setPrevious (String previous)
+    {
         this.previous = previous;
     }
 
-    public String getCount() {
+    public String getCount ()
+    {
         return count;
     }
 
-    public void setCount(String count) {
+    public void setCount (String count)
+    {
         this.count = count;
     }
 
-    public String getNext() {
+    public String getNext ()
+    {
         return next;
     }
 
-    public void setNext(String next) {
+    public void setNext (String next)
+    {
         this.next = next;
     }
 
     @Override
-    public String toString() {
-        return "ClassPojo [results = " + results + ", previous = " + previous + ", count = " + count + ", next = " + next + "]";
+    public String toString()
+    {
+        return "ClassPojo [results = "+results+", previous = "+previous+", count = "+count+", next = "+next+"]";
     }
 }
+
+

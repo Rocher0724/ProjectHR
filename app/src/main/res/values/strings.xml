@@ -10,5 +10,6 @@
     <string name="menu1">etc</string>
     <string name="internal_storage">Internal storage</string>
     <string name="title_activity_open_source">Open Source License</string>
+    <string name="title_activity_personal_info">PersonalInfoActivity</string>
 
 </resources>
