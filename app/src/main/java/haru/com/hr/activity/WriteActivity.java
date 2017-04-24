@@ -30,7 +30,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 
 import haru.com.hr.BaseActivity;
@@ -73,6 +75,7 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
     int selectedImgInDrawable;
     private int selectedEmotionPosition;
     private Uri imageUriInDrawable;
+    private Uri imageResizingTemp;
     private SimpleDateFormat selectedDate = new SimpleDateFormat("yyyy-MM-dd");
     String token;
 
@@ -245,13 +248,12 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
         switch (requestCode) {
             case REQ_GALLERY:
                 if(resultCode == RESULT_OK) {
                     afterPictureSelect(data);
                 } else {
-                    Toast.makeText(this, "사진파일이 없습니다.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "사진파일을 선택하지 않았습니다.", Toast.LENGTH_SHORT).show();
                 }
                 break;
         }
@@ -297,17 +299,77 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
         pData.setStatus(selectedEmotionPosition + 1); // 선택된 포지션은 0부터시작
 
         if( isPictureSelect ) {
-            // TODO 사용자가 데이터를 선택한경우 사용자 핸드폰에 있는 정보를 쏴줘야한다.
+//            imageResizing(selectedImageUrl, pData);
             selectedImagePosting(selectedImageUrl, pData);
         } else {
             whenUserNoSelectImage(selectedImgInDrawable, pData);
         }
     }
 
-    private String blankCheck(String text) {
-        return (text.equals(""))? "" : text;
-    }
+    private void imageResizing(Uri selectedImageUrl, Results pData) {
+        AsyncTask<Void,Void,Void> task = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                getBinding().pbWrite.setVisibility(View.VISIBLE);
+            }
 
+            @Override
+            protected Void doInBackground(Void... params) {
+
+                Bitmap bitmap = null;
+                try {
+                    bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImageUrl);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                int height = bitmap.getHeight();
+                int width = bitmap.getWidth();
+
+                Bitmap resized = null;
+
+                while (height > 400) {
+                    resized = Bitmap.createScaledBitmap(bitmap, (width * 400) / height, 400, true);
+                    height = resized.getHeight();
+                    width = resized.getWidth();
+                }
+
+                String extStorageDirectory = Environment.getExternalStorageDirectory().toString();
+                File file = new File(extStorageDirectory, "temp.PNG");
+                OutputStream outStream = null;
+                try {
+                    outStream = new FileOutputStream(file);
+
+                    if (resized != null) {
+                        resized.compress(Bitmap.CompressFormat.PNG, 100, outStream);
+                    }
+                    outStream.flush();
+                    outStream.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                finally {
+                    try {
+                        outStream.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                Log.e("path",file.getPath());
+                imageResizingTemp = Uri.parse(file.getPath());
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                selectedImagePosting(imageResizingTemp, pData);
+
+            }
+        };
+        task.execute();
+    }
     private void selectedImagePosting(Uri fileUri, Results pData) {
 
         RequestBody pDataTitle = RequestBody.create(MultipartBody.FORM, pData.getTitle());
@@ -319,8 +381,12 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
                 MediaType.parse(getContentResolver().getType(fileUri)),
                 originalFile
         );
+
+//        File originalFile = new File(String.valueOf(fileUri));
+//        RequestBody filePart = RequestBody.create(MediaType.parse("multipart/form-data"), originalFile);
+
         // 이미지 넣을때 키값
-        MultipartBody.Part file = MultipartBody.Part.createFormData("image", originalFile.getName() , filePart);
+        MultipartBody.Part file = MultipartBody.Part.createFormData("image", originalFile.getName(), filePart);
 
         Retrofit.Builder builder = new Retrofit.Builder()
                 .baseUrl(URL)
@@ -336,7 +402,7 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
                 Log.e(TAG,"코드 : " + response.code());
                 switch (response.code()) {
                     case CODE_CREATED:
-                        ResultsDataStore.getInstance().addData(response.body());
+                        ResultsDataStore.getInstance().addResults(response.body());
                         Toast.makeText(WriteActivity.this, "저장되었습니다.", Toast.LENGTH_SHORT).show();
                         Log.e(TAG,"데이터가 추가되었습니다.");
                         activityChange();
@@ -348,13 +414,15 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
                         Toast.makeText(WriteActivity.this, "토큰이 만료되었습니다.", Toast.LENGTH_SHORT).show();
                         break;
                 }
+                tempImageRemove(fileUri);
                 getBinding().pbWrite.setVisibility(View.GONE);
             }
             @Override
             public void onFailure(Call<Results> call, Throwable t) {
-                Toast.makeText(WriteActivity.this, "nooooo!!!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(WriteActivity.this, "서버오류", Toast.LENGTH_SHORT).show();
                 Log.e(TAG, "selectedImagePosting : error " + t.getMessage());
                 getBinding().pbWrite.setVisibility(View.GONE);
+                tempImageRemove(fileUri);
             }
         });
     }
@@ -385,7 +453,7 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
                 Log.e(TAG, "코드 : " + response.code());
                 switch (response.code()) {
                     case CODE_CREATED:
-                        ResultsDataStore.getInstance().addData(response.body());
+                        ResultsDataStore.getInstance().addResults(response.body());
                         Toast.makeText(WriteActivity.this, "저장되었습니다.", Toast.LENGTH_SHORT).show();
                         Log.e(TAG, "nonSelectedImagePosting 데이터가 추가되었습니다.");
                         activityChange();
@@ -399,7 +467,7 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
                     default:
                         Toast.makeText(WriteActivity.this, "저장하지 못했습니다.", Toast.LENGTH_SHORT).show();
                 }
-                drawableImageRemove(fileUri);
+                tempImageRemove(fileUri);
                 getBinding().pbWrite.setVisibility(View.GONE);
             }
             @Override
@@ -407,19 +475,14 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
                 Toast.makeText(WriteActivity.this, "nooooo!!!", Toast.LENGTH_SHORT).show();
                 Log.e("error:", "nonSelectedImagePosting : " + t.getMessage());
                 getBinding().pbWrite.setVisibility(View.GONE);
+                tempImageRemove(fileUri);
             }
         });
     }
 
-    private void drawableImageRemove(Uri fileUri) {
+    private void tempImageRemove(Uri fileUri) {
         File imagefile = new File(String.valueOf(fileUri));
         imagefile.delete();
-
-        if( imagefile != null) {
-            Log.e(TAG, "drawable 파일이 아직 있다");
-        } else {
-            Log.e(TAG, "drawable 파일이 삭제됐다.");
-        }
     }
 
     private void whenUserNoSelectImage(int resid, Results pData) {
@@ -456,11 +519,6 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
                 }
                 imageUriInDrawable = Uri.parse(file.getPath());
                 Log.e(TAG, imageUriInDrawable + "");
-                if( file != null) {
-                    Log.e(TAG, "파일이 있다");
-                } else {
-                    Log.e(TAG, "파일이 없다");
-                }
                 return null;
             }
 
@@ -471,6 +529,10 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
             }
         };
         task.execute();
+    }
+
+    private String blankCheck(String text) {
+        return (text.equals(""))? "" : text;
     }
 
     @Override

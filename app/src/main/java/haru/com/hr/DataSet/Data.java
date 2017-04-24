@@ -1,12 +1,14 @@
 package haru.com.hr.DataSet;
 
+import java.util.List;
+
 /**
  * Created by myPC on 2017-04-17.
  */
 
 public class Data
 {
-    private Results results;
+    private List<Results> results;
 
     private String previous;
 
@@ -16,12 +18,12 @@ public class Data
 
     private String detail;
 
-    public Results getResults ()
+    public List<Results> getResults ()
     {
         return results;
     }
 
-    public void setResults (Results results)
+    public void setResults (List<Results> results)
     {
         this.results = results;
     }

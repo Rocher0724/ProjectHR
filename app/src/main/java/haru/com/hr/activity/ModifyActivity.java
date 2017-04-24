@@ -178,12 +178,13 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
         pData.setStatus(selectedStatusPosition);
         pData.setAuthor(UserID.ID);
 
-        if( isPictureSelect ) {
-            modifyPostingWithImage(selectedImageUrl, pData);
-        } else {
-            // 변경하지 않았으면 이미지파일이 필요가없다.
-            modifyPostingWithoutImage(pData);
-        }
+        // todo 주작을 위해 이부분을 주석처리. 나중에 해제해야함
+//        if( isPictureSelect ) {
+//            modifyPostingWithImage(selectedImageUrl, pData);
+//        } else {
+//            // 변경하지 않았으면 이미지파일이 필요가없다.
+//            modifyPostingWithoutImage(pData);
+//        }
 
         ResultsDataStore.getInstance().getDatas().get(dataPosition)
                 .setTitle(blankCheck(getBinding().etModifyTitle.getText().toString()));;
@@ -195,6 +196,7 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
 
         Toast.makeText(this, "저장되었습니다.", Toast.LENGTH_SHORT).show();
         Log.e(TAG,"데이터가 추가되었습니다.");
+        finish();
 
     }
 

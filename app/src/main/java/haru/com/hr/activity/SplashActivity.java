@@ -150,7 +150,6 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
                 .build();
         // 2. 사용할 인터페이스를 설정한다.
         HostInterface localhost = retrofit.create(HostInterface.class);
-
         // 3. 토큰을 보내 데이터를 가져온다
         Call<Data> result = localhost.getData(token, id);
 
@@ -161,8 +160,8 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
                     case CODE_OK:
                         Data data = response.body();
                         ResultsDataStore resultsDataStore = ResultsDataStore.getInstance();
-                        Results results = response.body().getResults();
-                        resultsDataStore.addData(results);
+                        List<Results> list = response.body().getResults();
+                        resultsDataStore.addData(list);
                         Log.e(TAG, "dataSetting " + resultsDataStore.getDatas().size());
 
                         if (data.getNext() != null) {

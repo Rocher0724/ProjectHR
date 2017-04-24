@@ -9,6 +9,8 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.widget.Toast;
 
+import java.util.List;
+
 import haru.com.hr.BaseActivity;
 import haru.com.hr.HostInterface;
 import haru.com.hr.R;
@@ -51,6 +53,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
         super.onCreate(savedInstanceState);
         setBinding(R.layout.activity_login);
         token = getToken();
+        backPressCloseHandler = new BackPressCloseHandler(this);
 
         getBinding().imgLogin.setOnLongClickListener(v -> {
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
@@ -148,7 +151,6 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
             return;
         }
         // 로그인화면에서 백키를 누르면 한번더 누르겠냐고 묻는다.
-        backPressCloseHandler = new BackPressCloseHandler(this);
         backPressCloseHandler.onBackPressed();
     }
     private void createAccountExplanationRemove() {
@@ -235,7 +237,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
                         Log.e(TAG, "signin 정상 리턴");
                         break;
                     case CODE_BAD_REQUEST:
-                        Toast.makeText(LoginActivity.this, "아이디와 비밀번호를 입력해주세요", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(LoginActivity.this, "아이디 또는 비밀번호를 확인하세요.", Toast.LENGTH_SHORT).show();
                         Log.e(TAG, "signin 값이 비정상적으로 리턴되었다. = " + response.message());
                         break;
                     case CODE_INTERNAL_SERVER_ERROR:
@@ -339,12 +341,13 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
         result.enqueue(new Callback<Data>() {
             @Override
             public void onResponse(Call<Data> call, Response<Data> response) {
+                Log.e(TAG, "dataSetting code : " + response.code());
                 switch (response.code()) {
                     case CODE_OK:
                         Data data = response.body();
                         ResultsDataStore resultsDataStore = ResultsDataStore.getInstance();
-                        Results results = response.body().getResults();
-                        resultsDataStore.addData(results);
+                        List<Results> list = response.body().getResults();
+                        resultsDataStore.addData(list);
                         Log.e(TAG, "dataSetting " + resultsDataStore.getDatas().size());
 
                         if (data.getNext() != null) {
@@ -359,6 +362,10 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
                         Log.e(TAG, "dataSetting 잘못된 요청입니다.");
                         break;
                     case CODE_NOT_FOUND:
+                        Log.e(TAG, "dataSetting 잘못된 페이지번호입니다.");
+                        afterDataSetting(email, password);
+                        break;
+                    case CODE_INTERNAL_SERVER_ERROR:
                         Log.e(TAG, "dataSetting 잘못된 페이지번호입니다.");
                         afterDataSetting(email, password);
                         break;
@@ -389,6 +396,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
     private void setToken(String token) {
         SharedPreferences sharedPref = getSharedPreferences("Token", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
+        Log.e(TAG,"settoken token : " + token);
         editor.putString("token", "Token " + token);
         editor.apply();
     }

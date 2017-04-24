@@ -61,7 +61,7 @@ public class CalToDetailActivity extends BaseActivity<ActivityCalToDetailBinding
         pData.setId(intent.getExtras().getInt("id"));
         pData.setTitle(intent.getExtras().getString("title"));
         pData.setContent(intent.getExtras().getString("content"));
-        pData.setImage(intent.getExtras().getParcelable("image"));
+        pData.setImage(intent.getExtras().getString("image"));
         pData.setStatus(intent.getExtras().getInt("status"));
         pData.setDay(intent.getExtras().getString("day"));
     }

@@ -23,7 +23,6 @@ import haru.com.hr.R;
 import haru.com.hr.DataSet.Results;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import jp.wasabeef.glide.transformations.ColorFilterTransformation;
-
 /**
  * Created by myPC on 2017-03-22.
  */
@@ -81,7 +80,7 @@ public class MainStackViewAdapter extends ArrayAdapter<Results> {
                         , new BlurTransformation(context, 10)
                         , new ColorFilterTransformation(context, Color.argb(100, 100, 100, 100)))
                 .into(viewHolder.imgImage);
-
+//        }
         statusSetting(data.getStatus(), viewHolder, viewHolder.tvEmotion);
 
         return convertView;

@@ -40,6 +40,7 @@ import java.util.Locale;
 
 import haru.com.hr.BaseActivity;
 import haru.com.hr.DataSet.Data;
+import haru.com.hr.DataSet.GetUserID;
 import haru.com.hr.HostInterface;
 import haru.com.hr.DataSet.ResultsDataStore;
 import haru.com.hr.DataSet.Results;
@@ -134,8 +135,9 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
     }
 
     private void setAuthor() {
-        // todo 아마 여기서 이메일을 보내고 데이터를 받아오는것도 좋을것같다.
+
         String token = getToken();
+        Log.e(TAG, "token : " + token);
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(URL) // 포트까지가 베이스url이다.
@@ -149,10 +151,12 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         result.enqueue(new Callback<Data>() {
             @Override
             public void onResponse(Call<Data> call, Response<Data> response) {
+                Log.e(TAG,"set author코드 : " + response.code());
                 switch (response.code()) {
                     case CODE_OK:
                         Data data = response.body();
-                        UserID.ID = data.getResults().getAuthor();
+                        UserID.ID = data.getResults().get(0).getId();
+
                         break;
                     case CODE_UNAUTHORIZED:
                         Log.e(TAG, "setAuthor key 이름이 잘못되거나 유효하지 않은 token입니다.");
@@ -164,6 +168,7 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
 
             @Override
             public void onFailure(Call<Data> call, Throwable t) {
+
                 Log.e(TAG,"setAuthor 서버통신 실패");
                 Log.e(TAG,t.toString());
             }
