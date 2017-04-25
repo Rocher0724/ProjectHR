@@ -36,6 +36,8 @@ import static haru.com.hr.BaseURL.URL;
 import static haru.com.hr.HTTP_ResponseCode.CODE_NOT_FOUND;
 import static haru.com.hr.HTTP_ResponseCode.CODE_NO_CONTENT;
 import static haru.com.hr.HTTP_ResponseCode.CODE_UNAUTHORIZED;
+import static haru.com.hr.activity.MainActivity.REQ_DELETE;
+import static haru.com.hr.activity.MainActivity.refrashFlag;
 
 /**
  * Created by myPC on 2017-04-07.
@@ -159,6 +161,9 @@ public class CalToDetailActivity extends BaseActivity<ActivityCalToDetailBinding
                 switch (response.code()) {
                     case CODE_NO_CONTENT:
                         Toast.makeText(CalToDetailActivity.this, "삭제되었습니다.", Toast.LENGTH_SHORT).show();
+                        refrashFlag = true;
+                        setResult(REQ_DELETE);
+                        finish();
                         break;
                     case CODE_UNAUTHORIZED:
                         Toast.makeText(CalToDetailActivity.this, "토큰이 만료되었습니다. 재 로그인해야합니다.", Toast.LENGTH_SHORT).show();

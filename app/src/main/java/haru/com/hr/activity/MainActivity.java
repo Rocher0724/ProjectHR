@@ -59,6 +59,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import static haru.com.hr.HTTP_ResponseCode.CODE_BAD_REQUEST;
 import static haru.com.hr.HTTP_ResponseCode.CODE_NOT_FOUND;
 import static haru.com.hr.HTTP_ResponseCode.CODE_OK;
 import static haru.com.hr.BaseURL.URL;
@@ -68,6 +69,8 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = "MainActivity";
+    public static final int REQ_CTD = 101;
+    public static final int REQ_DELETE = 102;
     private final int REQ_PERMISSION = 100;
     private MainStackViewAdapter stackViewAdapter;
 
@@ -81,6 +84,7 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
     private SimpleDateFormat dateFormatForMonth = new SimpleDateFormat("yyyy-MM");
     private SimpleDateFormat selectedDate = new SimpleDateFormat("yyyy-MM-dd");
     private Calendar event = Calendar.getInstance(Locale.KOREA);
+    public static boolean refrashFlag = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,6 +107,7 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
     }
 
     private void tutorialDataSetting() {
+        realDatas = ResultsDataStore.getInstance().getDatas();
         if( realDatas.size() == 0) {
             Results data = new Results();
             data.setId(-2);
@@ -111,6 +116,7 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
             data.setImage("android.resource://" + MainActivity.this.getPackageName() + "/drawable/splash2");
             data.setStatus(1);
             data.setDay(selectedDate.format(new Date()));
+            data.setRealImage("false");
             realDatas.add(data);
 
             Results data1 = new Results();
@@ -120,6 +126,7 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
             data1.setImage("android.resource://" + MainActivity.this.getPackageName() + "/drawable/splash2");
             data1.setStatus(2);
             data1.setDay(selectedDate.format(new Date()));
+            data.setRealImage("false");
             realDatas.add(data1);
             stackViewAdapter.notifyDataSetChanged();
         }
@@ -190,14 +197,11 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         Log.e(TAG,realDatas.size()+"");
 
         for( Results data : realDatas) {
-            Log.e(TAG, "데이터 번호 : " + data.getId());
-            Log.e(TAG, "ndate : " + data.getDay());
             String[] date = data.getDay().split("-|T|:|\\.");
             int year = dateStrToInt(date[0]);
             int month = dateStrToInt(date[1]) - 1;
             int day = dateStrToInt(date[2]) - 1;
 
-            Log.e(TAG,"년 = " + year + ", 월 = " + month + ", 일 = " + day );
             addEvents( year , month , day );
         }
     }
@@ -258,8 +262,6 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
             for( Results data : realDatas) {
                 if( data.getId() != -2 && data.getDay().startsWith(selectedDate.format(dateClicked))) {
 
-//                    getDetailData(data);
-
                     Intent intent = new Intent(MainActivity.this, CalToDetailActivity.class);
                     intent.putExtra("id",data.getId());
                     intent.putExtra("title",data.getTitle());
@@ -267,7 +269,7 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
                     intent.putExtra("image",data.getImage());
                     intent.putExtra("status",data.getStatus());
                     intent.putExtra("day",data.getDay());
-                    startActivity(intent);
+                    startActivityForResult(intent, REQ_CTD);
                 }
             }
         }
@@ -278,6 +280,84 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
 
         }
     };
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        realDatas = ResultsDataStore.getInstance().getDatas();
+        tutorialDataSetting();
+        switch (requestCode) {
+            case REQ_CTD:
+                if( resultCode == REQ_DELETE) {
+                    mainDataRefrash(1);
+                }
+                break;
+        }
+    }
+
+    private void dataClear() {
+        ResultsDataStore resultsDataStore = ResultsDataStore.getInstance();
+        resultsDataStore.dataClear();
+        Log.e(TAG,"데이터 현재 크기 : " + resultsDataStore.getDatas().size());
+    }
+
+    private void mainDataRefrash(int id) {
+        String token = getToken();
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL) // 포트까지가 베이스url이다.
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        // 2. 사용할 인터페이스를 설정한다.
+        HostInterface localhost = retrofit.create(HostInterface.class);
+        // 3. 토큰을 보내 데이터를 가져온다
+        Call<Data> result = localhost.getData(token, id);
+
+        result.enqueue(new Callback<Data>() {
+            @Override
+            public void onResponse(Call<Data> call, Response<Data> response) {
+                switch (response.code()) {
+                    case CODE_OK:
+                        if( refrashFlag ) {
+                            dataClear();
+                            refrashFlag = false;
+                        }
+                        Data data = response.body();
+                        ResultsDataStore resultsDataStore = ResultsDataStore.getInstance();
+                        List<Results> list = response.body().getResults();
+                        resultsDataStore.addData(list);
+
+                        Log.e(TAG, "mainDataRefrash " + resultsDataStore.getDatas().size());
+
+                        if (data.getNext() != null) {
+                            mainDataRefrash(id + 1);
+                            Log.e(TAG , "mainDataRefrash 재귀적 작용 작동!");
+                        } else {
+                            Log.e(TAG, "mainDataRefrash next 는 null이다!");
+                            // 사용자가 작성한 자료를 전부 로드하고 next가 null 일때 끝나므로 else에서 처리한다.
+                            // 1번만 실행되기 위해서 이렇게 처리했다.
+                            cardStackSetting();
+                            stackViewAdapter.notifyDataSetChanged();
+                        }
+                        break;
+                    case CODE_BAD_REQUEST:
+                        Log.e(TAG, "mainDataRefrash 잘못된 요청입니다.");
+                        break;
+                    case CODE_NOT_FOUND:
+                        Log.e(TAG, "mainDataRefrash 잘못된 페이지번호입니다.");
+                        // 사용자가 작성한 데이터가 없을때 404 에러가 나며 그냥 액티비티 체인지시켜주면됀다.
+                        cardStackSetting();
+                        stackViewAdapter.notifyDataSetChanged();
+                        break;
+                }
+            }
+            @Override
+            public void onFailure(Call<Data> call, Throwable t) {
+                Log.e(TAG,"mainDataRefrash 서버통신 실패");
+                Log.e(TAG,t.toString());
+            }
+        });
+    }
 
     // 디테일 액티비티로 가기전에 데이터세팅 하려했으나 이미 있는 데이터로 처리가능할것같다.
     @Deprecated
@@ -343,6 +423,7 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         stackViewAdapter = new MainStackViewAdapter(this, R.layout.main_stack_item, R.id.tvTitle, realDatas);
         flingContainer.setAdapter(stackViewAdapter);
         flingContainer.setFlingListener(flingListener);
+
     }
 
     private void mainMoaSpnSetting(List<EmotionSpinnerData> datas) {
@@ -451,7 +532,7 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         List<Results> realdata = new ArrayList<>();
         for ( Results item : realDatas ) {
             Log.e(TAG,"아이디값 : "+item.getId());
-            if( item.getId() !=-1 && item.getId() != -2 ) {
+            if( item.getId() > 0 ) {
                 realdata.add(item);
                 Log.e(TAG,"리얼데이터 아이디 : "+item.getId());
             }
@@ -513,13 +594,19 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         int id = item.getItemId();
 
          if (id == R.id.nav_app_info) {
-
+             Intent intent = new Intent(MainActivity.this, PersonalInfoActivity.class);
+             startActivity(intent);
         } else if (id == R.id.nav_opensource) {
             Intent intent = new Intent(MainActivity.this, OpenSourceActivity.class);
              startActivity(intent);
         } else if (id == R.id.nav_sign_out) {
-            sharedpreferenceForLogOut();
-            Toast.makeText(this, "shared preference가 삭제됨", Toast.LENGTH_SHORT).show();
+             sharedpreferenceForLogOut();
+             dataClear();
+
+             Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+             startActivity(intent);
+             finish();
+             Toast.makeText(this, "shared preference가 삭제됨", Toast.LENGTH_SHORT).show();
         } else if (id == R.id.nav_send) {
              Intent email = new Intent(Intent.ACTION_SEND);
              email.putExtra(Intent.EXTRA_EMAIL, new String[]{"rocher0724.dev@gmail.com"});
@@ -537,13 +624,6 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         return true;
     }
 
-    // 데이터 2개빼고 나머지는 삭제하는 메소드
-    private void dataReset() {
-        while (realDatas.size() > 2) {
-            realDatas.remove(realDatas.size() -1);
-        }
-        stackViewAdapter.notifyDataSetChanged();
-    }
 
     private void sharedpreferenceForLogOut() {
         // TODO 로그아웃할때 실행해줘야하는 메소드.

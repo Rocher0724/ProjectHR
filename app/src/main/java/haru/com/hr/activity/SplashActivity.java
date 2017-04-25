@@ -71,7 +71,7 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
             // 로그인 쿠키가 없는경우  1초간 스플래시에서 머문후 로그인페이지로 이동
             Log.e(TAG,"로그인쿠키가 없어서 0.5초간 머문다.");
             Handler handler = new Handler();
-            handler.postDelayed(new splashHandler(), 100); // splashHandler 내부에 activityChange() 가 있다.
+            handler.postDelayed(new splashHandler(), 50); // splashHandler 내부에 activityChange() 가 있다.
         }
     }
 
@@ -130,6 +130,7 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
             public void onFailure(Call<Token> call, Throwable t) {
                 Log.e(TAG,"signin 서버통신 실패");
                 Log.e(TAG,t.toString());
+                finish();
             }
         });
 
@@ -143,53 +144,60 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
     }
 
     private void dataSetting(int id) {
+        List<Results> realDatas = ResultsDataStore.getInstance().getDatas();
+        if(realDatas == null || realDatas.size() == 0) {
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(URL) // 포트까지가 베이스url이다.
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        // 2. 사용할 인터페이스를 설정한다.
-        HostInterface localhost = retrofit.create(HostInterface.class);
-        // 3. 토큰을 보내 데이터를 가져온다
-        Call<Data> result = localhost.getData(token, id);
 
-        result.enqueue(new Callback<Data>() {
-            @Override
-            public void onResponse(Call<Data> call, Response<Data> response) {
-                switch (response.code()) {
-                    case CODE_OK:
-                        Data data = response.body();
-                        ResultsDataStore resultsDataStore = ResultsDataStore.getInstance();
-                        List<Results> list = response.body().getResults();
-                        resultsDataStore.addData(list);
-                        Log.e(TAG, "dataSetting " + resultsDataStore.getDatas().size());
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(URL) // 포트까지가 베이스url이다.
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+            // 2. 사용할 인터페이스를 설정한다.
+            HostInterface localhost = retrofit.create(HostInterface.class);
+            // 3. 토큰을 보내 데이터를 가져온다
+            Call<Data> result = localhost.getData(token, id);
 
-                        if (data.getNext() != null) {
-                            dataSetting(id + 1);
-                            Log.e(TAG , "dataSetting 재귀적 작용 작동!");
-                        } else {
-                            Log.e(TAG, "dataSetting next 는 null이다!");
-                            // 사용자가 작성한 자료를 전부 로드하고 next가 null 일때 끝나므로 else에서 처리한다.
-                            // 1번만 실행되기 위해서 이렇게 처리했다.
+            result.enqueue(new Callback<Data>() {
+                @Override
+                public void onResponse(Call<Data> call, Response<Data> response) {
+                    switch (response.code()) {
+                        case CODE_OK:
+                            Data data = response.body();
+                            ResultsDataStore resultsDataStore = ResultsDataStore.getInstance();
+                            List<Results> list = response.body().getResults();
+                            resultsDataStore.addData(list);
+                            Log.e(TAG, "dataSetting " + resultsDataStore.getDatas().size());
+
+                            if (data.getNext() != null) {
+                                dataSetting(id + 1);
+                                Log.e(TAG, "dataSetting 재귀적 작용 작동!");
+                            } else {
+                                Log.e(TAG, "dataSetting next 는 null이다!");
+                                // 사용자가 작성한 자료를 전부 로드하고 next가 null 일때 끝나므로 else에서 처리한다.
+                                // 1번만 실행되기 위해서 이렇게 처리했다.
+                                activityChange();
+                            }
+                            break;
+                        case CODE_BAD_REQUEST:
+                            Log.e(TAG, "dataSetting 잘못된 요청입니다.");
+                            break;
+                        case CODE_NOT_FOUND:
+                            Log.e(TAG, "dataSetting 잘못된 페이지번호입니다.");
+                            // 사용자가 작성한 데이터가 없을때 404 에러가 나며 그냥 액티비티 체인지시켜주면됀다.
                             activityChange();
-                        }
-                        break;
-                    case CODE_BAD_REQUEST:
-                        Log.e(TAG, "dataSetting 잘못된 요청입니다.");
-                        break;
-                    case CODE_NOT_FOUND:
-                        Log.e(TAG, "dataSetting 잘못된 페이지번호입니다.");
-                        // 사용자가 작성한 데이터가 없을때 404 에러가 나며 그냥 액티비티 체인지시켜주면됀다.
-                        activityChange();
-                        break;
+                            break;
+                    }
                 }
-            }
-            @Override
-            public void onFailure(Call<Data> call, Throwable t) {
-                Log.e(TAG,"dataSetting 서버통신 실패");
-                Log.e(TAG,t.toString());
-            }
-        });
+
+                @Override
+                public void onFailure(Call<Data> call, Throwable t) {
+                    Log.e(TAG, "dataSetting 서버통신 실패");
+                    Log.e(TAG, t.toString());
+                }
+            });
+        } else {
+            activityChange();
+        }
     }
 
     private String getToken() {

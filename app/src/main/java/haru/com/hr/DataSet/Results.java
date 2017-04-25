@@ -23,6 +23,16 @@ public class Results
 
     private String email;
 
+    private String realImage;
+
+    public String getRealImage() {
+        return realImage;
+    }
+
+    public void setRealImage(String realImage) {
+        this.realImage = realImage;
+    }
+
     public String getEmail() {
         return email;
     }

@@ -89,7 +89,6 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
         int id = intent.getExtras().getInt("id");
 
         ResultsDataStore resultsDataStore = ResultsDataStore.getInstance();
-
         for ( Results item : resultsDataStore.getDatas() ) {
             if( item.getId() == id ) {
                 pData = item; // todo 넘겨줄때도 id값만 넘겨주면 되는거아니야?
@@ -178,13 +177,6 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
         pData.setStatus(selectedStatusPosition);
         pData.setAuthor(UserID.ID);
 
-        // todo 주작을 위해 이부분을 주석처리. 나중에 해제해야함
-//        if( isPictureSelect ) {
-//            modifyPostingWithImage(selectedImageUrl, pData);
-//        } else {
-//            // 변경하지 않았으면 이미지파일이 필요가없다.
-//            modifyPostingWithoutImage(pData);
-//        }
 
         ResultsDataStore.getInstance().getDatas().get(dataPosition)
                 .setTitle(blankCheck(getBinding().etModifyTitle.getText().toString()));;
@@ -193,18 +185,21 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
         ResultsDataStore.getInstance().getDatas().get(dataPosition)
                 .setStatus(selectedStatusPosition + 1); // 선택된 포지션은 0부터시작
 
-
-        Toast.makeText(this, "저장되었습니다.", Toast.LENGTH_SHORT).show();
+        if( isPictureSelect ) {
+            modifyPostingWithImage(selectedImageUrl, pData);
+        } else {
+            // 변경하지 않았으면 이미지파일이 필요가없다.
+            modifyPostingWithoutImage(pData);
+        }
         Log.e(TAG,"데이터가 추가되었습니다.");
-        finish();
 
     }
 
     // 이미지 선택변경시
     private void modifyPostingWithImage(Uri fileUri, Results pData) {
 
-        RequestBody pDataTitle = RequestBody.create(MultipartBody.FORM, pData.getTitle());
-        RequestBody pDataContent = RequestBody.create(MultipartBody.FORM, pData.getContent());
+        String title = pData.getTitle();
+        String content = pData.getContent();
         int statusCode = pData.getStatus();
 
 
@@ -217,14 +212,14 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
         // 이미지 넣을때 키값
         MultipartBody.Part file = MultipartBody.Part.createFormData("image", originalFile.getName() , filePart);
 
-        Retrofit.Builder builder = new Retrofit.Builder()
-                .baseUrl(URL)
-                .addConverterFactory(GsonConverterFactory.create());
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL) // 포트까지가 베이스url이다.
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
 
-        Retrofit retrofit = builder.build();
         HostInterface client = retrofit.create(HostInterface.class);
 
-        Call<ResponseBody> call = client.modifyWithImage(token, pDataTitle, pDataContent, UserID.ID, statusCode, file);
+        Call<ResponseBody> call = client.modifyWithImage(token, pData.getId(), title, content, UserID.ID, statusCode, file);
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call,
@@ -259,14 +254,22 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
     // 이미지 변경없이 수정시
     private void modifyPostingWithoutImage(Results pData) {
 
-        Retrofit.Builder builder = new Retrofit.Builder()
+        Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(URL)
-                .addConverterFactory(GsonConverterFactory.create());
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
 
-        Retrofit retrofit = builder.build();
         HostInterface client = retrofit.create(HostInterface.class);
 
-        Call<ResponseBody> call = client.modifyWithoutImage(token, pData);
+        int id = pData.getId();
+        String title = pData.getTitle();
+        String content = pData.getContent();
+        int author  = pData.getAuthor();
+        int statusCode = pData.getStatus();
+
+
+        Log.e(TAG,"상태값 : " + pData.getStatus());
+        Call<ResponseBody> call = client.modifyWithoutImage(token, id, title, content, author, statusCode);
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call,

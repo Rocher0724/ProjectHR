@@ -9,7 +9,7 @@
     <string name="title_activity_main_view">MainViewActivity</string>
     <string name="menu1">etc</string>
     <string name="internal_storage">Internal storage</string>
-    <string name="title_activity_open_source">Open Source License</string>
-    <string name="title_activity_personal_info">PersonalInfoActivity</string>
+    <string name="title_activity_open_source">오픈소스 라이선스</string>
+    <string name="title_activity_personal_info">개인정보 취급방침</string>
 
 </resources>

@@ -15,6 +15,7 @@ import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
+import retrofit2.http.Headers;
 import retrofit2.http.Multipart;
 import retrofit2.http.PATCH;
 import retrofit2.http.POST;
@@ -38,22 +39,22 @@ public interface HostInterface {
     );
 
     @Multipart
-    @POST("posts/")
-    Call<Results> uploadWithSelectedImage(
+    @POST("post/")
+    Call<Results> uploadImage(
             @Header("Authorization") String token,
-            @Part ("title") RequestBody title,
-            @Part("content") RequestBody content,
+            @Part ("title") String title,
+            @Part("content") String content,
             @Part("author") int author,
             @Part("status") int code,
             @Part MultipartBody.Part file
     );
 
     @Multipart
-    @POST("posts/")
-    Call<Results> uploadWithDrawable(
+    @POST("post/")
+    Call<Results> uploadDrawable(
             @Header("Authorization") String token,
-            @Part ("title") RequestBody title,
-            @Part("content") RequestBody content,
+            @Part ("title") String title,
+            @Part("content") String content,
             @Part("author") int author,
             @Part("status") int code,
             @Part MultipartBody.Part file
@@ -83,7 +84,7 @@ public interface HostInterface {
     Call<Results> getDetailData(@Header("Authorization") String token,
                                 @Path("post_id") int id); // path는 리스트 리포함수를 통해서 데이터를 가져오게되는데 거기 들어오는 값을 path를 통해 url을 세팅한다.
 
-    @DELETE("posts/{post_id}/")
+    @DELETE("post/{post_id}/")
     Call<ResponseBody> deleteData(@Header("Authorization") String token, @Path("post_id") int id); // path는 리스트 리포함수를 통해서 데이터를 가져오게되는데 거기 들어오는 값을 path를 통해 url을 세팅한다.
 
 
@@ -91,18 +92,24 @@ public interface HostInterface {
     @PATCH("post/{post_id}/")
     Call<ResponseBody> modifyWithImage(
             @Header("Authorization") String token,
-            @Part ("title") RequestBody title,
-            @Part("content") RequestBody content,
+            @Path("post_id") int id,
+            @Part ("title") String title,
+            @Part("content") String content,
             @Part("author") int author,
             @Part("status") int code,
             @Part MultipartBody.Part file
     );
 
     // 사진 변경안했을때 - 파일빠지면 멀티파트는 오류날꺼임. 다른거 실험해봐야함
+    @FormUrlEncoded
     @PATCH("post/{post_id}/")
     Call<ResponseBody> modifyWithoutImage(
             @Header("Authorization") String token,
-            @Body Results results
+            @Path("post_id") int id,
+            @Field ("title") String title,
+            @Field("content") String content,
+            @Field("author") int author,
+            @Field("status") int code
     );
 
     @GET("user/")

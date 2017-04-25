@@ -299,8 +299,8 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
         pData.setStatus(selectedEmotionPosition + 1); // 선택된 포지션은 0부터시작
 
         if( isPictureSelect ) {
-//            imageResizing(selectedImageUrl, pData);
-            selectedImagePosting(selectedImageUrl, pData);
+            imageResizing(selectedImageUrl, pData);
+//            selectedImagePosting(selectedImageUrl, pData);
         } else {
             whenUserNoSelectImage(selectedImgInDrawable, pData);
         }
@@ -371,38 +371,46 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
         task.execute();
     }
     private void selectedImagePosting(Uri fileUri, Results pData) {
+        String token = getToken();
 
-        RequestBody pDataTitle = RequestBody.create(MultipartBody.FORM, pData.getTitle());
-        RequestBody pDataContent = RequestBody.create(MultipartBody.FORM, pData.getContent());
+//        RequestBody pDataTitle = RequestBody.create(MultipartBody.FORM, pData.getTitle());
+//        RequestBody pDataContent = RequestBody.create(MultipartBody.FORM, pData.getContent());
         int statusCode = pData.getStatus();
 
-        File originalFile = FileUtils.getFile(this, fileUri);
-        RequestBody filePart = RequestBody.create(
-                MediaType.parse(getContentResolver().getType(fileUri)),
-                originalFile
-        );
+//        File originalFile = FileUtils.getFile(this, fileUri);
+//        RequestBody filePart = RequestBody.create(
+//                MediaType.parse(getContentResolver().getType(fileUri)),
+//                originalFile
+//        );
 
-//        File originalFile = new File(String.valueOf(fileUri));
-//        RequestBody filePart = RequestBody.create(MediaType.parse("multipart/form-data"), originalFile);
+        File originalFile = new File(String.valueOf(fileUri));
+        RequestBody filePart = RequestBody.create(MediaType.parse("multipart/form-data"), originalFile);
 
         // 이미지 넣을때 키값
         MultipartBody.Part file = MultipartBody.Part.createFormData("image", originalFile.getName(), filePart);
 
-        Retrofit.Builder builder = new Retrofit.Builder()
-                .baseUrl(URL)
-                .addConverterFactory(GsonConverterFactory.create());
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL) // 포트까지가 베이스url이다.
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
 
-        Retrofit retrofit = builder.build();
         HostInterface client = retrofit.create(HostInterface.class);
 
-        Call<Results> call = client.uploadWithSelectedImage(token, pDataTitle, pDataContent, UserID.ID, statusCode, file);
+        Log.e(TAG, "토큰 : " + token);
+        Call<Results> call = client.uploadImage(token
+                                                , pData.getTitle()
+                                                , pData.getContent()
+                                                , UserID.ID
+                                                , statusCode
+                                                , file);
+
         call.enqueue(new Callback<Results>() {
             @Override
             public void onResponse(Call<Results> call, Response<Results> response) {
                 Log.e(TAG,"코드 : " + response.code());
                 switch (response.code()) {
                     case CODE_CREATED:
-                        ResultsDataStore.getInstance().addResults(response.body());
+                        responseParsing(response.body(), true);
                         Toast.makeText(WriteActivity.this, "저장되었습니다.", Toast.LENGTH_SHORT).show();
                         Log.e(TAG,"데이터가 추가되었습니다.");
                         activityChange();
@@ -429,8 +437,10 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
 
     private void nonSelectedImagePosting(Uri fileUri, Results pData) {
 
-        RequestBody pDataTitle = RequestBody.create(MultipartBody.FORM, pData.getTitle());
-        RequestBody pDataContent = RequestBody.create(MultipartBody.FORM, pData.getContent());
+//        RequestBody pDataTitle = RequestBody.create(MultipartBody.FORM, pData.getTitle());
+//        RequestBody pDataContent = RequestBody.create(MultipartBody.FORM, pData.getContent());
+        String title = pData.getTitle();
+        String content = pData.getContent();
         int statusCode = pData.getStatus();
 
         File originalFile = new File(String.valueOf(fileUri));
@@ -439,21 +449,22 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
         // 이미지 넣을때 키값
         MultipartBody.Part file = MultipartBody.Part.createFormData("image", originalFile.getName(), filePart);
 
-        Retrofit.Builder builder = new Retrofit.Builder()
-                .baseUrl(URL)
-                .addConverterFactory(GsonConverterFactory.create());
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL) // 포트까지가 베이스url이다.
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
 
-        Retrofit retrofit = builder.build();
         HostInterface client = retrofit.create(HostInterface.class);
 
-        Call<Results> call = client.uploadWithDrawable(token, pDataTitle, pDataContent, UserID.ID, statusCode, file);
+        Call<Results> call = client.uploadDrawable(token, title, content, UserID.ID, statusCode, file);
         call.enqueue(new Callback<Results>() {
             @Override
             public void onResponse(Call<Results> call, Response<Results> response) {
                 Log.e(TAG, "코드 : " + response.code());
                 switch (response.code()) {
                     case CODE_CREATED:
-                        ResultsDataStore.getInstance().addResults(response.body());
+                        responseParsing(response.body(), false);
+//                        ResultsDataStore.getInstance().addResults(response.body());
                         Toast.makeText(WriteActivity.this, "저장되었습니다.", Toast.LENGTH_SHORT).show();
                         Log.e(TAG, "nonSelectedImagePosting 데이터가 추가되었습니다.");
                         activityChange();
@@ -480,6 +491,28 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
         });
     }
 
+    private void responseParsing(Results body, boolean isRealImage) {
+        String title = body.getTitle();
+        String content = body.getContent();
+        title = title.substring(1, title.length() - 1);
+        content = content.substring(1, content.length() - 1);
+
+        Results results;
+        results = body;
+        results.setTitle(title);
+        results.setContent(content);
+
+        if( isRealImage ) {
+            results.setRealImage("true"); // main moa에서 데이터 종류를 나누기 위해 준 플래그
+        } else {
+            results.setRealImage("false"); // main moa에서 데이터 종류를 나누기 위해 준 플래그
+        }
+
+        Log.e(TAG,"타이틀 : " + results.getTitle());
+        Log.e(TAG,"리얼이미지 : " + results.getRealImage());
+        ResultsDataStore.getInstance().addResults(results);
+    }
+
     private void tempImageRemove(Uri fileUri) {
         File imagefile = new File(String.valueOf(fileUri));
         imagefile.delete();
@@ -498,6 +531,18 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
 
                 Resources res = WriteActivity.this.getResources();
                 Bitmap bitmap = BitmapFactory.decodeResource(res, resid);
+
+                int height = bitmap.getHeight();
+                int width = bitmap.getWidth();
+
+                Bitmap resized = null;
+
+                while (height > 400) { // 이미지 크기를 400kb 이하로 줄이는 로직
+                    resized = Bitmap.createScaledBitmap(bitmap, (width * 400) / height, 400, true);
+                    height = resized.getHeight();
+                    width = resized.getWidth();
+                }
+
                 String extStorageDirectory = Environment.getExternalStorageDirectory().toString();
 
                 File file = new File(extStorageDirectory, "temp.PNG");
@@ -505,7 +550,7 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
                 try {
                     outStream = new FileOutputStream(file);
 
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, outStream);
+                    resized.compress(Bitmap.CompressFormat.PNG, 100, outStream);
                     outStream.flush();
                     outStream.close();
                 } catch (Exception e) {

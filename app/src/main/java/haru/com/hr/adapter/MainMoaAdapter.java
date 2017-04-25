@@ -40,9 +40,14 @@ public class MainMoaAdapter extends RecyclerView.Adapter<MainMoaAdapter.ViewHold
     private List<Results> moaDataSetting(List<Results> datas) {
         List<Results> realdata = new ArrayList<>();
         for ( Results item : datas ) {
-            if( item.getId() >= 0 ) {
-                realdata.add(item);
+            if( item.getId() > 0 ) {
+                if( item.getRealImage() == null) {
+                    realdata.add(item);
+                } else if( item.getRealImage().equals("true") ) {
+                    realdata.add(item);
+                }
             }
+            Log.e(TAG, "realImage는 : " + item.getRealImage());
         }
         Log.e(TAG, "realdata의 크기는 : " + realdata.size());
         // 가독성은 매우 떨어지지만 realdata의 id 값을 비교해서 내림차순으로 정렬해주는 코딩이다.

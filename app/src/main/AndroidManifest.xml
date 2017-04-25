@@ -57,7 +57,7 @@
         <activity
             android:name=".activity.PersonalInfoActivity"
             android:label="@string/title_activity_personal_info"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.PersonalInfoActivity"></activity>
     </application>
 
 </manifest>
