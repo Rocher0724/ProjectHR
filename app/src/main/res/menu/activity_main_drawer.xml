@@ -18,7 +18,7 @@
 
     <item android:title="@string/menu1"
         android:textColor="@color/colorPrimaryDark">
-        <!--색깔 넣는게 안먹음 TODO -->
+        <!--색깔 넣는게 안먹음  -->
         <menu>
             <item
                 android:id="@+id/nav_send"

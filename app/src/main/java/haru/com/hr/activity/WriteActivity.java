@@ -204,7 +204,6 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
     AdapterView.OnItemSelectedListener spnItemClickListener = new AdapterView.OnItemSelectedListener() {
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-            // TODO 만약에 서버에서 이모션 값을 인덱스로 주고받기를 원하면 아래 setEmotion은 position으로 수정해야한다.
             selectedEmotionPosition = position;
         }
 

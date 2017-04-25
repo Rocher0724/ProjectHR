@@ -257,7 +257,8 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
             Log.e(TAG,dateClicked+"");
             getBinding().mainInclude.mainCal.tvMainCalTitle.setText(dateFormatForMonth.format(dateClicked));
 
-            Toast.makeText(MainActivity.this, selectedDate.format(dateClicked), Toast.LENGTH_SHORT).show(); // TODO 나중에 지워야함.
+            // 캘린더 클릭시 보여줄 메시지
+//            Toast.makeText(MainActivity.this, selectedDate.format(dateClicked), Toast.LENGTH_SHORT).show();
 
             for( Results data : realDatas) {
                 if( data.getId() != -2 && data.getDay().startsWith(selectedDate.format(dateClicked))) {
@@ -439,7 +440,7 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
             if( position == 0 ) {
                 moaSelectedData.addAll(realDatas);
             } else {
-                for (Results item : realDatas) {// todo 내가 감정탭을 어떻게 디자인해놨는지 잘 모르겠다. 살펴보고 수정해야 할것같다.
+                for (Results item : realDatas) {
                     if (item.getStatus() == MainMoaSpinnerDataLoader.getInstance().getDatas().get(position).getStatus()) {
                         moaSelectedData.add(item);
                     }
@@ -626,7 +627,6 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
 
 
     private void sharedpreferenceForLogOut() {
-        // TODO 로그아웃할때 실행해줘야하는 메소드.
         SharedPreferences sharedPref = getSharedPreferences("LoginCheck", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.remove("LoginCheck");
@@ -645,7 +645,6 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
     public final String PERMISSION_ARRAY[] = {
             Manifest.permission.WRITE_EXTERNAL_STORAGE
             , Manifest.permission.CAMERA
-            // TODO 원하는 permission 추가 또는 수정하기, manifest도 추가해줘야 실제 화면에서 선택창 뜸
     };
 
     public void checkVersion(int REQ_PERMISSION) {
@@ -671,7 +670,6 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
 
         // 1.2 퍼미션이 모두 true 이면 프로그램 실행
         if(permCheck) {
-            // TODO 퍼미션이 승인 되었을때 해야하는 작업이 있다면 여기에서 실행하자.
 
             return true;
         } else {
@@ -689,7 +687,6 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         if( requestCode == REQ_PERMISSION) {
 
             if( onCheckResult(grantResults)) {
-                // TODO 퍼미션이 승인 되었을때 해야하는 작업이 있다면 여기에서 실행하자.
 
                 return;
             } else {

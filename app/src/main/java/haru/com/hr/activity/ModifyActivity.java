@@ -91,7 +91,7 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
         ResultsDataStore resultsDataStore = ResultsDataStore.getInstance();
         for ( Results item : resultsDataStore.getDatas() ) {
             if( item.getId() == id ) {
-                pData = item; // todo 넘겨줄때도 id값만 넘겨주면 되는거아니야?
+                pData = item;
             }
         }
     }
@@ -139,7 +139,6 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
     AdapterView.OnItemSelectedListener spnItemClickListener = new AdapterView.OnItemSelectedListener() {
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-            // TODO 만약에 서버에서 이모션 값을 인덱스로 주고받기를 원하면 아래 setEmotion은 position으로 수정해야한다.
             selectedStatusPosition = position;
         }
         @Override
@@ -156,7 +155,6 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
                 break;
             case R.id.tvModifySave:
                 if(contentEmptyChecker()) {
-                    //TODO 글저장작업
                     dataSave();
                 } else {
                     Toast.makeText(this, "글 내용은 입력되어야 합니다.", Toast.LENGTH_SHORT).show();
@@ -170,7 +168,6 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
 
     private void dataSave() {
         // id값과 ndate는 수정할수없다.
-        // todo 서버에 고정데이터와 변동데이터를 쏴줘서 수정해야할것같다. api 나오면 해보자.
 
         pData.setTitle(blankCheck(getBinding().etModifyTitle.getText().toString()));
         pData.setContent(getBinding().etModifyContent.getText().toString());

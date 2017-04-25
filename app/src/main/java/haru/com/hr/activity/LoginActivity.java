@@ -124,7 +124,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
                 }
                 break;
 
-            // if posible TODO 페이스북로그인 api 붙이기
+            // if posible 페이스북로그인 api 붙이기
         }
     }
 
@@ -324,60 +324,6 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
         setToken(token.getKey());
         dataSetting(id, email, password); // 데이터 세팅. 기 로그인자면 사용데이터, 최초사용자면 튜토리얼 세팅
     }
-
-//    private void dataSetting(int id, String email, String password) {
-//        // todo 아마 여기서 이메일을 보내고 데이터를 받아오는것도 좋을것같다.
-//
-//        Retrofit retrofit = new Retrofit.Builder()
-//                .baseUrl(URL) // 포트까지가 베이스url이다.
-//                .addConverterFactory(GsonConverterFactory.create())
-//                .build();
-//        // 2. 사용할 인터페이스를 설정한다.
-//        HostInterface localhost = retrofit.create(HostInterface.class);
-//        // 3. 토큰을 보내 데이터를 가져온다
-//        Call<Data> result = localhost.getData(token, id);
-//
-//        result.enqueue(new Callback<Data>() {
-//            @Override
-//            public void onResponse(Call<Data> call, Response<Data> response) {
-//                Log.e(TAG, "dataSetting code : " + response.code());
-//                switch (response.code()) {
-//                    case CODE_OK:
-//                        Data data = response.body();
-//                        ResultsDataStore resultsDataStore = ResultsDataStore.getInstance();
-//                        List<Results> list = response.body().getResults();
-//                        resultsDataStore.addData(list);
-//                        Log.e(TAG, "dataSetting " + resultsDataStore.getDatas().size());
-//
-//                        if (data.getNext() != null) {
-//                            dataSetting(id + 1, email, password);
-//                            Log.e(TAG , "dataSetting 재귀적 작용 작동!");
-//                        } else {
-//                            Log.e(TAG, "dataSetting next 는 null이다!");
-//                            afterDataSetting(email, password);
-//                        }
-//                        break;
-//                    case CODE_BAD_REQUEST:
-//                        Log.e(TAG, "dataSetting 잘못된 요청입니다.");
-//                        break;
-//                    case CODE_NOT_FOUND:
-//                        Log.e(TAG, "dataSetting 잘못된 페이지번호입니다.");
-//                        afterDataSetting(email, password);
-//                        break;
-//                    case CODE_INTERNAL_SERVER_ERROR:
-//                        Log.e(TAG, "dataSetting 잘못된 페이지번호입니다.");
-//                        afterDataSetting(email, password);
-//                        break;
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(Call<Data> call, Throwable t) {
-//                Log.e(TAG,"dataSetting 서버통신 실패");
-//                Log.e(TAG,t.toString());
-//            }
-//        });
-//    }
 
     private void dataSetting(int id, String email, String password) {
         String token = getToken();
