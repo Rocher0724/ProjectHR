@@ -436,6 +436,8 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
 
     private void nonSelectedImagePosting(Uri fileUri, Results pData) {
 
+        // multipart에서 requestBody를 통해 string이나 int를 넣으려다 서버에서 받아들이질 못해서 실패했다. 그래서 주석처리됨.
+
 //        RequestBody pDataTitle = RequestBody.create(MultipartBody.FORM, pData.getTitle());
 //        RequestBody pDataContent = RequestBody.create(MultipartBody.FORM, pData.getContent());
         String title = pData.getTitle();
