@@ -51,7 +51,6 @@ import static haru.com.hr.HTTP_ResponseCode.CODE_UNAUTHORIZED;
 public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
     private static final int REQ_GALLERY = 100;
     private static final String TAG = "ModifyActivity";
-//    private PostingData pData;
     private Results pData;
     private int selectedStatusPosition;
     private WriteSpinnerDataLoader writeSpinnerDataLoader;
@@ -176,7 +175,7 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
 
 
         ResultsDataStore.getInstance().getDatas().get(dataPosition)
-                .setTitle(blankCheck(getBinding().etModifyTitle.getText().toString()));;
+                .setTitle(blankCheck(getBinding().etModifyTitle.getText().toString()));
         ResultsDataStore.getInstance().getDatas().get(dataPosition)
                 .setContent(getBinding().etModifyContent.getText().toString());
         ResultsDataStore.getInstance().getDatas().get(dataPosition)
@@ -366,8 +365,7 @@ public class ModifyActivity extends BaseActivity<ActivityModifyBinding>{
 
     private String getToken() {
         SharedPreferences sharedPref = getSharedPreferences("Token", Context.MODE_PRIVATE);
-        String token = sharedPref.getString("token", null);
-        return token;
+        return sharedPref.getString("token", null);
     }
 
 }

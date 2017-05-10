@@ -21,8 +21,6 @@ import haru.com.hr.R;
 import haru.com.hr.DataSet.ResultsDataStore;
 import haru.com.hr.DataSet.Results;
 import haru.com.hr.databinding.ActivityCalToDetailBinding;
-import haru.com.hr.domain.DataTemp;
-import haru.com.hr.domain.Token;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import jp.wasabeef.glide.transformations.ColorFilterTransformation;
 import okhttp3.ResponseBody;
@@ -196,8 +194,7 @@ public class CalToDetailActivity extends BaseActivity<ActivityCalToDetailBinding
 
     private String getToken() {
         SharedPreferences sharedPref = getSharedPreferences("Token", Context.MODE_PRIVATE);
-        String token = sharedPref.getString("token", null);
-        return token;
+        return sharedPref.getString("token", null);
     }
 
 }

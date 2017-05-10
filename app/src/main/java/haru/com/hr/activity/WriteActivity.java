@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Toast;
@@ -97,8 +98,7 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
 
     private String getToken() {
         SharedPreferences sharedPref = getSharedPreferences("Token", Context.MODE_PRIVATE);
-        String token = sharedPref.getString("token", null);
-        return token;
+        return sharedPref.getString("token", null);
     }
 
     private void randomImageSetting() {
@@ -168,7 +168,7 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
             @Override
             public void afterTextChanged(Editable s) {
                 if (getBinding().etWriteContent.getLineCount() >= 10) {
-                    getBinding().etWriteContent.setOnKeyListener((v, keyCode, event) -> (keyCode == event.KEYCODE_ENTER));
+                    getBinding().etWriteContent.setOnKeyListener((v, keyCode, event) -> (keyCode == KeyEvent.KEYCODE_ENTER));
                 }
             }
         });
@@ -180,14 +180,13 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
         // 1. Preference 생성하기
         sharedPref = getSharedPreferences("postIdCount", Context.MODE_PRIVATE);
         idCount = sharedPref.getInt("_id", 1 );
-        return;
     }
 
     @Deprecated
     private void setSharedpreferenceFor_id() {
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putInt("_id" , idCount );
-        editor.commit();
+        editor.apply();
     }
 
     private void writeActivityDateSetText() {
@@ -322,6 +321,7 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                assert bitmap != null;
                 int height = bitmap.getHeight();
                 int width = bitmap.getWidth();
 
@@ -350,6 +350,7 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
 
                 finally {
                     try {
+                        assert outStream != null;
                         outStream.close();
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -551,6 +552,7 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
                 try {
                     outStream = new FileOutputStream(file);
 
+                    assert resized != null;
                     resized.compress(Bitmap.CompressFormat.PNG, 100, outStream);
                     outStream.flush();
                     outStream.close();
@@ -558,6 +560,7 @@ public class WriteActivity extends BaseActivity<ActivityWriteBinding> {
                     e.printStackTrace();
                 } finally {
                     try {
+                        assert outStream != null;
                         outStream.close();
                     } catch (IOException e) {
                         e.printStackTrace();

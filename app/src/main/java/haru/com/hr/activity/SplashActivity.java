@@ -3,15 +3,11 @@ package haru.com.hr.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import haru.com.hr.BaseActivity;
@@ -79,11 +75,7 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
         // 토큰이 있으면 토큰을 날려서 서버에 인증한다.
 //        String token = getToken();
 
-        if( token != null ) { // 토큰이 널이 아니면 토큰을 날려서 확인을한다.
-            return false;
-        } else {
-            return true;
-        }
+        return token == null;
     }
 
     // 최초 로그인체크는 튜토리얼의 삽입과 연관이 있어야하고
@@ -116,7 +108,7 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
             public void onResponse(Call<Token> call, Response<Token> response) {
                 switch (response.code()) {
                     case CODE_OK:
-                        signinInit(response, email, password);
+                        signinInit(response);
                         Log.e(TAG, "signin 정상 리턴");
                         break;
                     case CODE_BAD_REQUEST:
@@ -136,7 +128,7 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
 
     }
 
-    private void signinInit(Response<Token> response, String email, String password) {
+    private void signinInit(Response<Token> response) {
         Token token = response.body();
         Log.e(TAG,"token 값 : " + token.getKey());
         setToken(token.getKey());
@@ -202,15 +194,14 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding> {
 
     private String getToken() {
         SharedPreferences sharedPref = getSharedPreferences("Token", Context.MODE_PRIVATE);
-        String token = sharedPref.getString("token", null);
-        return token;
+        return sharedPref.getString("token", null);
     }
 
     private void setToken(String token) {
         SharedPreferences sharedPref = getSharedPreferences("Token", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putString("token", "Token " + token);
-        editor.commit();
+        editor.apply();
     }
     private void activityChange() {
         Intent intent = autoLogin()?

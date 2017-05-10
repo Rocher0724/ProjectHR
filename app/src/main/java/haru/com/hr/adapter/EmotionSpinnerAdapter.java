@@ -24,9 +24,9 @@ import java.util.List;
 public class EmotionSpinnerAdapter extends BaseAdapter {
 
     private static final String TAG = "EmotionSpinnerAdapter";
-    Context context;
-    List<EmotionSpinnerData> datas;
-    LayoutInflater inflater;
+    private Context context;
+    private List<EmotionSpinnerData> datas;
+    private LayoutInflater inflater;
 
     public EmotionSpinnerAdapter(Context context, List<EmotionSpinnerData> datas){
         this.context = context;

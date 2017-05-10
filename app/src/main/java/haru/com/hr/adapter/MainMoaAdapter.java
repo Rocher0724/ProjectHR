@@ -32,8 +32,7 @@ public class MainMoaAdapter extends RecyclerView.Adapter<MainMoaAdapter.ViewHold
 
     public MainMoaAdapter(List<Results> datas , Context context) {
         // realData는 id값이 -1 인 더미데이터를 제외한 값이다.
-        List<Results> realData = moaDataSetting(datas);
-        this.datas = realData;
+        this.datas = moaDataSetting(datas);
         this.context = context;
     }
 
@@ -75,12 +74,12 @@ public class MainMoaAdapter extends RecyclerView.Adapter<MainMoaAdapter.ViewHold
         return datas.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder {
 
         ImageView imgPostingPicture;
         Uri imgUri;
 
-        public ViewHolder(View view) {
+        ViewHolder(View view) {
             super(view);
             imgPostingPicture = (ImageView) view.findViewById(R.id.imgInMoa);
             imgUri = null;

@@ -39,14 +39,13 @@ import static haru.com.hr.HTTP_ResponseCode.CODE_OK;
 
 public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
 
-    public static final String POST = "post";
     private static final String TAG = "LoginActivity";
     AnimationUtil anim = null;
     Animation loginActLogoAnim = null;
     Animation loginTextAnim = null;
     String token;
     private BackPressCloseHandler backPressCloseHandler;
-    private int id = 1;
+    int id = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,12 +87,6 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
             getBinding().activityLoginAddress.setVisibility(View.INVISIBLE);
             getBinding().activityLoginPassword.setVisibility(View.INVISIBLE);
         }
-    }
-    @Deprecated
-    private void checkSignUp() {
-        SharedPreferences sharedPref = getSharedPreferences("LoginCheck", Context.MODE_PRIVATE);
-        boolean loginCheck = sharedPref.getBoolean("FirstLoginCheck", true );
-//        return loginCheck;
     }
 
     public void clickListener(View view) {
@@ -163,10 +156,8 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
 
     public boolean infoCheck(String email, String password) {
 
-        AnimationUtil anim = null;
-        Animation loginTextAnim = null;
-        anim = new AnimationUtil(this, TAG);
-        loginTextAnim = anim.getLoginActivityTextAnim();
+        AnimationUtil anim = new AnimationUtil(this, TAG);
+        Animation loginTextAnim = anim.getLoginActivityTextAnim();
 
         int checkCount = 0;
         if( !SignUtil.validateEmail(email) ) {
@@ -412,7 +403,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
         editor.putBoolean("FirstLoginCheck" , false );
         editor.putString("email" , email );
         editor.putString("password" , password );
-        editor.commit();
+        editor.apply();
     }
 
     private void activityChange(String email) {

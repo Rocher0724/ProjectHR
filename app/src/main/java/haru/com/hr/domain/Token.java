@@ -1,8 +1,5 @@
 package haru.com.hr.domain;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.support.v7.app.AppCompatActivity;
 
 /**
  * Created by myPC on 2017-04-14.

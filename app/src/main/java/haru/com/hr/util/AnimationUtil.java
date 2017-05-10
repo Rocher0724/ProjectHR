@@ -20,7 +20,7 @@ public class AnimationUtil {
     private Animation loginActivityMainLogoAnim = null;
     private static Animation mainActivityBottomSpaceBlur = null;
 
-    Context context;
+    private Context context;
 
     public AnimationUtil(Context context, String activity) {
         this.context = context;

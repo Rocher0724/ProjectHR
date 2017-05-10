@@ -31,9 +31,9 @@ public class MainStackViewAdapter extends ArrayAdapter<Results> {
 
     private static final String TAG = "MainStackViewAdapter";
     private Context context;
-    List<Results> datas;
-    LayoutInflater inflater;
-    int mLayout;
+    private List<Results> datas;
+    private LayoutInflater inflater;
+    private int mLayout;
 
 
     public MainStackViewAdapter(@NonNull Context context, @LayoutRes int resource, @IdRes int textViewResourceId, @NonNull List<Results> objects) {
@@ -118,13 +118,13 @@ public class MainStackViewAdapter extends ArrayAdapter<Results> {
         tvEmotion.setText(emotionText);
     }
 
-    public class ViewHolder
+    private class ViewHolder
     {
-        public ImageView imgImage;
-        public ImageView imgEmotion;
-        public TextView tvTitle;
-        public TextView tvContent;
-        public TextView tvDate;
-        public TextView tvEmotion;
+        ImageView imgImage;
+        ImageView imgEmotion;
+        TextView tvTitle;
+        TextView tvContent;
+        TextView tvDate;
+        TextView tvEmotion;
     }
 }

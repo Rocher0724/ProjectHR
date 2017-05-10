@@ -360,46 +360,9 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         });
     }
 
-    // 디테일 액티비티로 가기전에 데이터세팅 하려했으나 이미 있는 데이터로 처리가능할것같다.
-    @Deprecated
-    private void getDetailData(Results data) {
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(URL) // 포트까지가 베이스url이다.
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        // 2. 사용할 인터페이스를 설정한다.
-        HostInterface localhost = retrofit.create(HostInterface.class);
-        // 3. 데이터를 가져온다
-
-        String token = getToken();
-        Call<Results> call = localhost.getDetailData(token, data.getId());
-
-        call.enqueue(new Callback<Results>() {
-            @Override
-            public void onResponse(Call<Results> call, Response<Results> response) {
-                // 값이 정상적으로 리턴되었을 경우
-                if(response.code() == CODE_OK) {
-
-                } else if ( response.code() == CODE_NOT_FOUND) {
-
-                } else {
-                    //정상적이지 않을 경우 message에 오류내용이 담겨 온다.
-                    Log.e("onResponse", "값이 비정상적으로 리턴되었다. = " + response.message());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Results> call, Throwable t) {
-
-            }
-        });
-    }
-
     private String getToken() {
         SharedPreferences sharedPref = getSharedPreferences("Token", Context.MODE_PRIVATE);
-        String token = sharedPref.getString("token", null);
-        return token;
+        return sharedPref.getString("token", null);
     }
 
     // 달력 안에 아이템 색깔 지정하는 메소드
@@ -590,7 +553,7 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
