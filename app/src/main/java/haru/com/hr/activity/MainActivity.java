@@ -93,16 +93,12 @@ public class MainActivity extends  BaseActivity<ActivityMainBinding>
         checkVersion(REQ_PERMISSION);
         backPressCloseHandler = new BackPressCloseHandler(this);
         userInfoSetting();
-
         cardStackSetting();
         tutorialDataSetting(); // 튜토리얼 데이터생성
-
         getBinding().navView.setNavigationItemSelectedListener(this);
-
         mainMoaRecyclerSetting(realDatas);
         mainMoaSpnSetting(MainMoaSpinnerDataLoader.getInstance().getDatas());
         appBarCollapsingCheckerForBlur();
-
         MainCalSetting();
     }
 
