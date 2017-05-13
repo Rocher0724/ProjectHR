@@ -54,13 +54,6 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
         token = getToken();
         backPressCloseHandler = new BackPressCloseHandler(this);
 
-        getBinding().imgLogin.setOnLongClickListener(v -> {
-            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-            intent.putExtra("email","test@email.com");
-            startActivity(intent);
-            return false;
-        });
-
     }
 
     private void animationSetting() {
